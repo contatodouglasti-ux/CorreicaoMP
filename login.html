@@ -46,7 +46,7 @@
     // Defina aqui o Client ID, tenant e redirect URI exatos da sua aplicação Azure AD.
     const CLIENT_ID = 'db712dfb-57de-488e-af9f-12bee87fa61c';
     const TENANT = '84a9248e-396f-44df-84a9-4379e11007ab';
-    const REDIRECT_URI = 'http://localhost:5500/login.html';
+    const REDIRECT_URI = 'https://correicao-mp.vercel.app';
 
     function log(...args){
       debugEl.textContent = args.map(a=>typeof a==='object'?JSON.stringify(a,null,2):String(a)).join(' ');
