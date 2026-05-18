@@ -97,7 +97,7 @@
           msalInstance.handleRedirectPromise().then(response=>{
             if(response && response.account){
               log('Login concluído:', response.account.username);
-              sessionStorage.setItem('msalAccount', JSON.stringify(response.account));
+              localStorage.setItem('msalAccount', JSON.stringify(response.account));
               window.location.href = 'index.html';
             }
           }).catch(err=> log('Erro ao tratar redirect:', err.errorMessage || err.message || err));
