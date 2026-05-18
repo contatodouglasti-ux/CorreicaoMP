@@ -1,16 +1,14 @@
+// Proteção secundária de rota (a principal está no <head> do index.html)
+// Este script garante consistência caso o estado mude após o carregamento.
 try {
-  const acc = localStorage.getItem('msalAccount');
-
-  // evita rodar na tela de login
+  // Evita rodar na tela de login
   if (window.location.pathname.includes('login.html')) return;
 
-  // pequena espera para o MSAL terminar o fluxo
-  setTimeout(() => {
-    if (!acc) {
-      window.location.href = '/login.html';
-    }
-  }, 300);
-
+  const acc = localStorage.getItem('msalAccount');
+  if (!acc) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace('/login.html');
+  }
 } catch (e) {
   console.error(e);
 }

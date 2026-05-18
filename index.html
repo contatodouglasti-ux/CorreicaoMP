@@ -6,6 +6,21 @@
 <link rel="stylesheet" href="style.css">
 <title>Correição</title>
 
+<script>
+  (function () {
+    try {
+      var acc = localStorage.getItem('msalAccount');
+      if (!acc) {
+        // Esconde o body imediatamente para evitar flash de conteúdo
+        document.documentElement.style.visibility = 'hidden';
+        window.location.replace('/login.html');
+      }
+    } catch (e) {
+      document.documentElement.style.visibility = 'hidden';
+      window.location.replace('/login.html');
+    }
+  })();
+</script>
 
 </head>
 
@@ -402,8 +417,9 @@ function toggleMenu(){
 }
 
 function logout(){
-  sessionStorage.removeItem('msalAccount');
-  window.location.href = 'login.html';
+  localStorage.removeItem('msalAccount');   // ✅ storage correto
+  localStorage.removeItem('msal_email');    // ✅ limpa o email também
+  window.location.replace('/login.html');   // ✅ sem histórico
 }
 
 function criarMenu(){
