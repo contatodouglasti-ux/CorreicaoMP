@@ -38,6 +38,32 @@
     margin:24px 0 10px;padding-bottom:6px;
     border-bottom:2px solid var(--accent,#1C799B);
   }
+
+  /* ── Campo inline (number) ── */
+  .campo-wrap { margin-top: 15px; }
+  .campo-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid #B0BEC5;
+  }
+  .campo-inline label {
+    margin: 0;
+    flex: 1;
+    font-weight: 600;
+    color: #263238;
+  }
+  .campo-inline input {
+    width: 110px;
+    min-width: 110px;
+    margin: 0;
+    text-align: right;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 
@@ -60,9 +86,7 @@
 
 <div class="container" id="formContainer"></div>
 
-<div class="container" id="historicoContainer" style="display:none;"></div>
-
-<div id="enviarTudoWrap" style="text-align:center;margin:20px;">
+<div style="text-align:center;margin:20px;">
   <button class="btn-primary" onclick="enviarTudo()">Enviar tudo</button>
 </div>
 
@@ -445,12 +469,39 @@ function toggleMenu(){
 }
 
 function logout(){
+  // Lê a conta ANTES de limpar o storage
+  const accRaw = localStorage.getItem('msalAccount');
+
   localStorage.removeItem('msalAccount');
   localStorage.removeItem('msal_email');
+function logout(){
+  localStorage.removeItem('msalAccount');
+  localStorage.removeItem('msal_email');
+  // ← aqui
   Object.keys(localStorage)
     .filter(k => k.startsWith('msal.'))
     .forEach(k => localStorage.removeItem(k));
+
   window.location.replace('/login.html');
+}
+  // Encerra a sessão também no servidor da Microsoft
+  try {
+    const acc = accRaw ? JSON.parse(accRaw) : null;
+    const msalConfig = {
+      auth: {
+        clientId: 'db712dfb-57de-488e-af9f-12bee87fa61c',
+        authority: 'https://login.microsoftonline.com/84a9248e-396f-44df-84a9-4379e11007ab',
+        redirectUri: window.location.origin + '/login.html'
+      }
+    };
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+    msalInstance.logoutRedirect({
+      account: acc,
+      postLogoutRedirectUri: '/login.html'
+    });
+  } catch(e) {
+    window.location.replace('/login.html');
+  }
 }
 
 function criarMenu(){
@@ -458,24 +509,15 @@ function criarMenu(){
   form.secoes.forEach((s,i)=>{
     let a=document.createElement("a");
     a.innerText=s.nome;
-    a.onclick=()=>{ abrirFormulario(); mostrar(i); toggleMenu(); };
+    a.onclick=()=>mostrar(i);
     m.appendChild(a);
   });
 
-  let sepHistorico = document.createElement("a");
-  sepHistorico.innerText = "📋 Histórico";
-  sepHistorico.style.marginTop = "16px";
-  sepHistorico.style.borderTop = "1px solid rgba(255,255,255,0.18)";
-  sepHistorico.style.paddingTop = "16px";
-  sepHistorico.style.color = "#4FB8EE";
-  sepHistorico.onclick = () => { abrirHistorico(); toggleMenu(); };
-  m.appendChild(sepHistorico);
-
   let logoutLink = document.createElement("a");
   logoutLink.innerText = "Sair";
-  logoutLink.style.marginTop = "8px";
+  logoutLink.style.marginTop = "20px";
   logoutLink.style.borderTop = "1px solid rgba(255,255,255,0.18)";
-  logoutLink.style.paddingTop = "16px";
+  logoutLink.style.paddingTop = "20px";
   logoutLink.onclick = logout;
   m.appendChild(logoutLink);
 }
@@ -580,10 +622,13 @@ function criarForm(){
 }
 function render(p,c){
 
+  let wrap=document.createElement("div");
+  wrap.className = c.tipo==="number" ? "campo-wrap campo-inline" : "campo-wrap";
+
   let l=document.createElement("label");
   l.className = "required";
   l.innerText=c.pergunta;
-  p.appendChild(l);
+  wrap.appendChild(l);
 
   // TEXTAREA
   if(c.tipo==="textarea"){
@@ -591,7 +636,7 @@ function render(p,c){
     t.id=c.id;
     t.required=true;
     t.oninput=salvar;
-    p.appendChild(t);
+    wrap.appendChild(t);
   }
 
   // DATE
@@ -601,7 +646,7 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.onchange=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // TIME ✅ NOVO
@@ -611,18 +656,17 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.onchange=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // NUMBER ✅ NOVO
   if(c.tipo==="number"){
-    
     let i=document.createElement("input");
     i.type="number";
     i.id=c.id;
     i.required=true;
     i.oninput=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // TEXT ✅ NOVO
@@ -632,7 +676,7 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.oninput=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // RADIO
@@ -655,8 +699,10 @@ function render(p,c){
       d.appendChild(lbl);
     });
 
-    p.appendChild(d);
+    wrap.appendChild(d);
   }
+
+  p.appendChild(wrap);
 }
 
 /* ===== BOTÃO ===== */
@@ -777,20 +823,6 @@ function focusFirstInvalid(invalids){
 }
 
 /* ===== ENVIO ===== */
-
-// ─── Placeholders Power Automate ───────────────────────────────
-const PA_CRIAR   = "https://default84a9248e396f44df84a94379e11007.ab.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1552ec21b75e4a91a8efe46646df29cd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=FM0vBZ2DznnnXSaICrqcIeeIRayGG94EzZSCnsjztp0";   // POST → cria registro, retorna { id }
-const PA_ATUALIZAR = "https://SEU_POWER_AUTOMATE_URL/atualizar"; // POST → atualiza registro pelo id
-const PA_BUSCAR  = "https://SEU_POWER_AUTOMATE_URL/buscar";  // POST { email } → retorna [ registros ]
-// ───────────────────────────────────────────────────────────────
-
-function getEmailUsuario(){
-  try {
-    const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
-    return acc.username || acc.email || 'desconhecido';
-  } catch(e){ return 'desconhecido'; }
-}
-
 function enviarSecao(i){
   let section = document.querySelectorAll('.section')[i];
   let invalidos = encontrarInvalidos(section);
@@ -801,49 +833,10 @@ function enviarSecao(i){
     return;
   }
 
-  let dadosSecao = coletar(i);
-  let registroId = localStorage.getItem('registro_id_atual');
-  let email      = getEmailUsuario();
-  let nomeSecao  = form.secoes[i].nome;
-
-  let payload = {
-    id: registroId || null,
-    email,
-    secao: nomeSecao,
-    data_envio: new Date().toISOString(),
-    dados: dadosSecao
-  };
-
-  // ── Marcar seção como enviada localmente ──
-  let enviadas = JSON.parse(localStorage.getItem('secoes_enviadas') || '{}');
-  if(!registroId) enviadas = {}; // novo registro, zera controle
-  enviadas[i] = true;
-  localStorage.setItem('secoes_enviadas', JSON.stringify(enviadas));
-
-  // ── Chamar Power Automate ──
-  let url = registroId ? PA_ATUALIZAR : PA_CRIAR;
-
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(res => {
-    if(res.id) {
-      localStorage.setItem('registro_id_atual', res.id);
-    }
-    alert(`Seção "${nomeSecao}" enviada ✅`);
-    bloquearSecao(i);
-  })
-  .catch(() => {
-    // Fallback offline: salva localmente e avisa
-    if(!registroId){
-      localStorage.setItem('registro_id_atual', 'local_' + Date.now());
-    }
-    alert(`Seção "${nomeSecao}" salva localmente. Será enviada quando houver conexão.`);
-    bloquearSecao(i);
-  });
+  let d=coletar(i);
+  let json = JSON.stringify(d, null, 2);
+  console.log('SEÇÃO:', json);
+  alert('Seção enviada ✅');
 }
 
 function enviarTudo(){
@@ -859,145 +852,26 @@ function enviarTudo(){
     alert('Preencha todos os campos obrigatórios antes de enviar.');
     return;
   }
-  form.secoes.forEach((_,i) => enviarSecao(i));
-}
 
-/* ===== BLOQUEIO / DESBLOQUEIO DE SEÇÃO ===== */
-function bloquearSecao(i){
-  let section = document.querySelectorAll('.section')[i];
-  section.querySelectorAll('input, textarea, select').forEach(el => el.disabled = true);
+  let d=coletar();
+  let json = JSON.stringify(d, null, 2);
+  console.log('COMPLETO:', json);
 
-  // Adiciona botão Editar se ainda não existe
-  if(!section.querySelector('.btn-editar')){
-    let btnEditar = document.createElement('button');
-    btnEditar.innerText = '✏️ Editar esta seção';
-    btnEditar.className = 'btn-editar btn-gray';
-    btnEditar.style.marginTop = '16px';
-    btnEditar.onclick = () => desbloquearSecao(i, btnEditar);
-    let nav = section.querySelector('.nav');
-    if(nav) nav.prepend(btnEditar);
-  }
-}
+  // Coloque sua URL do Power Automate abaixo:
+  // const powerAutomateUrl = "https://prod-XX.westus.logic.azure.com:443/workflows/....";
+  // fetch(powerAutomateUrl, {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: json
+  // });
 
-function desbloquearSecao(i, btnEditar){
-  let section = document.querySelectorAll('.section')[i];
-  section.querySelectorAll('input, textarea, select').forEach(el => el.disabled = false);
-  if(btnEditar) btnEditar.remove();
-}
-
-function restaurarBloqueios(){
-  let enviadas = JSON.parse(localStorage.getItem('secoes_enviadas') || '{}');
-  Object.keys(enviadas).forEach(i => bloquearSecao(Number(i)));
-}
-
-/* ===== HISTÓRICO ===== */
-function abrirFormulario(){
-  document.getElementById('formContainer').style.display = '';
-  document.getElementById('historicoContainer').style.display = 'none';
-  document.getElementById('enviarTudoWrap').style.display = '';
-}
-
-function abrirHistorico(){
-  document.getElementById('formContainer').style.display = 'none';
-  document.getElementById('enviarTudoWrap').style.display = 'none';
-  let hc = document.getElementById('historicoContainer');
-  hc.style.display = '';
-  hc.innerHTML = '<p style="color:#546E7A;padding:20px">Buscando registros...</p>';
-
-  let email = getEmailUsuario();
-
-  fetch(PA_BUSCAR, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  })
-  .then(r => r.json())
-  .then(registros => renderHistorico(registros, hc))
-  .catch(() => {
-    // Fallback: mostra registro local se existir
-    let idLocal = localStorage.getItem('registro_id_atual');
-    if(idLocal){
-      let dadosLocal = JSON.parse(localStorage.getItem('form_correcao') || '{}');
-      renderHistorico([{
-        id: idLocal,
-        email,
-        data_envio: 'Salvo localmente',
-        dados: dadosLocal
-      }], hc);
-    } else {
-      hc.innerHTML = '<p style="color:#546E7A;padding:20px">Nenhum registro encontrado ou sem conexão.</p>';
-    }
-  });
-}
-
-function renderHistorico(registros, container){
-  container.innerHTML = '';
-
-  let titulo = document.createElement('h2');
-  titulo.innerText = '📋 Histórico de Envios';
-  titulo.style.cssText = 'color:#1C799B;margin-bottom:20px;';
-  container.appendChild(titulo);
-
-  if(!registros || registros.length === 0){
-    container.innerHTML += '<p style="color:#546E7A">Nenhum registro encontrado.</p>';
-    return;
-  }
-
-  registros.forEach(reg => {
-    let card = document.createElement('div');
-    card.style.cssText = `
-      background:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.08);cursor:pointer;
-      border-left:4px solid #1C799B;display:flex;justify-content:space-between;align-items:center;
-    `;
-
-    let data = new Date(reg.data_envio);
-    let dataStr = isNaN(data) ? reg.data_envio : data.toLocaleString('pt-BR');
-
-    card.innerHTML = `
-      <div>
-        <div style="font-weight:700;color:#263238;font-size:15px">Envio — ${dataStr}</div>
-        <div style="color:#546E7A;font-size:13px;margin-top:4px">ID: ${reg.id}</div>
-      </div>
-      <button class="btn-primary" style="padding:8px 16px;font-size:13px">Abrir</button>
-    `;
-
-    card.querySelector('button').onclick = () => abrirRegistro(reg);
-    container.appendChild(card);
-  });
-}
-
-function abrirRegistro(reg){
-  // Salva o ID do registro carregado
-  localStorage.setItem('registro_id_atual', reg.id);
-
-  // Carrega os dados nos campos
-  let dados = reg.dados || {};
-  Object.keys(dados).forEach(k => {
-    let el = document.getElementById(k) || document.querySelector(`input[name="${k}"][value="${dados[k]}"]`);
-    if(el){
-      if(el.type === 'radio'){
-        let r = document.querySelector(`input[name="${k}"][value="${dados[k]}"]`);
-        if(r) r.checked = true;
-      } else {
-        el.value = dados[k];
-      }
-    }
-  });
-
-  // Bloqueia todas as seções (já enviadas)
-  form.secoes.forEach((_,i) => bloquearSecao(i));
-
-  // Abre o formulário na primeira seção
-  abrirFormulario();
-  mostrar(0);
+  alert('Dados enviados com sucesso.');
 }
 
 /* INIT */
 criarMenu();
 criarForm();
 carregar();
-restaurarBloqueios();
 
 </script>
 <script src="script.js"></script>
