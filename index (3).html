@@ -6,12 +6,12 @@
 <link rel="stylesheet" href="style.css">
 <title>Correição</title>
 
+<!-- Proteção de rota: executa ANTES de qualquer renderização -->
 <script>
   (function () {
     try {
       var acc = localStorage.getItem('msalAccount');
       if (!acc) {
-        // Esconde o body imediatamente para evitar flash de conteúdo
         document.documentElement.style.visibility = 'hidden';
         window.location.replace('/login.html');
       }
@@ -22,6 +22,23 @@
   })();
 </script>
 
+<style>
+  /* ── Chips de subtópico ── */
+  .chip-bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px;}
+  .chip{
+    padding:7px 14px;border-radius:20px;border:2px solid var(--accent,#1C799B);
+    background:#fff;color:var(--accent,#1C799B);font-size:13px;font-weight:600;
+    cursor:pointer;transition:all .18s;white-space:nowrap;
+  }
+  .chip:hover{background:#eef7f8;}
+  .chip-ativo{background:var(--accent,#1C799B);color:#fff;}
+  .chip-aviso{color:#888;font-style:italic;margin:12px 0;}
+  .subtopico-title{
+    font-size:15px;font-weight:700;color:var(--accent,#1C799B);
+    margin:24px 0 10px;padding-bottom:6px;
+    border-bottom:2px solid var(--accent,#1C799B);
+  }
+</style>
 </head>
 
 <body>
@@ -181,22 +198,16 @@ const form = {
 
   ]
 },{
-"nome": "===== 31 — FAMÍLIA ===== ",
-  "campos": [ 
-    {"id":"31.a","pergunta":"Processos cíveis recebidos (família)","tipo":"number"},
-    {"id":"31.b","pergunta":"Notícias de Fato (NF) autuadas (família)","tipo":"number"},
-    {"id":"31.c","pergunta":"Inquéritos Civis (IC) instaurados (família)","tipo":"number"},
-    {"id":"31.d","pergunta":"Procedimentos Preparatórios (PP) instaurados (família)","tipo":"number"},
-    {"id":"31.e","pergunta":"Procedimentos Administrativos (PA) instaurados (família)","tipo":"number"},
-    {"id":"31.f","pergunta":"Recomendações (família)","tipo":"number"},
-    {"id":"31.g","pergunta":"Termos de Ajustamento de Conduta (TAC) (família)","tipo":"number"},
-    {"id":"31.h","pergunta":"Acordos de Não Persecução Cível (ANPC) (família)","tipo":"number"},
-    {"id":"31.i","pergunta":"Audiências judiciais (família)","tipo":"number"},
-    {"id":"31.j","pergunta":"Inspeções/Visitas (família)","tipo":"number"}
-]
-},
-{
-  "nome": "DADOS ESPECÍFICOS (separados por topicos)",
+  "nome": "DADOS ESPECÍFICOS",
+  "subtopicos": [
+    { "id":"sub31", "nome":"FAMÍLIA",              "prefixo":"31" },
+    { "id":"sub32", "nome":"VIO. DOMÉSTICA",        "prefixo":"32" },
+    { "id":"sub33", "nome":"DISCRIMINAÇÃO",          "prefixo":"33" },
+    { "id":"sub34", "nome":"PES. C/ DEFICIÊNCIA",   "prefixo":"34" },
+    { "id":"sub35", "nome":"SEGURANÇA PÚBLICA",      "prefixo":"35" },
+    { "id":"sub36", "nome":"PATRIMÔNIO PÚBLICO",     "prefixo":"36" },
+    { "id":"sub37", "nome":"MEIO AMBIENTE",          "prefixo":"37" }
+  ],
   "campos": [
 
     /* ===== 31 — FAMÍLIA ===== */
@@ -432,9 +443,31 @@ function toggleMenu(){
 }
 
 function logout(){
-  localStorage.removeItem('msalAccount');   // ✅ storage correto
-  localStorage.removeItem('msal_email');    // ✅ limpa o email também
-  window.location.replace('/login.html');   // ✅ sem histórico
+  // Lê a conta ANTES de limpar o storage
+  const accRaw = localStorage.getItem('msalAccount');
+
+  localStorage.removeItem('msalAccount');
+  localStorage.removeItem('msal_email');
+
+  // Encerra a sessão também no servidor da Microsoft
+  try {
+    const acc = accRaw ? JSON.parse(accRaw) : null;
+    const msalConfig = {
+      auth: {
+        clientId: 'db712dfb-57de-488e-af9f-12bee87fa61c',
+        authority: 'https://login.microsoftonline.com/84a9248e-396f-44df-84a9-4379e11007ab',
+        redirectUri: window.location.origin + '/login.html'
+      }
+    };
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+    msalInstance.logoutRedirect({
+      account: acc,
+      postLogoutRedirectUri: '/login.html'
+    });
+  } catch(e) {
+    // fallback caso MSAL falhe
+    window.location.replace('/login.html');
+  }
 }
 
 function criarMenu(){
@@ -468,7 +501,69 @@ function criarForm(){
     h.innerText=sec.nome;
     d.appendChild(h);
 
-    sec.campos.forEach(campo=>render(d,campo));
+    // ── Seção com subtópicos: renderiza chips de filtro múltiplo ──
+    if(sec.subtopicos){
+      // barra de chips
+      let chipBar=document.createElement("div");
+      chipBar.className="chip-bar";
+
+      // container dos campos filtrados
+      let camposWrap=document.createElement("div");
+      camposWrap.id="campos-especificos";
+
+      let ativos=new Set(); // prefixos selecionados
+
+      function atualizarCampos(){
+        camposWrap.innerHTML="";
+        if(ativos.size===0){
+          let aviso=document.createElement("p");
+          aviso.className="chip-aviso";
+          aviso.innerText="Selecione um ou mais tópicos acima para exibir os campos.";
+          camposWrap.appendChild(aviso);
+          return;
+        }
+        sec.subtopicos.forEach(sub=>{
+          if(!ativos.has(sub.prefixo)) return;
+          // título do grupo
+          let gt=document.createElement("h3");
+          gt.className="subtopico-title";
+          gt.innerText=sub.nome;
+          camposWrap.appendChild(gt);
+          // campos do grupo
+          sec.campos
+            .filter(c=>c.id.startsWith(sub.prefixo+"."))
+            .forEach(campo=>render(camposWrap,campo));
+        });
+        // restaurar valores salvos
+        carregar();
+      }
+
+      sec.subtopicos.forEach(sub=>{
+        let chip=document.createElement("button");
+        chip.type="button";
+        chip.className="chip";
+        chip.innerText=sub.nome;
+        chip.dataset.prefixo=sub.prefixo;
+        chip.onclick=()=>{
+          if(ativos.has(sub.prefixo)){
+            ativos.delete(sub.prefixo);
+            chip.classList.remove("chip-ativo");
+          } else {
+            ativos.add(sub.prefixo);
+            chip.classList.add("chip-ativo");
+          }
+          atualizarCampos();
+        };
+        chipBar.appendChild(chip);
+      });
+
+      d.appendChild(chipBar);
+      atualizarCampos();
+      d.appendChild(camposWrap);
+
+    } else {
+      sec.campos.forEach(campo=>render(d,campo));
+    }
 
     let nav=document.createElement("div");
     nav.className="nav";

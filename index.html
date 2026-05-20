@@ -443,9 +443,39 @@ function toggleMenu(){
 }
 
 function logout(){
+  // Lê a conta ANTES de limpar o storage
+  const accRaw = localStorage.getItem('msalAccount');
+
   localStorage.removeItem('msalAccount');
   localStorage.removeItem('msal_email');
+function logout(){
+  localStorage.removeItem('msalAccount');
+  localStorage.removeItem('msal_email');
+  // ← aqui
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('msal.'))
+    .forEach(k => localStorage.removeItem(k));
+
   window.location.replace('/login.html');
+}
+  // Encerra a sessão também no servidor da Microsoft
+  try {
+    const acc = accRaw ? JSON.parse(accRaw) : null;
+    const msalConfig = {
+      auth: {
+        clientId: 'db712dfb-57de-488e-af9f-12bee87fa61c',
+        authority: 'https://login.microsoftonline.com/84a9248e-396f-44df-84a9-4379e11007ab',
+        redirectUri: window.location.origin + '/login.html'
+      }
+    };
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+    msalInstance.logoutRedirect({
+      account: acc,
+      postLogoutRedirectUri: '/login.html'
+    });
+  } catch(e) {
+    window.location.replace('/login.html');
+  }
 }
 
 function criarMenu(){

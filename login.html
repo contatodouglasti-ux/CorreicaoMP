@@ -85,7 +85,7 @@
       const msalInstance = initMsal(cfg);
       if(!msalInstance) return;
       log(`Iniciando loginRedirect com redirectUri: ${cfg.redirectUri}`);
-      msalInstance.loginRedirect({ scopes: ['user.read'], loginHint: cfg.email || undefined });
+      msalInstance.loginRedirect({ scopes: ['user.read'], loginHint: cfg.email, prompt: 'login' });
     });
 
     (function autoInit(){
