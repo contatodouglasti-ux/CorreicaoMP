@@ -38,6 +38,32 @@
     margin:24px 0 10px;padding-bottom:6px;
     border-bottom:2px solid var(--accent,#1C799B);
   }
+
+  /* ── Campo inline (number) ── */
+  .campo-wrap { margin-top: 15px; }
+  .campo-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid #B0BEC5;
+  }
+  .campo-inline label {
+    margin: 0;
+    flex: 1;
+    font-weight: 600;
+    color: #263238;
+  }
+  .campo-inline input {
+    width: 110px;
+    min-width: 110px;
+    margin: 0;
+    text-align: right;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 
@@ -596,10 +622,13 @@ function criarForm(){
 }
 function render(p,c){
 
+  let wrap=document.createElement("div");
+  wrap.className = c.tipo==="number" ? "campo-wrap campo-inline" : "campo-wrap";
+
   let l=document.createElement("label");
   l.className = "required";
   l.innerText=c.pergunta;
-  p.appendChild(l);
+  wrap.appendChild(l);
 
   // TEXTAREA
   if(c.tipo==="textarea"){
@@ -607,7 +636,7 @@ function render(p,c){
     t.id=c.id;
     t.required=true;
     t.oninput=salvar;
-    p.appendChild(t);
+    wrap.appendChild(t);
   }
 
   // DATE
@@ -617,7 +646,7 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.onchange=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // TIME ✅ NOVO
@@ -627,7 +656,7 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.onchange=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // NUMBER ✅ NOVO
@@ -637,7 +666,7 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.oninput=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // TEXT ✅ NOVO
@@ -647,7 +676,7 @@ function render(p,c){
     i.id=c.id;
     i.required=true;
     i.oninput=salvar;
-    p.appendChild(i);
+    wrap.appendChild(i);
   }
 
   // RADIO
@@ -670,8 +699,10 @@ function render(p,c){
       d.appendChild(lbl);
     });
 
-    p.appendChild(d);
+    wrap.appendChild(d);
   }
+
+  p.appendChild(wrap);
 }
 
 /* ===== BOTÃO ===== */
