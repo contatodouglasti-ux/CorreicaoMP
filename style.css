@@ -203,3 +203,28 @@ button {
 .btn-primary { background:#1C799B; color:white; }
 .btn-green { background:#2E9E8F; color:white; }
 .btn-gray { background:#B0BEC5; color:#263238; }
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #263238;
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  max-width: 320px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all .3s ease;
+
+  z-index: 9999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
