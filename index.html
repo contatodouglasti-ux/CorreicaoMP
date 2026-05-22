@@ -13,11 +13,11 @@
       var acc = localStorage.getItem('msalAccount');
       if (!acc) {
         document.documentElement.style.visibility = 'hidden';
-        window.location.replace('CorreicaoMP/login.html');
+        window.location.replace('/login.html');
       }
     } catch (e) {
       document.documentElement.style.visibility = 'hidden';
-      window.location.replace('CorreicaoMP/login.html');
+      window.location.replace('/login.html');
     }
   })();
 </script>
@@ -38,6 +38,18 @@
     margin:24px 0 10px;padding-bottom:6px;
     border-bottom:2px solid var(--accent,#1C799B);
   }
+
+  /* ── Toast ── */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    padding:13px 13px;border-radius:10px;font-size:14px;font-weight:600;
+    box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    opacity:0;pointer-events:none;white-space:normal;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
+  .toast-ok{background:#1C799B;color:#fff;}
+  .toast-erro{background:#c0392b;color:#fff;}
 </style>
 </head>
 <div id="toast" class="toast"></div>
@@ -65,6 +77,10 @@
 <div id="enviarTudoWrap" style="text-align:center;margin:20px;">
   <button class="btn-primary" onclick="enviarTudo()">Enviar tudo</button>
 </div>
+
+<!-- ── Painel de teste Power Automate ── -->
+
+</div>
 <script src="Secoes.js"></script>
 <script src="script.js"></script>
 <script src="red_login.js"></script>
@@ -91,12 +107,20 @@ function logout(){
 }
 
 function criarMenu(){
-  let m = document.getElementById("menu");
+ 
+let m = document.getElementById("menu");
+m.innerHTML = ""; // limpa
+
+let scroll = document.createElement("div");
+scroll.className = "menu-scroll";
+
+m.appendChild(scroll);
+
   form.secoes.forEach((s,i)=>{
     let a=document.createElement("a");
     a.innerText=s.nome;
     a.onclick=()=>{ abrirFormulario(); mostrar(i); toggleMenu(); };
-    m.appendChild(a);
+    scroll.appendChild(a);
   });
 
   let sepHistorico = document.createElement("a");
@@ -106,7 +130,7 @@ function criarMenu(){
   sepHistorico.style.paddingTop = "16px";
   sepHistorico.style.color = "#4FB8EE";
   sepHistorico.onclick = () => { abrirHistorico(); toggleMenu(); };
-  m.appendChild(sepHistorico);
+  scroll.appendChild(sepHistorico);
 
   let logoutLink = document.createElement("a");
   logoutLink.innerText = "Sair";
@@ -114,7 +138,7 @@ function criarMenu(){
   logoutLink.style.borderTop = "1px solid rgba(255,255,255,0.18)";
   logoutLink.style.paddingTop = "16px";
   logoutLink.onclick = logout;
-  m.appendChild(logoutLink);
+  scroll.appendChild(logoutLink);
 }
 
 /* ===== FORM ===== */
@@ -415,16 +439,20 @@ function focusFirstInvalid(invalids){
 
 /* ===== ENVIO ===== */
 
-// ─── Placeholders Power Automate ───────────────────────────────
-const PA_CRIAR   = "https://default84a9248e396f44df84a94379e11007.ab.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1552ec21b75e4a91a8efe46646df29cd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=FM0vBZ2DznnnXSaICrqcIeeIRayGG94EzZSCnsjztp0";   // POST → cria registro, retorna { id }
-const PA_ATUALIZAR = "https://SEU_POWER_AUTOMATE_URL/atualizar"; // POST → atualiza registro pelo id
-const PA_BUSCAR  = "https://SEU_POWER_AUTOMATE_URL/buscar";  // POST { email } → retorna [ registros ]
+// ─── Power Automate ────────────────────────────────────────────
+const PA_CRIAR = "https://default84a9248e396f44df84a94379e11007.ab.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/679dbd3be9884fac8665fa7b7458c589/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MyA3qI1BWcZTqtVbRNPmJx3vUVW0RKkXNFrOkd5vH6A";
 // ───────────────────────────────────────────────────────────────
 
 function getEmailUsuario(){
   try {
     const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
     return acc.username || acc.email || 'desconhecido';
+  } catch(e){ return 'desconhecido'; }
+}
+function getNomeUsuario(){
+  try {
+    const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
+    return acc.name || acc.displayName || acc.nome || 'desconhecido';
   } catch(e){ return 'desconhecido'; }
 }
 function enviarSecao(i){
@@ -476,38 +504,122 @@ function enviarTudo(){
       mostrar(sections.indexOf(firstSection));
     }
     focusFirstInvalid(invalidos);
-    alert('Preencha todos os campos obrigatórios antes de enviar.');
+    showToast('Preencha todos os campos obrigatórios antes de enviar.', 'erro');
     return;
   }
 
-  let dados = coletar(); // ✅ pega tudo
+  // Monta payload: campos no nível raiz + metadados
+  let dadosCampos = coletar();
   let email = getEmailUsuario();
+  let nome = getNomeUsuario();
+  let payload = Object.assign({}, dadosCampos, {
+    __email: email,
+    __nome: nome,
+    __data_envio: new Date().toISOString()
+  });
 
-  let payload = {
-    email,
-    data_envio: new Date().toISOString(),
-    dados
-  };
+  // ── DEBUG: inspecione o JSON no F12 → Console ──
+  console.log('%c[enviarTudo] JSON enviado ao Power Automate', 'color:#1C799B;font-weight:bold;font-size:13px');
+  console.log(JSON.parse(JSON.stringify(payload))); // objeto expansível
+  console.log('%c[enviarTudo] JSON stringificado:', 'color:#546E7A;font-size:12px', JSON.stringify(payload, null, 2));
+
+  // Feedback visual
+  let btnEnviar = document.querySelector('#enviarTudoWrap .btn-primary');
+  let textoOriginal = btnEnviar ? btnEnviar.innerText : '';
+  if(btnEnviar){ btnEnviar.disabled = true; btnEnviar.innerText = 'Enviando…'; }
 
   fetch(PA_CRIAR, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   })
-  .then(r => r.json())
+  .then(r => {
+    // PA pode retornar 200/202 com corpo vazio — trata ambos os casos
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text().then(t => { try{ return JSON.parse(t); } catch(e){ return {}; } });
+  })
   .then(() => {
-    alert('Dados enviados para o Excel ✅');
-
-    // limpa local
+    showToast('Dados enviados com sucesso ✅', 'ok');
     localStorage.removeItem("form_correcao");
     localStorage.removeItem("secoes_enviadas");
     localStorage.removeItem("registro_id_atual");
-
-    location.reload();
+   // setTimeout(() => location.reload(), 1800);
   })
-  .catch(() => {
-    alert('Erro ao enviar. Dados continuam salvos localmente.');
+  .catch(err => {
+    console.error('Erro enviarTudo:', err);
+    showToast('Erro ao enviar (' + (err.message||'verifique o console') + '). Dados continuam salvos localmente.', 'erro');
+    if(btnEnviar){ btnEnviar.disabled = false; btnEnviar.innerText = textoOriginal; }
   });
+}
+
+/* ===== TESTE DE CONEXÃO Power Automate ===== */
+function testarConexaoPA(){
+  let btn = document.getElementById('btnTestePA');
+  let log = document.getElementById('logTestePA');
+  btn.disabled = true;
+  log.style.display = 'block';
+  log.innerHTML = '⏳ Enviando payload de teste…';
+
+  let email = getEmailUsuario();
+  let payload = Object.assign({}, { __teste: true }, {
+    __email: email,
+    __data_envio: new Date().toISOString()
+  });
+
+  let inicio = Date.now();
+
+  fetch(PA_CRIAR, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => {
+    let ms = Date.now() - inicio;
+    let status = r.status;
+    return r.text().then(body => {
+      let ok = r.ok;
+      let linhas = [
+        `<b>Status HTTP:</b> ${status} ${ok ? '✅' : '❌'}`,
+        `<b>Tempo:</b> ${ms} ms`,
+        `<b>Corpo da resposta:</b><br><code>${escapeHtml(body || '(vazio)')}</code>`,
+      ];
+      if(ok){
+        linhas.push('<br>🟢 <b>Conexão OK!</b> O flow recebeu a requisição.');
+        linhas.push('Verifique no Power Automate se a linha de teste foi criada.');
+      } else {
+        linhas.push('<br>🔴 <b>Falha.</b> Verifique a URL e as permissões do flow.');
+      }
+      log.innerHTML = linhas.join('<br>');
+    });
+  })
+  .catch(err => {
+    let ms = Date.now() - inicio;
+    log.innerHTML = [
+      `<b>Erro de rede / CORS:</b> ${escapeHtml(err.message)}`,
+      `<b>Tempo:</b> ${ms} ms`,
+      '<br>🔴 Possíveis causas:',
+      '• A URL do flow está incorreta ou expirada',
+      '• O flow não está habilitado',
+      '• Bloqueio de CORS (o flow precisa retornar cabeçalhos CORS ou você precisa de um proxy)',
+      '<br>Abra o Console do navegador (F12) para mais detalhes.',
+    ].join('<br>');
+  })
+  .finally(() => { btn.disabled = false; });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ===== TOAST ===== */
+function showToast(msg, tipo){
+  let t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.className = 'toast ' + (tipo === 'erro' ? 'toast-erro' : 'toast-ok');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 4000);
 }
 
 /* ===== BLOQUEIO / DESBLOQUEIO DE SEÇÃO ===== */
@@ -563,6 +675,7 @@ function abrirHistorico(){
   renderHistorico([{
     id: 'local',
     email: getEmailUsuario(),
+    Nome:getNomeUsuario(),
     data_envio: 'Salvo localmente',
     dados: dadosLocal
   }], hc);
