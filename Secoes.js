@@ -9,48 +9,50 @@ const form = {
       {"id": "4", "pergunta": "Municípios que compõem a área de atuação e população abrangida.", "tipo": "textarea"}
     ]
   }
+
+  
   ,
   {
     "nome": "DADOS DO MEMBRO",
     "campos": [
       {"id": "5", "pergunta": "Data em que assumiu o órgão/unidade atual de lotação.", "tipo": "date"},
       {"id": "6", "pergunta": "Reside na comarca de lotação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "6.a", "pergunta": "Em caso negativo, informar o ato autorizativo.", "tipo": "textarea"},
+      {"id": "6.a", "pergunta": "Em caso negativo, informar o ato autorizativo.", "tipo": "textarea", dependeDe: { id: "6", valor: "Não" }},
       {"id": "7", "pergunta": "Com que regularidade comparece à Promotoria de Justiça?", "tipo": "textarea"},
       {"id": "8", "pergunta": "Tem autorização para trabalho remoto?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "8.a", "pergunta": "Em caso positivo, informar o ato autorizativo.", "tipo": "textarea"},
+      {"id": "8.a", "pergunta": "Em caso positivo, informar o ato autorizativo.", "tipo": "textarea", dependeDe: { id: "8", valor: "Sim" }},
       {"id": "9", "pergunta": "Participa das audiências judiciais de forma presencial?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "9.a", "pergunta": "Em caso negativo, justificar com base legal.", "tipo": "textarea"},
+      {"id": "9.a", "pergunta": "Em caso negativo, justificar com base legal.", "tipo": "textarea", dependeDe: { id: "9", valor: "Não" }},
       {"id": "10", "pergunta": "Nos últimos 12 meses participou de cursos de aperfeiçoamento?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "10.a", "pergunta": "Informar cursos e datas.", "tipo": "textarea"},
+      {"id": "10.a", "pergunta": "Informar cursos e datas.", "tipo": "textarea", dependeDe: { id: "10", valor: "Sim" }},
       {"id": "11", "pergunta": "Já recebeu prêmio, homenagem ou elogio?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "11.a", "pergunta": "Especificar.", "tipo": "textarea"},
+      {"id": "11.a", "pergunta": "Especificar.", "tipo": "textarea", dependeDe: { id: "11", valor: "Sim" }},
       {"id": "12", "pergunta": "Exerce magistério?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "13", "pergunta": "Exerce atividades de mentoria?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "14", "pergunta": "Participa de sociedade comercial ou ONG?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "15", "pergunta": "Participa de comissão ou grupo de trabalho?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "16", "pergunta": "Está respondendo cumulativamente por outro órgão?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "16.a", "pergunta": "A cumulação é voluntária ou involuntária?", "tipo": "radio", "opcoes": ["Voluntária", "Involuntária"]},
+      {"id": "16.a", "pergunta": "A cumulação é voluntária ou involuntária?", "tipo": "radio", "opcoes": ["Voluntária", "Involuntária"], dependeDe: { id: "16", valor: "Sim" }},
       {"id": "17", "pergunta": "Nos últimos 12 meses afastou-se das atividades?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "17.a", "pergunta": "Especificar motivo e período.", "tipo": "textarea"}
+      {"id": "17.a", "pergunta": "Especificar motivo e período.", "tipo": "textarea", dependeDe: { id: "17", valor: "Sim" }}
     ]
   },
   {
     "nome": "DADOS DA UNIDADE",
     "campos": [
         {"id": "18", "pergunta": "Realiza atendimento ao público?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "18.a", "pergunta": "Especificar de que forma realiza o atendimento e como o registra.", "tipo": "textarea"},
-        {"id": "18.b", "pergunta": "Horário de início do atendimento ao público.", "tipo": "time"},
-        {"id": "18.c", "pergunta": "Horário do fim do atendimento ao público.", "tipo": "time"},
+        {"id": "18.a", "pergunta": "Especificar de que forma realiza o atendimento e como o registra.", "tipo": "textarea", dependeDe: { id: "18", valor: "Sim" }},
+        {"id": "18.b", "pergunta": "Horário de início do atendimento ao público.", "tipo": "time", dependeDe: { id: "18", valor: "Sim" }},
+        {"id": "18.c", "pergunta": "Horário do fim do atendimento ao público.", "tipo": "time", dependeDe: { id: "18", valor: "Sim" }},
         {"id": "19", "pergunta": "Quantidade de membros lotados no órgão correicionado.", "tipo": "number"},
         {"id": "20", "pergunta": "Quantidade de servidores lotados no órgão correicionado.", "tipo": "number"},
         {"id": "21", "pergunta": "Quantidade de terceirizados lotados no órgão correicionado.", "tipo": "number"},
         {"id": "22", "pergunta": "Quantidade de estagiários lotados no órgão correicionado.", "tipo": "number"},
         {"id": "23", "pergunta": "Os recursos humanos são adequados (quantidade), de acordo com o padrão de força de trabalho disponibilizada pelo Ministério Público local para órgãos semelhantes?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "24", "pergunta": "As instalações físicas são adequadas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "24.a", "pergunta": "Especificar.", "tipo": "textarea"},
+        {"id": "24.a", "pergunta": "Especificar.", "tipo": "textarea", dependeDe: { id: "24", valor: "Não" }},
         {"id": "25", "pergunta": "Utiliza a rede e os equipamentos da instituição?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "25.a", "pergunta": "Em caso negativo, justificar.", "tipo": "textarea"}
+        {"id": "25.a", "pergunta": "Em caso negativo, justificar.", "tipo": "textarea", dependeDe: { id: "25", valor: "Não" }}
       ]
   },
 {
@@ -387,12 +389,12 @@ const form = {
       "nome": "TUTELA DA FAMÍLIA",
       "campos": [
         {"id": "85", "pergunta": "Em procedimentos que envolvem guarda compartilhada, O(a) membro(a) analisa, no caso concreto, se a mulher é vítima de violência doméstica, na forma do artigo 1.584, § 2º, do Código Civil (alterado pela Lei nº 14.713/2023)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "85.a", "pergunta": "Em caso positivo, informar o número do processo como exemplo de atuação.", "tipo": "textarea"},
+        {"id": "85.a", "pergunta": "Em caso positivo, informar o número do processo como exemplo de atuação.", "tipo": "textarea", dependeDe: { id: "85", valor: "Sim" }},
         {"id": "86", "pergunta": "O(a) membro(a) atua em todos os processos judiciais de família em que a mulher é vítima de violência doméstica, conforme determina o artigo 698, parágrafo único, do CPC (incluído pela Lei nº 13.894/2019)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "86.a", "pergunta": "Em caso positivo, informar o número do processo como exemplo de atuação.", "tipo": "textarea"},
+        {"id": "86.a", "pergunta": "Em caso positivo, informar o número do processo como exemplo de atuação.", "tipo": "textarea", dependeDe: { id: "86", valor: "Sim" }},
         {"id": "87", "pergunta": "O(a) membro(a) atua em todos os processos judiciais que envolvam direitos de crianças e adolescentes, de incapazes ou de idosos em situação de vulnerabilidade, nos termos do artigo 5º, VIII, da Recomendação CNMP nº 34/2016?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "88", "pergunta": "Em situações de crianças e adolescentes vítimas de violência, há articulação ou atuação integrada entre as Promotorias de Justiça criminais, as Promotorias de Justiça de violência doméstica e familiar e as Promotorias de Justiça da infância e juventude, conforme estabelecido pela Resolução CNMP nº 287/2024?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "88.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "88.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "88", valor: "Sim" }},
         {"id": "89", "pergunta": "Em situações de crianças e adolescentes vítimas de violência, O(a) membro(a) zela para que o depoimento especial ocorra preferencialmente no âmbito criminal, com posterior compartilhamento de provas com a Promotoria de Justiça da área de família, nos termos do artigo 8º da Resolução CNMP nº 287/2024?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "90", "pergunta": "Nos casos de alienação parental que não tenham repercussão criminal, O(a) membro(a) zela para que, havendo necessidade de oitiva da criança ou do adolescente, esta seja realizada obrigatoriamente por meio de depoimento especial, conforme o artigo 8-A da Lei nº 12.318/2010?", "tipo": "radio", "opcoes": ["Sim", "Não"]}
       ]
@@ -401,35 +403,35 @@ const form = {
       "nome": "VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER",
       "campos": [
         {"id": "91", "pergunta": "O(a) membro(a) fomenta o diálogo entre as polícias civil e militar e as redes de saúde e assistência social, por meio de encontros temáticos, cursos de formação e outras atividades, com o objetivo de promover a proteção integral à mulher, evitando a revitimização nos atendimentos policiais?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "91.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "91.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "91", valor: "Sim" }},
         {"id": "92", "pergunta": "O(a) membro(a) analisa o histórico de violência doméstica ou familiar sofrida pela vítima, a fim de instruir o processo criminal?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "93", "pergunta": "Há o regular preenchimento do Cadastro Nacional de Violência Doméstica do CNMP?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "94", "pergunta": "O(a) membro(a) tem fiscalizado se a Polícia Civil — ou outros órgãos competentes — aplica o Formulário Nacional de Avaliação de Risco (FONAR) em todos os casos que envolvam violência doméstica no âmbito familiar?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "95", "pergunta": "Existe delegacia especializada?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "95.a", "pergunta": "Em caso negativo, tem policial feminina compondo a equipe da Delegacia e de que forma é realizado o acolhimento da mulher vítima de violência?", "tipo": "textarea"},
+        {"id": "95.a", "pergunta": "Em caso negativo, tem policial feminina compondo a equipe da Delegacia e de que forma é realizado o acolhimento da mulher vítima de violência?", "tipo": "textarea", dependeDe: { id: "95", valor: "Não" }},
         {"id": "96", "pergunta": "Há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "96.a", "pergunta": "Especificar.", "tipo": "textarea"},
+        {"id": "96.a", "pergunta": "Especificar.", "tipo": "textarea", dependeDe: { id: "96", valor: "Sim" }},
         {"id": "97", "pergunta": "A Promotoria de Justiça possui algum projeto, procedimento ou ação judicial com o objetivo de buscar a implementação ou o aprimoramento — pelo ente federativo competente — da capacitação de agentes de segurança pública e/ou guardas civis municipais sobre o enfrentamento à violência doméstica e familiar contra a mulher?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "97.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "97.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "97", valor: "Sim" }},
         {"id": "98", "pergunta": "O(a) membro(a), quando do ajuizamento da ação penal, formula pedido de indenização à vítima com a fixação de valor mínimo para reparação dos danos materiais, morais e psicológicos, causados pela infração penal, em prol das vítimas diretas, indiretas e coletivas, nos termos do art. 9º da Resolução CNMP nº 243/2021 (artigo 387, inciso IV, do CPP)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "99", "pergunta": "O(a) membro(a) tem fiscalizado, em sede de controle concentrado, se os órgãos de segurança pública dispõem de condições materiais, técnicas e operacionais necessárias e compatíveis para o exercício de suas atribuições na área do enfrentamento à violência doméstica e familiar contra a mulher?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "100", "pergunta": "O(a) membro(a) possui projetos de recuperação e reeducação do agressor, nos termos da Recomendação CNMP nº 93/2022.", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "100.a", "pergunta": "Especificar.", "tipo": "textarea"}
+        {"id": "100.a", "pergunta": "Especificar.", "tipo": "textarea", dependeDe: { id: "100", valor: "Sim" }}
       ]
     },
     {
       "nome": "ENFRENTAMENTO À DISCRIMINAÇÃO RACIAL, À POPULAÇÃO LGBTQIAPN+ E AOS POVOS E COMUNIDADES TRADICIONAIS",
       "campos": [
         {"id": "101", "pergunta": "Promotoria de Justiça possui projetos, ações, estratégias ou atividades específicas para o enfrentamento à discriminação à raça, à população LGBTQIAPN+ e à diversidade?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "101.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "101.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "101", valor: "Sim" }},
         {"id": "102", "pergunta": "A Promotoria de Justiça possui algum projeto, procedimento ou ação judicial com o objetivo de buscar a implementação ou o aprimoramento — pelo ente federativo competente — da capacitação de agentes de segurança pública e/ou guardas civis municipais sobre o enfrentamento à discriminação à raça, à população LGBTQIAPN+ e à diversidade, prevenindo eventuais abordagens, revistas e outras condutas discriminatórias?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "103", "pergunta": "Há atuação do(a) membro(a) para fiscalizar ou fomentar a promoção de políticas públicas garantidoras do respeito à diversidade sexual, de gênero e de raça no âmbito de sua atuação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "103.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "103.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "103", valor: "Sim" }},
         {"id": "104", "pergunta": "Há monitoramento dos indicadores locais relativos à violência decorrente de discriminação à raça, à população LGBTQIAPN+ e à diversidade?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "104.a", "pergunta": "Informar o fluxo ou protocolo empregado.", "tipo": "textarea"},
+        {"id": "104.a", "pergunta": "Informar o fluxo ou protocolo empregado.", "tipo": "textarea", dependeDe: { id: "104", valor: "Sim" }},
         {"id": "105", "pergunta": "O(a) membro(a), quando do ajuizamento da ação penal, formula pedido de indenização à vítima (artigo 387, inciso IV, do CPP)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "106", "pergunta": "Na hipótese de omissão do juiz na fixação da indenização, são interpostos recursos?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "106.a", "pergunta": "Em caso positivo, informar o número do processo como exemplo de atuação.", "tipo": "textarea"},
+        {"id": "106.a", "pergunta": "Em caso positivo, informar o número do processo como exemplo de atuação.", "tipo": "textarea", dependeDe: { id: "106", valor: "Sim" }},
         {"id": "107", "pergunta": "O(a) membro(a) fiscaliza os parâmetros de acolhimento das pessoas LGBTQIAPN+ privadas de liberdade em estabelecimentos penais, nos termos da Recomendação CNMP nº 85/2021?", "tipo": "radio", "opcoes": ["Sim", "Não"]}
       ]
     },
@@ -437,14 +439,14 @@ const form = {
       "nome": "ATUAÇÃO NA DEFESA DAS PESSOAS COM DEFICIÊNCIA",
       "campos": [
         {"id": "108", "pergunta": "A Promotoria de Justiça possui estratégia institucional específica voltada à atuação da defesa das pessoas com deficiência?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "108.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "108.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "108", valor: "Sim" }},
         {"id": "109", "pergunta": "O(a) membro(a) inspeciona pessoalmente, com periodicidade mínima anual, as Residências Inclusivas (RIs) e/ou outras instituições que prestem serviços de acolhimento a pessoas com deficiência, nos termos do art. 1º da Resolução CNMP nº 228/2021?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "109.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "109.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "109", valor: "Sim" }},
         {"id": "110", "pergunta": "Nos processos de curatela, o(a) membro(a) atua na fiscalização das respectivas prestações de contas e/ou em processos de tomada de decisão apoiada (TDA)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "110.a", "pergunta": "Em caso negativo, há atuação integrada com a Promotoria de Justiça com atribuição nas áreas cível e de família?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "110.b", "pergunta": "Especificar a atuação integrada.", "tipo": "textarea"},
+        {"id": "110.a", "pergunta": "Em caso negativo, há atuação integrada com a Promotoria de Justiça com atribuição nas áreas cível e de família?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "110", valor: "Não" }},
+        {"id": "110.b", "pergunta": "Especificar a atuação integrada.", "tipo": "textarea", dependeDe: { id: "110", valor: "Não" }},
         {"id": "111", "pergunta": "Há articulação ou atuação integrada com o RECOMEÇAR ou com o NAVID, quando necessário?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "111.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea"},
+        {"id": "111.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "111", valor: "Sim" }},
         {"id": "112", "pergunta": "O(a) membro(a), quando do ajuizamento da ação penal, formula pedido de indenização à vítima (artigo 387, inciso IV, do CPP)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "113", "pergunta": "Na hipótese de omissão do juiz na fixação de indenização, são interpostos recursos?", "tipo": "radio", "opcoes": ["Sim", "Não"]}
       ]
@@ -453,69 +455,69 @@ const form = {
       "nome": "EXECUÇÃO PENAL, CONTROLE EXTERNO DA ATIVIDADE POLICIAL E SEGURANÇA PÚBLICA",
       "campos": [
         {"id": "114", "pergunta": "Há presos da comarca correicionada que estejam custodiados em outras jurisdições, como na capital?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "114.a", "pergunta": "Caso positivo, informar o quantitativo.", "tipo": "textarea"},
+        {"id": "114.a", "pergunta": "Caso positivo, informar o quantitativo.", "tipo": "textarea", dependeDe: { id: "114", valor: "Sim" }},
         {"id": "115", "pergunta": "Como ocorre o cumprimento de pena para os sentenciados em regime semiaberto e aberto?", "tipo": "textarea"},
         {"id": "116", "pergunta": "O(a) membro(a) estimula, de alguma forma, o desenvolvimento de ações para a remissão de pena?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "116.a", "pergunta": "Especificar.", "tipo": "textarea"},
+        {"id": "116.a", "pergunta": "Especificar.", "tipo": "textarea", dependeDe: { id: "116", valor: "Sim" }},
         {"id": "117", "pergunta": "O(a) membro(a) tem fiscalizado, em sede de controle concentrado, se os órgãos de segurança pública dispõem de condições materiais, técnicas e operacionais necessárias e compatíveis para o exercício de suas atribuições?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "117.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea"},
+        {"id": "117.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "117", valor: "Sim" }},
         {"id": "118", "pergunta": "Nas hipóteses de promoção de arquivamento das investigações criminais, a vítima e/ou seus familiares têm sido notificados sobre o pronunciamento do Ministério Público, conforme art. 11, § 2º, da Resolução CNMP nº 279/2023?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "118.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea"},
+        {"id": "118.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "118", valor: "Sim" }},
         {"id": "119", "pergunta": "O(a) membro(a) acompanha as investigações dos crimes que envolvam letalidade e vitimização policiais a partir das primeiras 24 (vinte e quatro) horas da ocorrência ou do conhecimento dos fatos, com pleno e irrestrito acesso aos autos e demais atos e fases da investigação, conforme art. 11, § 3º, da Resolução CNMP nº 279/2023?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "119.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea"}
+        {"id": "119.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "119", valor: "Sim" }}
       ]
     },
     {
       "nome": "PATRIMÔNIO PÚBLICO, PROBIDADE ADMINISTRATIVA E ACESSO À INFORMAÇÃO",
       "campos": [
         {"id": "120", "pergunta": "O(a) membro(a) correicionado instaurou procedimento administrativo para verificar a existência e o adequado funcionamento de Programa de Integridade na Administração Pública, conforme o art. 4º da Resolução nº 305/2025-CNMP?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "120.a", "pergunta": "Em caso positivo, informar o número do processo/procedimento.", "tipo": "textarea"},
+        {"id": "120.a", "pergunta": "Em caso positivo, informar o número do processo/procedimento.", "tipo": "textarea", dependeDe: { id: "120", valor: "Sim" }},
         {"id": "121", "pergunta": "O(a) membro(a) correicionado tem celebrado acordo de não persecução cível quando este se mostra proporcional e suficiente para a proteção do patrimônio público e da moralidade administrativa, nos termos do art. 2º da Resolução nº 306/2025-CNMP?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "121.a", "pergunta": "Em caso positivo, informar o número do processo/procedimento.", "tipo": "textarea"},
-        {"id": "121.b", "pergunta": "Em caso afirmativo, o acordo de não persecução cível tem contemplado a aplicação de uma ou mais sanções previstas na Lei nº 8.429/1992, bem como as condições necessárias para assegurar sua efetividade, sem prejuízo do ressarcimento integral do dano patrimonial e da perda de bens ou valores acrescidos ilicitamente, quando houver, conforme o art. 3º da Resolução nº 306/2025-CNMP?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "121.c", "pergunta": "Em caso positivo, informar o número do processo/procedimento.", "tipo": "textarea"},
+        {"id": "121.a", "pergunta": "Em caso positivo, informar o número do processo/procedimento.", "tipo": "textarea", dependeDe: { id: "121", valor: "Sim" }},
+        {"id": "121.b", "pergunta": "Em caso afirmativo, o acordo de não persecução cível tem contemplado a aplicação de uma ou mais sanções previstas na Lei nº 8.429/1992, bem como as condições necessárias para assegurar sua efetividade, sem prejuízo do ressarcimento integral do dano patrimonial e da perda de bens ou valores acrescidos ilicitamente, quando houver, conforme o art. 3º da Resolução nº 306/2025-CNMP?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "121", valor: "Sim" }},
+        {"id": "121.c", "pergunta": "Em caso positivo, informar o número do processo/procedimento.", "tipo": "textarea", dependeDe: { id: "121", valor: "Sim" }},
         {"id": "122", "pergunta": "O(a) membro(a) correicionado tem fiscalizado se o ente público observa os parâmetros legais mínimos obrigatórios que devem constar nos Portais da Transparência, conforme a Nota Técnica CAO-PDC nº 5/2025?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "122.a", "pergunta": "Em caso positivo, informar o número do processo/procedimento para exemplificar a atuação.", "tipo": "textarea"}
+        {"id": "122.a", "pergunta": "Em caso positivo, informar o número do processo/procedimento para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "122", valor: "Sim" }}
       ]
     },
     {
       "nome": "TUTELA DA SAÚDE",
       "campos": [
         {"id": "123", "pergunta": "O(a) membro(a) correicionado(a) realiza vistorias em hospitais, UPAs e postos de saúde para verificar condições de higiene, presença de médicos, estoque de medicamentos e funcionamento de equipamentos?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "123.a", "pergunta": "Em caso positivo, qual a periodicidade e o procedimento?", "tipo": "textarea"},
+        {"id": "123.a", "pergunta": "Em caso positivo, qual a periodicidade e o procedimento?", "tipo": "textarea", dependeDe: { id: "123", valor: "Sim" }},
         {"id": "124", "pergunta": "O(a) membro(a) correicionado(a) fiscaliza a correta aplicação de verbas públicas destinadas à saúde e o cumprimento de metas de vacinação e saneamento?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "124.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea"},
+        {"id": "124.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "124", valor: "Sim" }},
         {"id": "125", "pergunta": "O(a) membro(a) correicionado(a) tem atuado para reduzir o tempo de espera por cirurgias, exames e consultas especializadas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "125.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "125.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "125", valor: "Sim" }},
         {"id": "126", "pergunta": "O(a) membro(a) correicionado(a) tem atuado visando assegurar o atendimento prioritário e adequado a idosos, crianças, pessoas com deficiências e pacientes com doenças raras ou transtornos mentais?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "126.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea"},
+        {"id": "126.a", "pergunta": "Em caso positivo, especificar.", "tipo": "textarea", dependeDe: { id: "126", valor: "Sim" }},
         {"id": "127", "pergunta": "O(a) membro(a) correicionado(a) tem investigado desvios de recursos, fraude em licitações na área da saúde ou omissão de gestores que coloquem a vida da população em risco?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "127.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea"},
+        {"id": "127.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "127", valor: "Sim" }},
         {"id": "128", "pergunta": "O Município tem TFD (Tratamento Fora do Domicílio)?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "128.a", "pergunta": "Em caso negativo, especificar como é feita a transferência de pacientes para a rede estadual.", "tipo": "textarea"},
+        {"id": "128.a", "pergunta": "Em caso negativo, especificar como é feita a transferência de pacientes para a rede estadual.", "tipo": "textarea", dependeDe: { id: "128", valor: "Não" }},
         {"id": "129", "pergunta": "Existe CAPS no Município?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "129.a", "pergunta": "Em caso afirmativo, especificar o tipo.", "tipo": "textarea"},
+        {"id": "129.a", "pergunta": "Em caso afirmativo, especificar o tipo.", "tipo": "textarea", dependeDe: { id: "129", valor: "Sim" }},
         {"id": "130", "pergunta": "O(a) membro(a) fiscaliza os repasses fundo a fundo?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "130.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea"},
+        {"id": "130.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "130", valor: "Sim" }},
         {"id": "131", "pergunta": "O Município possui usina própria de oxigênio?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "131.a", "pergunta": "Em caso negativo, como é feito o abastecimento do hospital?", "tipo": "textarea"},
+        {"id": "131.a", "pergunta": "Em caso negativo, como é feito o abastecimento do hospital?", "tipo": "textarea", dependeDe: { id: "131", valor: "Não" }},
         {"id": "132", "pergunta": "O Município possui sistema de tratamento de água distribuída para a população?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "132.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea"},
-        {"id": "132.b", "pergunta": "Em caso negativo, informar o número do procedimento instaurado, se houver.", "tipo": "textarea"}
+        {"id": "132.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "132", valor: "Sim" }},
+        {"id": "132.b", "pergunta": "Em caso negativo, informar o número do procedimento instaurado, se houver.", "tipo": "textarea", dependeDe: { id: "132", valor: "Não" }}
       ]
     },
     {
       "nome": "TUTELA DO MEIO AMBIENTE",
       "campos": [
         {"id": "133", "pergunta": "O(a) membro(a) correicionado(a), quando atua na responsabilização por danos ambientais e climáticos, observa o princípio da reparação integral, levando em conta todas as dimensões socioambientais, incluindo os impactos sobre a flora, fauna, clima, solo, ar, água e bem-estar coletivo, conforme o art. 3º da Recomendação nº 48/2016 do CNMP?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "133.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea"},
+        {"id": "133.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "133", valor: "Sim" }},
         {"id": "134", "pergunta": "O(a) membro(a) correicionado(a), quando realiza a valoração e a quantificação dos danos ambientais, utiliza ferramentas como a calculadora CCAL, desenvolvida pelo IPAM, para mensurar os impactos climáticos decorrentes do desmatamento e das queimadas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "134.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea"},
+        {"id": "134.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "134", valor: "Sim" }},
         {"id": "135", "pergunta": "O(a) membro(a) correicionado(a) fiscaliza a política de descarte de resíduos sólidos e de lixo hospitalar?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "135.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea"},
+        {"id": "135.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "135", valor: "Sim" }},
         {"id": "136", "pergunta": "O Município possui Plano Diretor?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "136.a", "pergunta": "O(a) membro(a) correicionado(a) fiscaliza a ocupação do solo e o parcelamento urbano para evitar o crescimento desordenado que degrada o ecossistema local?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-        {"id": "136.b", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea"}
+        {"id": "136.a", "pergunta": "O(a) membro(a) correicionado(a) fiscaliza a ocupação do solo e o parcelamento urbano para evitar o crescimento desordenado que degrada o ecossistema local?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "136", valor: "Sim" }},
+        {"id": "136.b", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "136.a", valor: "Sim" }}
       ]
     },
     {
@@ -526,7 +528,4 @@ const form = {
         {"id": "139", "pergunta": "Experiências inovadoras e boas práticas.", "tipo": "textarea"},
         {"id": "140", "pergunta": "Observações (outras atividades de atuação).", "tipo": "textarea"},
         {"id": "141", "pergunta": "Documento preenchido por.", "tipo": "text"}
-    ]
-  }
-]
-};
+    ]}]};

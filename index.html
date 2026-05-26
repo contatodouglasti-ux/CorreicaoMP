@@ -22,6 +22,10 @@
   })();
 </script>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
   /* ── Chips de subtópico ── */
   .chip-bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px;}
@@ -50,9 +54,66 @@
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
   .toast-ok{background:#1C799B;color:#fff;}
   .toast-erro{background:#c0392b;color:#fff;}
+
+  /* ── Badge de usuário (canto superior direito) ── */
+  #userBadge{
+    position:fixed;top:12px;right:16px;z-index:1000;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
+    border:1px solid #dde3e8;border-radius:24px;
+    padding:6px 14px 6px 10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.10);
+    font-size:13px;font-weight:600;color:#263238;
+    pointer-events:none;
+  }
+  #userBadge .avatar{
+    width:28px;height:28px;border-radius:50%;
+    background:#1C799B;color:#fff;font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+
+  /* ── Spinner de carregamento ── */
+  #loadingOverlay{
+    position:fixed;inset:0;background:rgba(255,255,255,0.85);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:9000;gap:14px;font-size:15px;color:#546E7A;font-weight:600;
+  }
+  #loadingOverlay .spinner{
+    width:36px;height:36px;border:4px solid #d0e8f0;
+    border-top-color:#1C799B;border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ── Badge de seção enviada ── */
+  .badge-enviada{
+    display:inline-block;margin-left:8px;padding:2px 8px;
+    border-radius:12px;font-size:11px;font-weight:700;
+    background:#d4edda;color:#155724;vertical-align:middle;
+  }
+
+  /* ── Modo somente leitura ── */
+  .modo-leitura-aviso{
+    background:#fff3cd;border:1px solid #ffc107;border-radius:8px;
+    padding:12px 16px;margin-bottom:16px;font-size:13px;color:#856404;font-weight:600;
+  }
 </style>
 </head>
+
 <div id="toast" class="toast"></div>
+
+<!-- Badge do usuário -->
+<div id="userBadge" style="display:none">
+  <div class="avatar" id="userAvatar">?</div>
+  <span id="userName">Carregando…</span>
+</div>
+
+<!-- Overlay de carregamento -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <span id="loadingMsg">Carregando…</span>
+</div>
+
 <body>
 
 <div class="progress">
@@ -65,692 +126,1140 @@
 </div>
 
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
-
 <div class="menu" id="menu"></div>
 
-
-
 <div class="container" id="formContainer"></div>
-
 <div class="container" id="historicoContainer" style="display:none;"></div>
 
 <div id="enviarTudoWrap" style="text-align:center;margin:20px;">
   <button class="btn-primary" onclick="enviarTudo()">Enviar tudo</button>
 </div>
 
-<!-- ── Painel de teste Power Automate ── -->
-
-</div>
 <script src="Secoes.js"></script>
 <script src="script.js"></script>
 <script src="red_login.js"></script>
 
 <script>
+/* ================================================================
+   CONFIGURAÇÃO SUPABASE
+   Substitua pelos valores do seu projeto em supabase.com
+   ================================================================ */
+const SUPABASE_URL  = 'https://dcqxekzenkmietbhqwng.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_6JnCXxZImhhc7ivUuJWkGg_u4mRF_A7';
 
-let atual = 0;
+// Opção B: RLS via header customizado (compatível com login MSAL/Azure AD)
+// O email do usuário é enviado em cada requisição e validado pela policy do Supabase
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  global: {
+    headers: {
+      'x-user-id': (()=>{
+        try{ const a=JSON.parse(localStorage.getItem('msalAccount')||'{}'); return a.username||a.email||''; }
+        catch(e){ return ''; }
+      })()
+    }
+  }
+});
 
-/* ===== MENU ===== */
+/*
+  Estrutura esperada da tabela "correicoes" no Supabase:
+  ─────────────────────────────────────────────────────
+  id          uuid  (default: gen_random_uuid(), primary key)
+  user_id     text  (email do usuário — vem do MSAL)
+  nome        text
+  dados       jsonb (campos do formulário por seção)
+  secoes_ok   jsonb (ex: {"0":true,"2":true})
+  finalizado  boolean (default: false)
+  criado_em   timestamptz (default: now())
+  atualizado_em timestamptz (default: now())
+
+  SQL para criar:
+  ───────────────
+  create table correicoes (
+    id            uuid primary key default gen_random_uuid(),
+    user_id       text not null,
+    nome          text,
+    dados         jsonb default '{}'::jsonb,
+    secoes_ok     jsonb default '{}'::jsonb,
+    finalizado    boolean default false,
+    criado_em     timestamptz default now(),
+    atualizado_em timestamptz default now()
+  );
+  -- RLS: cada usuário só vê o seu
+  alter table correicoes enable row level security;
+  create policy "usuario_proprio" on correicoes
+    using (user_id = current_setting('request.jwt.claims', true)::json->>'email');
+*/
+
+/* ================================================================
+   ESTADO GLOBAL
+   ================================================================ */
+let atual        = 0;
+let registroId   = null;   // UUID do registro ativo no Supabase
+let modoLeitura  = false;  // true = formulário bloqueado (já finalizado)
+
+/* ================================================================
+   UTILITÁRIOS DE USUÁRIO
+   ================================================================ */
+function getEmailUsuario(){
+  try{
+    const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
+    return acc.username || acc.email || 'desconhecido';
+  }catch(e){ return 'desconhecido'; }
+}
+function getNomeUsuario(){
+  try{
+    const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
+    return acc.name || acc.displayName || acc.nome || 'desconhecido';
+  }catch(e){ return 'desconhecido'; }
+}
+
+function exibirBadgeUsuario(){
+  const nome  = getNomeUsuario();
+  const email = getEmailUsuario();
+  const badge = document.getElementById('userBadge');
+  const span  = document.getElementById('userName');
+  const av    = document.getElementById('userAvatar');
+  const iniciais = nome.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase() || '?';
+  av.textContent = iniciais;
+  span.textContent = nome !== 'desconhecido' ? nome : email;
+  badge.style.display = 'flex';
+}
+
+/* ================================================================
+   LOADING OVERLAY
+   ================================================================ */
+function mostrarLoading(msg='Carregando…'){
+  document.getElementById('loadingMsg').textContent = msg;
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function esconderLoading(){
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+/* ================================================================
+   MENU
+   ================================================================ */
 function toggleMenu(){
-  document.getElementById("menu").classList.toggle("open");
-  document.getElementById("menuOverlay").classList.toggle("open");
-  document.querySelector(".menu-btn").style.display = 
-    document.querySelector(".menu-btn").style.display === "none" ? "inline-block" : "none";
+  document.getElementById('menu').classList.toggle('open');
+  document.getElementById('menuOverlay').classList.toggle('open');
+  let mb = document.querySelector('.menu-btn');
+  mb.style.display = mb.style.display === 'none' ? 'inline-block' : 'none';
 }
 
 function logout(){
   localStorage.removeItem('msalAccount');
   localStorage.removeItem('msal_email');
-  Object.keys(localStorage)
-    .filter(k => k.startsWith('msal.'))
-    .forEach(k => localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k=>k.startsWith('msal.')).forEach(k=>localStorage.removeItem(k));
   window.location.replace('/login.html');
 }
 
 function criarMenu(){
- 
-let m = document.getElementById("menu");
-m.innerHTML = ""; // limpa
-
-let scroll = document.createElement("div");
-scroll.className = "menu-scroll";
-
-m.appendChild(scroll);
+  let m = document.getElementById('menu');
+  m.innerHTML = '';
+  let scroll = document.createElement('div');
+  scroll.className = 'menu-scroll';
+  m.appendChild(scroll);
 
   form.secoes.forEach((s,i)=>{
-    let a=document.createElement("a");
-    a.innerText=s.nome;
-    a.onclick=()=>{ abrirFormulario(); mostrar(i); toggleMenu(); };
+    let a = document.createElement('a');
+    a.id = `menu-sec-${i}`;
+    a.innerText = s.nome;
+    a.onclick = ()=>{ abrirFormulario(); mostrar(i); toggleMenu(); };
     scroll.appendChild(a);
   });
 
-  let sepHistorico = document.createElement("a");
-  sepHistorico.innerText = "📋 Histórico";
-  sepHistorico.style.marginTop = "16px";
-  sepHistorico.style.borderTop = "1px solid rgba(255,255,255,0.18)";
-  sepHistorico.style.paddingTop = "16px";
-  sepHistorico.style.color = "#4FB8EE";
-  sepHistorico.onclick = () => { abrirHistorico(); toggleMenu(); };
+  let sepNovo = document.createElement('a');
+  sepNovo.innerText = '➕ Nova correição';
+  sepNovo.style.cssText = 'margin-top:16px;border-top:1px solid rgba(255,255,255,0.18);padding-top:16px;color:#4FB8EE;';
+  sepNovo.onclick = ()=>{ novaCorreicao(); toggleMenu(); };
+  scroll.appendChild(sepNovo);
+
+  let sepHistorico = document.createElement('a');
+  sepHistorico.innerText = '📋 Histórico';
+  sepHistorico.style.cssText = 'margin-top:8px;color:#4FB8EE;';
+  sepHistorico.onclick = ()=>{ abrirHistorico(); toggleMenu(); };
   scroll.appendChild(sepHistorico);
 
-  let logoutLink = document.createElement("a");
-  logoutLink.innerText = "Sair";
-  logoutLink.style.marginTop = "8px";
-  logoutLink.style.borderTop = "1px solid rgba(255,255,255,0.18)";
-  logoutLink.style.paddingTop = "16px";
+  let logoutLink = document.createElement('a');
+  logoutLink.innerText = 'Sair';
+  logoutLink.style.cssText = 'margin-top:8px;border-top:1px solid rgba(255,255,255,0.18);padding-top:16px;';
   logoutLink.onclick = logout;
   scroll.appendChild(logoutLink);
 }
 
-/* ===== FORM ===== */
+/* ================================================================
+   FORM — RENDERIZAÇÃO
+   ================================================================ */
 function criarForm(){
-  let c = document.getElementById("formContainer");
+  let c = document.getElementById('formContainer');
 
   form.secoes.forEach((sec,i)=>{
-    let d=document.createElement("div");
-    d.className="section";
-    if(i===0) d.classList.add("active");
+    let d = document.createElement('div');
+    d.className = 'section';
+    if(i===0) d.classList.add('active');
 
-    let h=document.createElement("h2");
-    h.innerText=sec.nome;
+    let h = document.createElement('h2');
+    h.innerText = sec.nome;
     d.appendChild(h);
 
-    // ── Seção com subtópicos: renderiza chips de filtro múltiplo ──
     if(sec.subtopicos){
-      // barra de chips
-      let chipBar=document.createElement("div");
-      chipBar.className="chip-bar";
-
-      // container dos campos filtrados
-      let camposWrap=document.createElement("div");
-      camposWrap.id="campos-especificos";
-
-      let ativos=new Set(); // prefixos selecionados
+      let chipBar = document.createElement('div');
+      chipBar.className = 'chip-bar';
+      let camposWrap = document.createElement('div');
+      camposWrap.id = 'campos-especificos';
+      let ativos = new Set();
 
       function atualizarCampos(){
-        camposWrap.innerHTML="";
+        camposWrap.innerHTML = '';
         if(ativos.size===0){
-          let aviso=document.createElement("p");
-          aviso.className="chip-aviso";
-          aviso.innerText="Selecione um ou mais tópicos acima para exibir os campos.";
+          let aviso = document.createElement('p');
+          aviso.className = 'chip-aviso';
+          aviso.innerText = 'Selecione um ou mais tópicos acima para exibir os campos.';
           camposWrap.appendChild(aviso);
           return;
         }
         sec.subtopicos.forEach(sub=>{
           if(!ativos.has(sub.prefixo)) return;
-          // título do grupo
-          let gt=document.createElement("h3");
-          gt.className="subtopico-title";
-          gt.innerText=sub.nome;
+          let gt = document.createElement('h3');
+          gt.className = 'subtopico-title';
+          gt.innerText = sub.nome;
           camposWrap.appendChild(gt);
-          // campos do grupo
-          sec.campos
-            .filter(c=>c.id.startsWith(sub.prefixo+"."))
-            .forEach(campo=>render(camposWrap,campo));
+          sec.campos.filter(c=>c.id.startsWith(sub.prefixo+'.')).forEach(campo=>render(camposWrap,campo));
         });
-        // restaurar valores salvos
         carregar();
       }
 
       sec.subtopicos.forEach(sub=>{
-        let chip=document.createElement("button");
-        chip.type="button";
-        chip.className="chip";
-        chip.innerText=sub.nome;
-        chip.dataset.prefixo=sub.prefixo;
-        chip.onclick=()=>{
-          if(ativos.has(sub.prefixo)){
-            ativos.delete(sub.prefixo);
-            chip.classList.remove("chip-ativo");
-          } else {
-            ativos.add(sub.prefixo);
-            chip.classList.add("chip-ativo");
-          }
+        let chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip';
+        chip.innerText = sub.nome;
+        chip.dataset.prefixo = sub.prefixo;
+        chip.onclick = ()=>{
+          if(ativos.has(sub.prefixo)){ ativos.delete(sub.prefixo); chip.classList.remove('chip-ativo'); }
+          else { ativos.add(sub.prefixo); chip.classList.add('chip-ativo'); }
           atualizarCampos();
         };
         chipBar.appendChild(chip);
       });
-
       d.appendChild(chipBar);
       atualizarCampos();
       d.appendChild(camposWrap);
-
     } else {
       sec.campos.forEach(campo=>render(d,campo));
     }
 
-    let nav=document.createElement("div");
-    nav.className="nav";
-
-    if(i>0){
-      let b1=btn("Voltar","btn-gray",()=>mostrar(i-1));
-      nav.appendChild(b1);
-    }
-
-    let b2=btn("Próximo","btn-primary",()=>mostrar(i+1));
-    nav.appendChild(b2);
-
-    let b3=btn("Enviar seção","btn-green",()=>enviarSecao(i));
-    nav.appendChild(b3);
-
+    let nav = document.createElement('div');
+    nav.className = 'nav';
+    if(i>0){ nav.appendChild(btn('Voltar','btn-gray',()=>mostrar(i-1))); }
+    nav.appendChild(btn('Próximo','btn-primary',()=>mostrar(i+1)));
+    nav.appendChild(btn('Salvar seção','btn-green',()=>salvarSecao(i)));
     d.appendChild(nav);
-
     c.appendChild(d);
   });
 
   atualizarBarra();
 }
-function render(p,c){
 
-  let l=document.createElement("label");
-  l.className = "required";
-  l.innerText=c.pergunta;
+function render(p,c){
+  let wrapper = document.createElement('div');
+  wrapper.dataset.campoId = c.id;
+  if(c.dependeDe){
+    wrapper.dataset.dependeDeId    = c.dependeDe.id;
+    wrapper.dataset.dependeDeValor = c.dependeDe.valor;
+  }
+  p.appendChild(wrapper);
+  p = wrapper;
+
+  let l = document.createElement('label');
+  l.className = 'required';
+  l.innerText = c.pergunta;
   p.appendChild(l);
 
-  // TEXTAREA
-  if(c.tipo==="textarea"){
-    let t=document.createElement("textarea");
-    t.id=c.id;
-    t.required=true;
-    t.oninput=salvar;
+  if(c.tipo==='textarea'){
+    let t=document.createElement('textarea');
+    t.id=c.id; t.required=true; t.oninput=autoSalvar;
     p.appendChild(t);
   }
-
-  // DATE
-  if(c.tipo==="date"){
-    let i=document.createElement("input");
-    i.type="date";
-    i.id=c.id;
-    i.required=true;
-    i.onchange=salvar;
+  if(c.tipo==='date'){
+    let i=document.createElement('input');
+    i.type='date'; i.id=c.id; i.required=true; i.onchange=autoSalvar;
     p.appendChild(i);
   }
-
-  // TIME ✅ NOVO
-  if(c.tipo==="time"){
-    let i=document.createElement("input");
-    i.type="time";
-    i.id=c.id;
-    i.required=true;
-    i.onchange=salvar;
+  if(c.tipo==='time'){
+    let i=document.createElement('input');
+    i.type='time'; i.id=c.id; i.required=true; i.onchange=autoSalvar;
     p.appendChild(i);
   }
-
-  // NUMBER ✅ NOVO
-  if(c.tipo==="number"){
-    
-    let i=document.createElement("input");
-    i.type="number";
-    i.id=c.id;
-    i.required=true;
-    i.oninput=salvar;
+  if(c.tipo==='number'){
+    let i=document.createElement('input');
+    i.type='number'; i.id=c.id; i.required=true; i.oninput=autoSalvar;
     p.appendChild(i);
   }
-
-  // TEXT ✅ NOVO
-  if(c.tipo==="text"){
-    let i=document.createElement("input");
-    i.type="text";
-    i.id=c.id;
-    i.required=true;
-    i.oninput=salvar;
+  if(c.tipo==='text'){
+    let i=document.createElement('input');
+    i.type='text'; i.id=c.id; i.required=true; i.oninput=autoSalvar;
     p.appendChild(i);
   }
-
-  // RADIO
-  if(c.tipo==="radio"){
-    let d=document.createElement("div");
-    d.className="radio-group";
-
+  if(c.tipo==='radio'){
+    let dv=document.createElement('div');
+    dv.className='radio-group';
     c.opcoes.forEach(op=>{
-      let lbl=document.createElement("label");
-      let r=document.createElement("input");
-
-      r.type="radio";
-      r.name=c.id;
-      r.value=op;
-      r.required=true;
-      r.onchange=salvar;
-
+      let lbl=document.createElement('label');
+      let r=document.createElement('input');
+      r.type='radio'; r.name=c.id; r.value=op; r.required=true;
+      r.onchange=()=>{ avaliarCondicionais(); autoSalvar(); };
       lbl.appendChild(r);
-      lbl.append(" "+op);
-      d.appendChild(lbl);
+      lbl.append(' '+op);
+      dv.appendChild(lbl);
     });
-
-    p.appendChild(d);
+    p.appendChild(dv);
   }
 }
 
-/* ===== BOTÃO ===== */
+/* ================================================================
+   CONDICIONAIS
+   ================================================================ */
+function avaliarCondicionais(){
+  document.querySelectorAll('[data-depende-de-id]').forEach(wrapper=>{
+    let controlId     = wrapper.dataset.dependeDeId;
+    let valorEsperado = wrapper.dataset.dependeDeValor;
+    let controlEl     = document.querySelector(`input[name="${controlId}"]:checked`);
+    let valorAtual    = controlEl ? controlEl.value : null;
+    let obrigatorio   = (valorAtual === valorEsperado);
+    wrapper.querySelectorAll('input, textarea, select').forEach(el=>{ el.required = obrigatorio; });
+    let lbl = wrapper.querySelector('label');
+    if(lbl) lbl.className = obrigatorio ? 'required' : '';
+  });
+}
+
+/* ================================================================
+   BOTÃO UTILITÁRIO
+   ================================================================ */
 function btn(text,cls,fn){
-  let b=document.createElement("button");
-  b.innerText=text;
-  b.className=cls;
-  b.onclick=fn;
+  let b=document.createElement('button');
+  b.innerText=text; b.className=cls; b.onclick=fn;
   return b;
 }
 
-/* ===== NAVEGAÇÃO ===== */
+/* ================================================================
+   NAVEGAÇÃO / PROGRESSO
+   ================================================================ */
 function mostrar(i){
-  let secs=document.querySelectorAll(".section");
+  let secs=document.querySelectorAll('.section');
   if(i<0||i>=secs.length) return;
-
-  secs.forEach(s=>s.classList.remove("active"));
-  secs[i].classList.add("active");
-
+  secs.forEach(s=>s.classList.remove('active'));
+  secs[i].classList.add('active');
   atual=i;
   atualizarBarra();
 }
 
-/* ===== PROGRESSO ===== */
 function atualizarBarra(){
-  let perc = ((atual+1)/form.secoes.length)*100;
-  document.getElementById("progressBar").style.width = perc+"%";
+  let perc=((atual+1)/form.secoes.length)*100;
+  document.getElementById('progressBar').style.width=perc+'%';
 }
 
-/* ===== STORAGE ===== */
-function salvar(){
-  let dados = coletar();
-  localStorage.setItem("form_correcao", JSON.stringify(dados));
-}
-
-function carregar(){
-  let dados = JSON.parse(localStorage.getItem("form_correcao")||"{}");
-
-  Object.keys(dados).forEach(k=>{
-    let el=document.getElementById(k) || document.querySelector(`input[name="${k}"][value="${dados[k]}"]`);
-    if(el){
-      if(el.type==="radio"){
-        document.querySelector(`input[name="${k}"][value="${dados[k]}"]`).checked=true;
-      }else{
-        el.value=dados[k];
-      }
-    }
-  });
-}
-
-/* ===== COLETA ===== */
+/* ================================================================
+   COLETA DE DADOS DO DOM
+   ================================================================ */
 function coletar(sec=null){
-  let base = sec!==null ? document.querySelectorAll(".section")[sec] : document;
-  let inputs = base.querySelectorAll("input,textarea");
-
+  let base = sec!==null ? document.querySelectorAll('.section')[sec] : document;
+  let inputs = base.querySelectorAll('input,textarea');
   let d={};
-
   inputs.forEach(i=>{
-    if(i.type==="radio"){
-      if(i.checked) d[i.name]=i.value;
-    } else {
-      d[i.id]=i.value;
-    }
+    if(i.type==='radio'){ if(i.checked) d[i.name]=String(i.value); }
+    else { if(i.id) d[i.id]=String(i.value); }
   });
-
   return d;
 }
 
-/* ===== VALIDAÇÃO ===== */
+function carregar(){
+  // Lê dados salvos no Supabase (já em memória) ou do localStorage fallback
+  let dadosSalvos = window._dadosCarregados || {};
+  Object.keys(dadosSalvos).forEach(k=>{
+    let el=document.getElementById(k)||document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
+    if(!el) return;
+    if(el.type==='radio'){
+      let r=document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
+      if(r) r.checked=true;
+    } else {
+      el.value=dadosSalvos[k];
+    }
+  });
+  avaliarCondicionais();
+}
+
+/* ================================================================
+   VALIDAÇÃO
+   ================================================================ */
 function limparInvalidos(base){
   base.querySelectorAll('.invalid').forEach(el=>el.classList.remove('invalid'));
 }
-
 function encontrarInvalidos(base){
   limparInvalidos(base);
-  let invalids = [];
-  let radiosProcessados = new Set();
-
+  let invalids=[]; let radiosProc=new Set();
   base.querySelectorAll('input,textarea').forEach(el=>{
-    if(el.type === 'radio'){
-      if(radiosProcessados.has(el.name)) return;
-      radiosProcessados.add(el.name);
-      let radios = Array.from(base.querySelectorAll(`input[name="${el.name}"]`));
-      if(!radios.some(r=>r.checked)){
-        let grupo = radios[0] && radios[0].closest('.radio-group');
-        if(grupo){
-          grupo.classList.add('invalid');
-          invalids.push(grupo);
-        } else {
-          radios[0].classList.add('invalid');
-          invalids.push(radios[0]);
-        }
+    if(el.type==='radio'){
+      if(radiosProc.has(el.name)) return;
+      radiosProc.add(el.name);
+      let radios=Array.from(base.querySelectorAll(`input[name="${el.name}"]`));
+      if(el.required && !radios.some(r=>r.checked)){
+        let grupo=radios[0]&&radios[0].closest('.radio-group');
+        if(grupo){ grupo.classList.add('invalid'); invalids.push(grupo); }
+        else { radios[0].classList.add('invalid'); invalids.push(radios[0]); }
       }
       return;
     }
-
-    if(el.required){
-      if(!el.value || !el.value.toString().trim()){
-        el.classList.add('invalid');
-        invalids.push(el);
-      }
+    if(el.required && (!el.value||!el.value.toString().trim())){
+      el.classList.add('invalid'); invalids.push(el);
     }
   });
-
   return invalids;
 }
-
 function focusFirstInvalid(invalids){
   if(!invalids.length) return;
-  let first = invalids[0];
+  let first=invalids[0];
   if(first.classList.contains('radio-group')){
-    let firstRadio = first.querySelector('input[type="radio"]');
-    if(firstRadio) firstRadio.focus();
-  } else {
-    first.focus();
+    let r=first.querySelector('input[type="radio"]');
+    if(r) r.focus();
+  } else { first.focus(); }
+  first.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* ================================================================
+   SUPABASE — CRUD
+   ================================================================ */
+
+// Garante que existe um registro em aberto para o usuário.
+// Retorna o registro (row).
+async function garantirRegistroAberto(){
+  const userId = getEmailUsuario();
+
+  // Busca registro não finalizado do usuário
+  let { data, error } = await sb
+    .from('correicoes')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('finalizado', false)
+    .order('criado_em', { ascending: false })
+    .limit(1);
+
+  if(error) throw error;
+
+  if(data && data.length > 0){
+    return data[0];
   }
-  first.scrollIntoView({ behavior:'smooth', block:'center' });
+
+  // Nenhum aberto — cria um novo
+  let { data: novo, error: errNovo } = await sb
+    .from('correicoes')
+    .insert({ user_id: userId, nome: getNomeUsuario(), dados: {}, secoes_ok: {}, finalizado: false })
+    .select()
+    .single();
+
+  if(errNovo) throw errNovo;
+  return novo;
 }
 
-/* ===== ENVIO ===== */
-
-// ─── Power Automate ────────────────────────────────────────────
-const PA_CRIAR = "https://default84a9248e396f44df84a94379e11007.ab.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/679dbd3be9884fac8665fa7b7458c589/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MyA3qI1BWcZTqtVbRNPmJx3vUVW0RKkXNFrOkd5vH6A";
-// ───────────────────────────────────────────────────────────────
-
-function getEmailUsuario(){
-  try {
-    const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
-    return acc.username || acc.email || 'desconhecido';
-  } catch(e){ return 'desconhecido'; }
+// Auto-salva campo a campo (debounce 1.5s)
+let _autoSalvarTimer = null;
+function autoSalvar(){
+  clearTimeout(_autoSalvarTimer);
+  _autoSalvarTimer = setTimeout(()=>{ persistirDados(); }, 1500);
 }
-function getNomeUsuario(){
-  try {
-    const acc = JSON.parse(localStorage.getItem('msalAccount') || '{}');
-    return acc.name || acc.displayName || acc.nome || 'desconhecido';
-  } catch(e){ return 'desconhecido'; }
+
+// Persiste todos os dados do formulário no Supabase
+async function persistirDados(){
+  if(!registroId) return;
+  const dados = coletar();
+  window._dadosCarregados = dados;
+  await sb.from('correicoes').update({
+    dados,
+    atualizado_em: new Date().toISOString()
+  }).eq('id', registroId);
 }
-function enviarSecao(i){
-  
-alert(`⚠️ Os dados das seções ficam salvos apenas neste dispositivo.
 
-Eles podem ser apagados se você:
-• Limpar dados do navegador
-• Trocar de dispositivo ou navegador
-• Usar modo anônimo
-
-Finalize em "Enviar tudo" para garantir o envio.`);
+/* ================================================================
+   SALVAR SEÇÃO (antigo "Enviar seção")
+   ================================================================ */
+async function salvarSecao(i){
+  if(modoLeitura){ showToast('Este envio já foi finalizado e não pode ser alterado.','erro'); return; }
 
   let section = document.querySelectorAll('.section')[i];
-
   let invalidos = encontrarInvalidos(section);
   if(invalidos.length){
     mostrar(i);
     focusFirstInvalid(invalidos);
-    alert('Preencha todos os campos obrigatórios antes de enviar a seção.');
+    showToast('Preencha todos os campos obrigatórios antes de salvar a seção.','erro');
     return;
   }
 
-  let dadosSecao = coletar(i);
+  mostrarLoading('Salvando seção…');
+  try{
+    const dadosSecao  = coletar(i);
+    const dadosAtuais = window._dadosCarregados || {};
+    const dadosMerged = Object.assign({}, dadosAtuais, dadosSecao);
+    window._dadosCarregados = dadosMerged;
 
-  // ✅ salva local
-  let dados = JSON.parse(localStorage.getItem("form_correcao") || "{}");
-  Object.assign(dados, dadosSecao);
-  localStorage.setItem("form_correcao", JSON.stringify(dados));
+    // Busca secoes_ok atual
+    let { data: reg } = await sb.from('correicoes').select('secoes_ok').eq('id', registroId).single();
+    let secoesOk = reg ? (reg.secoes_ok || {}) : {};
+    secoesOk[i] = "true";
 
-  // ✅ marca seção como enviada
-  let enviadas = JSON.parse(localStorage.getItem('secoes_enviadas') || '{}');
-  enviadas[i] = true;
-  localStorage.setItem('secoes_enviadas', JSON.stringify(enviadas));
+    await sb.from('correicoes').update({
+      dados: dadosMerged,
+      secoes_ok: secoesOk,
+      atualizado_em: new Date().toISOString()
+    }).eq('id', registroId);
 
-  alert(`Seção "${form.secoes[i].nome}" salva localmente ✅`);
-
-  bloquearSecao(i);
+    bloquearSecao(i);
+    atualizarMenuBadge(i);
+    showToast(`Seção "${form.secoes[i].nome}" salva ✅`,'ok');
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao salvar seção. Verifique sua conexão.','erro');
+  }finally{
+    esconderLoading();
+  }
 }
 
-function enviarTudo(){
-  let container = document.getElementById('formContainer');
+/* ================================================================
+   ENVIAR TUDO
+   ================================================================ */
+const PA_CRIAR = "https://default84a9248e396f44df84a94379e11007.ab.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/679dbd3be9884fac8665fa7b7458c589/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MyA3qI1BWcZTqtVbRNPmJx3vUVW0RKkXNFrOkd5vH6A";
 
+async function enviarTudo(){
+  if(modoLeitura){ showToast('Este envio já foi finalizado.','erro'); return; }
+
+  let container = document.getElementById('formContainer');
   let invalidos = encontrarInvalidos(container);
   if(invalidos.length){
     let firstSection = invalidos[0].closest('.section');
-    if(firstSection){
-      let sections = Array.from(document.querySelectorAll('.section'));
-      mostrar(sections.indexOf(firstSection));
-    }
+    if(firstSection){ mostrar(Array.from(document.querySelectorAll('.section')).indexOf(firstSection)); }
     focusFirstInvalid(invalidos);
-    showToast('Preencha todos os campos obrigatórios antes de enviar.', 'erro');
+    showToast('Preencha todos os campos obrigatórios antes de enviar.','erro');
     return;
   }
 
-  // Monta payload: campos no nível raiz + metadados
-  let dadosCampos = coletar();
-  let email = getEmailUsuario();
-  let nome = getNomeUsuario();
-  let payload = Object.assign({}, dadosCampos, {
-    __email: email,
-    __nome: nome,
-    __data_envio: new Date().toISOString()
-  });
+  mostrarLoading('Enviando…');
+  try{
+    const dadosCampos = coletar();
+    const email       = getEmailUsuario();
+    const nome        = getNomeUsuario();
+    const dataEnvio   = new Date().toISOString();
 
-  // ── DEBUG: inspecione o JSON no F12 → Console ──
-  console.log('%c[enviarTudo] JSON enviado ao Power Automate', 'color:#1C799B;font-weight:bold;font-size:13px');
-  console.log(JSON.parse(JSON.stringify(payload))); // objeto expansível
-  console.log('%c[enviarTudo] JSON stringificado:', 'color:#546E7A;font-size:12px', JSON.stringify(payload, null, 2));
+    // 1. Finaliza no Supabase PRIMEIRO (garante que o PA vai encontrar os dados)
+    await sb.from('correicoes').update({
+      dados: dadosCampos,
+      finalizado: true,
+      atualizado_em: dataEnvio
+    }).eq('id', registroId);
 
-  // Feedback visual
-  let btnEnviar = document.querySelector('#enviarTudoWrap .btn-primary');
-  let textoOriginal = btnEnviar ? btnEnviar.innerText : '';
-  if(btnEnviar){ btnEnviar.disabled = true; btnEnviar.innerText = 'Enviando…'; }
+    // 2. Envia payload REDUZIDO ao Power Automate
+    //    O PA busca os dados completos no Supabase pelo registro_id
+    const payload = {
+      registro_id: registroId,
+      email:       email,
+      nome:        nome,
+      data_envio:  dataEnvio
+    };
 
-  fetch(PA_CRIAR, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(r => {
-    // PA pode retornar 200/202 com corpo vazio — trata ambos os casos
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    return r.text().then(t => { try{ return JSON.parse(t); } catch(e){ return {}; } });
-  })
-  .then(() => {
-    showToast('Dados enviados com sucesso ✅', 'ok');
-    localStorage.removeItem("form_correcao");
-    localStorage.removeItem("secoes_enviadas");
-    localStorage.removeItem("registro_id_atual");
-   // setTimeout(() => location.reload(), 1800);
-  })
-  .catch(err => {
-    console.error('Erro enviarTudo:', err);
-    showToast('Erro ao enviar (' + (err.message||'verifique o console') + '). Dados continuam salvos localmente.', 'erro');
-    if(btnEnviar){ btnEnviar.disabled = false; btnEnviar.innerText = textoOriginal; }
-  });
-}
+    console.log('%c[enviarTudo] Payload enviado ao Power Automate','color:#1C799B;font-weight:bold;font-size:13px');
+    console.log(payload);
 
-/* ===== TESTE DE CONEXÃO Power Automate ===== */
-function testarConexaoPA(){
-  let btn = document.getElementById('btnTestePA');
-  let log = document.getElementById('logTestePA');
-  btn.disabled = true;
-  log.style.display = 'block';
-  log.innerHTML = '⏳ Enviando payload de teste…';
-
-  let email = getEmailUsuario();
-  let payload = Object.assign({}, { __teste: true }, {
-    __email: email,
-    __data_envio: new Date().toISOString()
-  });
-
-  let inicio = Date.now();
-
-  fetch(PA_CRIAR, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(r => {
-    let ms = Date.now() - inicio;
-    let status = r.status;
-    return r.text().then(body => {
-      let ok = r.ok;
-      let linhas = [
-        `<b>Status HTTP:</b> ${status} ${ok ? '✅' : '❌'}`,
-        `<b>Tempo:</b> ${ms} ms`,
-        `<b>Corpo da resposta:</b><br><code>${escapeHtml(body || '(vazio)')}</code>`,
-      ];
-      if(ok){
-        linhas.push('<br>🟢 <b>Conexão OK!</b> O flow recebeu a requisição.');
-        linhas.push('Verifique no Power Automate se a linha de teste foi criada.');
-      } else {
-        linhas.push('<br>🔴 <b>Falha.</b> Verifique a URL e as permissões do flow.');
-      }
-      log.innerHTML = linhas.join('<br>');
+    const r = await fetch(PA_CRIAR, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
-  })
-  .catch(err => {
-    let ms = Date.now() - inicio;
-    log.innerHTML = [
-      `<b>Erro de rede / CORS:</b> ${escapeHtml(err.message)}`,
-      `<b>Tempo:</b> ${ms} ms`,
-      '<br>🔴 Possíveis causas:',
-      '• A URL do flow está incorreta ou expirada',
-      '• O flow não está habilitado',
-      '• Bloqueio de CORS (o flow precisa retornar cabeçalhos CORS ou você precisa de um proxy)',
-      '<br>Abra o Console do navegador (F12) para mais detalhes.',
-    ].join('<br>');
-  })
-  .finally(() => { btn.disabled = false; });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+
+    // 3. Bloqueia tudo
+    modoLeitura = true;
+    form.secoes.forEach((_,i)=>bloquearSecao(i));
+    document.getElementById('enviarTudoWrap').style.display = 'none';
+    mostrarAvisoLeitura();
+
+    showToast('Dados enviados com sucesso ✅','ok');
+  }catch(err){
+    console.error('Erro enviarTudo:',err);
+    showToast('Erro ao enviar ('+( err.message||'verifique o console')+'). Tente novamente.','erro');
+  }finally{
+    esconderLoading();
+  }
 }
 
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* ================================================================
+   NOVA CORREIÇÃO
+   ================================================================ */
+async function novaCorreicao(){
+  // Verifica se há seções pendentes no registro atual
+  if(registroId && !modoLeitura){
+    let { data: reg } = await sb.from('correicoes').select('secoes_ok').eq('id', registroId).single();
+    let secoesOk = reg ? (reg.secoes_ok || {}) : {};
+    let qtdEnviadas = Object.keys(secoesOk).length;
+    let qtdTotal    = form.secoes.length;
+    if(qtdEnviadas < qtdTotal){
+      let pendentes = qtdTotal - qtdEnviadas;
+      if(!confirm(`Você tem ${pendentes} seção(ões) não salva(s) no registro atual.\n\nDeseja realmente iniciar uma nova correição? O rascunho atual será mantido.`)) return;
+    }
+  }
+
+  mostrarLoading('Criando nova correição…');
+  try{
+    const userId = getEmailUsuario();
+    let { data: novo, error } = await sb
+      .from('correicoes')
+      .insert({ user_id: userId, nome: getNomeUsuario(), dados: {}, secoes_ok: {}, finalizado: false })
+      .select()
+      .single();
+    if(error) throw error;
+
+    registroId = novo.id;
+    modoLeitura = false;
+    window._dadosCarregados = {};
+
+    // Limpa o formulário
+    document.querySelectorAll('#formContainer input, #formContainer textarea').forEach(el=>{
+      if(el.type==='radio'||el.type==='checkbox') el.checked=false;
+      else el.value='';
+    });
+    // Remove bloqueios e badges
+    form.secoes.forEach((_,i)=>{ desbloquearSecao(i); atualizarMenuBadge(i, false); });
+    document.getElementById('enviarTudoWrap').style.display='';
+    document.querySelector('.modo-leitura-aviso') && document.querySelector('.modo-leitura-aviso').remove();
+    avaliarCondicionais();
+    abrirFormulario();
+    mostrar(0);
+
+    showToast('Nova correição iniciada ✅','ok');
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao criar nova correição.','erro');
+  }finally{
+    esconderLoading();
+  }
 }
 
-/* ===== TOAST ===== */
-function showToast(msg, tipo){
-  let t = document.getElementById('toast');
-  if(!t) return;
-  t.textContent = msg;
-  t.className = 'toast ' + (tipo === 'erro' ? 'toast-erro' : 'toast-ok');
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 4000);
+/* ================================================================
+   HISTÓRICO
+   ================================================================ */
+function abrirFormulario(){
+  document.getElementById('formContainer').style.display='';
+  document.getElementById('historicoContainer').style.display='none';
+  if(!modoLeitura) document.getElementById('enviarTudoWrap').style.display='';
 }
 
-/* ===== BLOQUEIO / DESBLOQUEIO DE SEÇÃO ===== */
+async function abrirHistorico(){
+  document.getElementById('formContainer').style.display='none';
+  document.getElementById('enviarTudoWrap').style.display='none';
+  let hc = document.getElementById('historicoContainer');
+  hc.style.display='';
+  hc.innerHTML='<p style="color:#546E7A;padding:20px">Carregando histórico…</p>';
+
+  try{
+    let { data, error } = await sb
+      .from('correicoes')
+      .select('id, criado_em, atualizado_em, finalizado, secoes_ok')
+      .eq('user_id', getEmailUsuario())
+      .order('criado_em', { ascending: false });
+
+    if(error) throw error;
+    renderHistorico(data || [], hc);
+  }catch(err){
+    hc.innerHTML='<p style="color:#c0392b;padding:20px">Erro ao carregar histórico.</p>';
+    console.error(err);
+  }
+}
+
+function renderHistorico(registros, container){
+  container.innerHTML='';
+  let titulo=document.createElement('h2');
+  titulo.innerText='📋 Histórico de Correições';
+  titulo.style.cssText='color:#1C799B;margin-bottom:20px;';
+  container.appendChild(titulo);
+
+  if(!registros||registros.length===0){
+    container.innerHTML+='<p style="color:#546E7A">Nenhum registro encontrado.</p>';
+    return;
+  }
+
+  registros.forEach(reg=>{
+    let card=document.createElement('div');
+    card.style.cssText=`
+      background:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.08);
+      border-left:4px solid ${reg.finalizado ? '#27ae60' : '#1C799B'};
+      display:flex;justify-content:space-between;align-items:flex-start;
+      gap:18px;
+    `;
+    let data = new Date(reg.criado_em);
+    let dataStr = isNaN(data) ? reg.criado_em : data.toLocaleString('pt-BR');
+    let secoesOk = Object.keys(reg.secoes_ok||{}).length;
+    let status = reg.finalizado
+      ? '<span style="color:#27ae60;font-weight:700">✅ Finalizado</span>'
+      : `<span style="color:#f39c12;font-weight:700">⏳ Em andamento (${secoesOk}/${form.secoes.length} seções)</span>`;
+
+    card.innerHTML=`
+      <div>
+        <div style="font-weight:700;color:#263238;font-size:15px">Correição — ${dataStr}</div>
+        <div style="color:#546E7A;font-size:13px;margin-top:4px">${status}</div>
+      </div>
+      
+<div class="historico-card-actions">
+  <button class="btn-primary">Abrir</button>
+  <button class="btn-gray">📄 PDF</button>
+  <button class="btn-danger">🗑️ Excluir</button>
+</div>
+    `;
+
+let btnAbrir   = card.querySelector('.btn-primary');
+let btnPDF     = card.querySelector('.btn-gray');
+let btnExcluir = card.querySelector('.btn-danger');
+
+// ABRIR
+btnAbrir.onclick = () => carregarRegistro(reg.id, reg.finalizado);
+
+// PDF
+btnPDF.onclick = () => baixarPDF(reg);
+
+// EXCLUIR
+if(reg.finalizado){
+  btnExcluir.disabled = true;
+  btnExcluir.style.opacity = '0.5';
+  btnExcluir.style.cursor = 'not-allowed';
+  btnExcluir.title = 'Registros finalizados não podem ser excluídos';
+}else{
+  btnExcluir.onclick = () => excluirRegistro(reg.id);
+}
+
+container.appendChild(card);
+  });
+}
+
+async function carregarRegistro(id, finalizado){
+  mostrarLoading('Carregando registro…');
+  try{
+    let { data: reg, error } = await sb.from('correicoes').select('*').eq('id', id).single();
+    if(error) throw error;
+
+    registroId  = reg.id;
+    modoLeitura = reg.finalizado;
+    window._dadosCarregados = reg.dados || {};
+
+    // Limpa campos antes de carregar
+    document.querySelectorAll('#formContainer input, #formContainer textarea').forEach(el=>{
+      if(el.type==='radio'||el.type==='checkbox') el.checked=false;
+      else el.value='';
+    });
+    // Remove bloqueios antigos
+    form.secoes.forEach((_,i)=>{ desbloquearSecao(i); atualizarMenuBadge(i, false); });
+
+    carregar();
+
+    // Restaura bloqueios de seções salvas
+    let secoesOk = reg.secoes_ok || {};
+    Object.keys(secoesOk).forEach(i=>{ bloquearSecao(Number(i)); atualizarMenuBadge(Number(i), true); });
+
+    if(modoLeitura){
+      form.secoes.forEach((_,i)=>bloquearSecao(i));
+      document.getElementById('enviarTudoWrap').style.display='none';
+      mostrarAvisoLeitura();
+    } else {
+      document.getElementById('enviarTudoWrap').style.display='';
+      document.querySelector('.modo-leitura-aviso')&&document.querySelector('.modo-leitura-aviso').remove();
+    }
+
+    abrirFormulario();
+    mostrar(0);
+    avaliarCondicionais();
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao carregar registro.','erro');
+  }finally{
+    esconderLoading();
+  }
+}
+async function excluirRegistro(id){
+  const confirmar = confirm(
+    'Deseja realmente excluir esta correição?\n\nEsta ação não poderá ser desfeita.'
+  );
+
+  if(!confirmar) return;
+
+  mostrarLoading('Excluindo registro…');
+
+  try{
+
+    // Segurança extra:
+    // só exclui se NÃO estiver finalizado
+    const { data: reg, error: erroBusca } = await sb
+      .from('correicoes')
+      .select('id, finalizado')
+      .eq('id', id)
+      .single();
+
+    if(erroBusca) throw erroBusca;
+
+    if(reg.finalizado){
+      showToast('Registros finalizados não podem ser excluídos.','erro');
+      return;
+    }
+
+    // Exclui no banco
+    const { error: erroDelete } = await sb
+      .from('correicoes')
+      .delete()
+      .eq('id', id);
+
+    if(erroDelete) throw erroDelete;
+
+    showToast('Registro excluído com sucesso ✅','ok');
+
+    // Atualiza o histórico
+    abrirHistorico();
+
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao excluir registro.','erro');
+  }finally{
+    esconderLoading();
+  }
+}
+
+/* ================================================================
+   Baixar Pdf
+   ================================================================ */
+async function baixarPDF(reg){
+
+  mostrarLoading('Gerando PDF…');
+
+  try{
+
+    // Busca dados completos
+    const { data, error } = await sb
+      .from('correicoes')
+      .select('*')
+      .eq('id', reg.id)
+      .single();
+
+    if(error) throw error;
+
+    const dados = data.dados || {};
+
+    // Container temporário — anexado ao DOM para renderização correta
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 170mm;
+      background: #fff;
+      font-family: Arial, sans-serif;
+      color: #263238;
+      font-size: 12px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    `;
+    document.body.appendChild(wrapper);
+
+    // CSS interno para controle de quebras e texto longo
+    wrapper.innerHTML = `
+<style>
+  * { box-sizing: border-box; }
+
+  .pdf-page {
+    width: 170mm;
+    padding: 10mm;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #263238;
+  }
+
+  h1, h2 {
+    page-break-after: avoid;
+  }
+
+  .pdf-secao {
+    page-break-before: auto;
+    page-break-after: avoid;
+  }
+
+  .pdf-campo {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .pdf-pergunta {
+    font-weight: bold;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+
+  .pdf-valor {
+    background: #f5f7f9;
+    padding: 8px;
+    border-radius: 4px;
+
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+</style>
+
+<div class="pdf-page" id="pdf-conteudo">
+
+<div class="pdf-banner">
+  <img src="logo.png" />
+</div>
+
+  <div class="pdf-header">
+    
+    <div>
+      <h1 class="pdf-titulo">Relatório de Correição</h1>
+      <div class="pdf-subtitulo">Documento gerado automaticamente</div>
+    </div>
+  </div>
+
+  <div class="pdf-cabecalho">
+    <div><b>Usuário:</b> ${escapeHtml(data.nome || '')}</div>
+    <div><b>Email:</b> ${escapeHtml(data.user_id || '')}</div>
+    <div><b>Data:</b> ${new Date(data.criado_em).toLocaleString('pt-BR')}</div>
+  </div>
+</div>
+`;
+
+    const pdfPage = wrapper.querySelector('#pdf-conteudo');
+
+    // Seções e campos
+   form.secoes.forEach(sec => {
+
+  const h2 = document.createElement('h2');
+  h2.className = 'pdf-secao';
+  h2.textContent = sec.nome;
+  pdfPage.appendChild(h2);
+
+  // ✅ SE TIVER SUBTÓPICOS
+  if (sec.subtopicos) {
+
+    sec.subtopicos.forEach(sub => {
+
+      const subTitle = document.createElement('h3');
+      subTitle.textContent = sub.nome;
+      subTitle.style.cssText = `
+        font-size:13px;
+        color:#37474F;
+        margin-top:10px;
+      `;
+      pdfPage.appendChild(subTitle);
+
+      // Campos só daquele subtópico
+      sec.campos
+        .filter(campo => campo.id.startsWith(sub.prefixo + '.'))
+        .forEach(campo => {
+
+          const valor = dados[campo.id];
+          if (!valor) return;
+
+          const div = document.createElement('div');
+          div.className = 'pdf-campo';
+
+          const perg = document.createElement('div');
+          perg.className = 'pdf-pergunta';
+          perg.textContent = campo.pergunta;
+
+          const val = document.createElement('div');
+          val.className = 'pdf-valor';
+          val.textContent = valor;
+
+          div.appendChild(perg);
+          div.appendChild(val);
+          pdfPage.appendChild(div);
+        });
+
+    });
+
+  } else {
+    // ✅ fallback pra seções sem subtópico
+    sec.campos.forEach(campo => {
+
+      const valor = dados[campo.id];
+      if (!valor) return;
+
+      const div = document.createElement('div');
+      div.className = 'pdf-campo';
+
+      const perg = document.createElement('div');
+      perg.className = 'pdf-pergunta';
+      perg.textContent = campo.pergunta;
+
+      const val = document.createElement('div');
+      val.className = 'pdf-valor';
+      val.textContent = valor;
+
+      div.appendChild(perg);
+      div.appendChild(val);
+      pdfPage.appendChild(div);
+    });
+  }
+
+});
+
+
+    // Opções PDF — sem scale excessivo para não causar corte
+   const opt = {
+  margin: 10,
+  filename: `correicao-${data.id}.pdf`,
+  image: { type: 'jpeg', quality: 0.98 },
+
+  html2canvas: {
+    scale: 2,         // melhor qualidade
+    useCORS: true,
+    scrollX: 0,
+    scrollY: 0
+  },
+
+  jsPDF: {
+    unit: 'mm',
+    format: 'a4',
+    orientation: 'portrait'
+  },
+
+  pagebreak: {
+    mode: ['css'],
+    avoid: ['.pdf-campo', 'h2']
+  }
+};
+``
+
+    await html2pdf().set(opt).from(pdfPage).save();
+
+    showToast('PDF gerado com sucesso ✅','ok');
+
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao gerar PDF.','erro');
+  }finally{
+    // Remove o container temporário do DOM
+    const tmp = document.querySelector('div[style*="-9999px"]');
+    if(tmp) tmp.remove();
+    esconderLoading();
+  }
+}
+
+
+
+/* ================================================================
+   BLOQUEIO / DESBLOQUEIO
+   ================================================================ */
 function bloquearSecao(i){
-  let section = document.querySelectorAll('.section')[i];
-  section.querySelectorAll('input, textarea, select').forEach(el => el.disabled = true);
-
-  // Adiciona botão Editar se ainda não existe
-  if(!section.querySelector('.btn-editar')){
-    let btnEditar = document.createElement('button');
-    btnEditar.innerText = '✏️ Editar esta seção';
-    btnEditar.className = 'btn-editar btn-gray';
-    btnEditar.style.marginTop = '16px';
-    btnEditar.onclick = () => desbloquearSecao(i, btnEditar);
-    let nav = section.querySelector('.nav');
-    if(nav) nav.prepend(btnEditar);
+  let section=document.querySelectorAll('.section')[i];
+  if(!section) return;
+  section.querySelectorAll('input, textarea, select').forEach(el=>el.disabled=true);
+  if(!section.querySelector('.btn-editar') && !modoLeitura){
+    let btnE=document.createElement('button');
+    btnE.innerText='✏️ Editar esta seção';
+    btnE.className='btn-editar btn-gray';
+    btnE.style.marginTop='16px';
+    btnE.onclick=()=>desbloquearSecao(i,btnE);
+    let nav=section.querySelector('.nav');
+    if(nav) nav.prepend(btnE);
   }
 }
 
 function desbloquearSecao(i, btnEditar){
-  let section = document.querySelectorAll('.section')[i];
-  section.querySelectorAll('input, textarea, select').forEach(el => el.disabled = false);
+  let section=document.querySelectorAll('.section')[i];
+  if(!section) return;
+  section.querySelectorAll('input, textarea, select').forEach(el=>el.disabled=false);
   if(btnEditar) btnEditar.remove();
 }
 
-function restaurarBloqueios(){
-  let enviadas = JSON.parse(localStorage.getItem('secoes_enviadas') || '{}');
-  Object.keys(enviadas).forEach(i => bloquearSecao(Number(i)));
-}
-
-/* ===== HISTÓRICO ===== */
-function abrirFormulario(){
-  document.getElementById('formContainer').style.display = '';
-  document.getElementById('historicoContainer').style.display = 'none';
-  document.getElementById('enviarTudoWrap').style.display = '';
-}
-
-function abrirHistorico(){
-  document.getElementById('formContainer').style.display = 'none';
-  document.getElementById('enviarTudoWrap').style.display = 'none';
-
-  let hc = document.getElementById('historicoContainer');
-  hc.style.display = '';
-
-  // ✅ pega só do localStorage
-  let dadosLocal = JSON.parse(localStorage.getItem('form_correcao') || '{}');
-
-  if(Object.keys(dadosLocal).length === 0){
-    hc.innerHTML = '<p style="color:#546E7A;padding:20px">Nenhum registro salvo localmente.</p>';
-    return;
+function atualizarMenuBadge(i, enviada=true){
+  let link=document.getElementById(`menu-sec-${i}`);
+  if(!link) return;
+  let badge=link.querySelector('.badge-enviada');
+  if(enviada && !badge){
+    let b=document.createElement('span');
+    b.className='badge-enviada';
+    b.textContent='✓';
+    link.appendChild(b);
+  } else if(!enviada && badge){
+    badge.remove();
   }
-
-  renderHistorico([{
-    id: 'local',
-    email: getEmailUsuario(),
-    Nome:getNomeUsuario(),
-    data_envio: 'Salvo localmente',
-    dados: dadosLocal
-  }], hc);
 }
 
-
-function renderHistorico(registros, container){
-  container.innerHTML = '';
-
-  let titulo = document.createElement('h2');
-  titulo.innerText = '📋 Histórico de Envios';
-  titulo.style.cssText = 'color:#1C799B;margin-bottom:20px;';
-  container.appendChild(titulo);
-
-  if(!registros || registros.length === 0){
-    container.innerHTML += '<p style="color:#546E7A">Nenhum registro encontrado.</p>';
-    return;
-  }
-
-  registros.forEach(reg => {
-    let card = document.createElement('div');
-    card.style.cssText = `
-      background:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.08);cursor:pointer;
-      border-left:4px solid #1C799B;display:flex;justify-content:space-between;align-items:center;
-    `;
-
-    let data = new Date(reg.data_envio);
-    let dataStr = isNaN(data) ? reg.data_envio : data.toLocaleString('pt-BR');
-
-    card.innerHTML = `
-      <div>
-        <div style="font-weight:700;color:#263238;font-size:15px">Envio — ${dataStr}</div>
-        <div style="color:#546E7A;font-size:13px;margin-top:4px">ID: ${reg.id}</div>
-      </div>
-      <button class="btn-primary" style="padding:8px 16px;font-size:13px">Abrir</button>
-    `;
-
-    card.querySelector('button').onclick = () => abrirRegistro(reg);
-    container.appendChild(card);
-  });
+function mostrarAvisoLeitura(){
+  if(document.querySelector('.modo-leitura-aviso')) return;
+  let aviso=document.createElement('div');
+  aviso.className='modo-leitura-aviso';
+  aviso.innerHTML='🔒 <b>Correição finalizada.</b> Este registro está em modo somente leitura. Use "➕ Nova correição" no menu para iniciar um novo.';
+  let fc=document.getElementById('formContainer');
+  fc.prepend(aviso);
 }
 
-function abrirRegistro(reg){
-  // Salva o ID do registro carregado
-  localStorage.setItem('registro_id_atual', reg.id);
+/* ================================================================
+   TOAST
+   ================================================================ */
+function showToast(msg,tipo){
+  let t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=msg;
+  t.className='toast '+(tipo==='erro'?'toast-erro':'toast-ok');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),4000);
+}
 
-  // Carrega os dados nos campos
-  let dados = reg.dados || {};
-  Object.keys(dados).forEach(k => {
-    let el = document.getElementById(k) || document.querySelector(`input[name="${k}"][value="${dados[k]}"]`);
-    if(el){
-      if(el.type === 'radio'){
-        let r = document.querySelector(`input[name="${k}"][value="${dados[k]}"]`);
-        if(r) r.checked = true;
-      } else {
-        el.value = dados[k];
-      }
+/* ================================================================
+   UTILITÁRIOS HTML
+   ================================================================ */
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ================================================================
+   INICIALIZAÇÃO
+   ================================================================ */
+async function init(){
+  mostrarLoading('Carregando…');
+  try{
+    exibirBadgeUsuario();
+    criarMenu();
+    criarForm();
+
+    // Busca ou cria registro em aberto
+    let reg = await garantirRegistroAberto();
+    registroId  = reg.id;
+    modoLeitura = reg.finalizado;
+    window._dadosCarregados = reg.dados || {};
+
+    carregar();
+
+    // Restaura bloqueios das seções já salvas
+    let secoesOk = reg.secoes_ok || {};
+    Object.keys(secoesOk).forEach(i=>{ bloquearSecao(Number(i)); atualizarMenuBadge(Number(i), true); });
+
+    if(modoLeitura){
+      form.secoes.forEach((_,i)=>bloquearSecao(i));
+      document.getElementById('enviarTudoWrap').style.display='none';
+      mostrarAvisoLeitura();
     }
-  });
 
-  // Bloqueia todas as seções (já enviadas)
-  form.secoes.forEach((_,i) => bloquearSecao(i));
-
-  // Abre o formulário na primeira seção
-  abrirFormulario();
-  mostrar(0);
+    avaliarCondicionais();
+    mostrar(0);
+  }catch(err){
+    console.error('Erro na inicialização:',err);
+    showToast('Erro ao conectar ao banco de dados. Verifique as credenciais do Supabase.','erro');
+  }finally{
+    esconderLoading();
+  }
 }
 
-/* INIT */
-criarMenu();
-criarForm();
-carregar();
-restaurarBloqueios();
-
+init();
 </script>
 
 </body>

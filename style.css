@@ -224,11 +224,25 @@ button {
   border:none;
   border-radius:8px;
   cursor:pointer;
+  min-width: 100px;
 }
 
 .btn-primary { background:#1C799B; color:white; }
 .btn-green { background:#2E9E8F; color:white; }
 .btn-gray { background:#B0BEC5; color:#263238; }
+.btn-danger { background:#e74c3c; color:white; }
+
+.historico-card-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.campo, .campo .valor, textarea, input {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 
 .toast {
   position: fixed;
@@ -253,4 +267,47 @@ button {
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+
+.pdf-subtitulo {
+  font-size: 11px;
+  color: #78909C;
+}
+
+.pdf-campo {
+  margin-bottom: 14px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e0e0e0;
+}
+.pdf-pergunta {
+  font-weight: 700;
+  color: #1C799B;
+}
+
+.pdf-valor {
+  background: #F4F8FA;
+  border-left: 3px solid #1C799B;
+}
+.pdf-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.pdf-logo {
+  width: 120px;
+  height: auto;
+}
+.pdf-banner {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.pdf-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
