@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Correição</title>
+
+  <!-- Proteção de rota (antes de qualquer renderização) -->
+  <script src="red_login.js"></script>
+
+  <!-- SDKs externos -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<div id="toast" class="toast"></div>
+
+<!-- Badge do usuário -->
+<div id="userBadge" style="display:none">
+  <div class="avatar" id="userAvatar">?</div>
+  <span id="userName">Carregando…</span>
+</div>
+
+<!-- Overlay de carregamento -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <span id="loadingMsg">Carregando…</span>
+</div>
+
+<body>
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="banner"></div>
+
+  <div class="menu-container">
+    <span class="menu-btn" onclick="toggleMenu()">☰ Menu</span>
+  </div>
+
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+  <div class="menu" id="menu"></div>
+
+  <div class="container" id="formContainer"></div>
+  <div class="container" id="historicoContainer" style="display:none;"></div>
+
+  <div id="enviarTudoWrap" style="text-align:center;margin:20px;">
+    <button class="btn-primary" onclick="enviarTudo()">Enviar tudo</button>
+  </div>
+
+  <!-- Configuração e lógica -->
+  <script src="config.js"></script>
+  <script src="Secoes.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
