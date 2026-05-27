@@ -15,5 +15,5 @@ const CONFIG = {
   // Microsoft / MSAL
   MSAL_CLIENT_ID:    'db712dfb-57de-488e-af9f-12bee87fa61c',
   MSAL_TENANT:       '84a9248e-396f-44df-84a9-4379e11007ab',
-  MSAL_REDIRECT_URI: 'http://localhost:5500/login.html',
+  MSAL_REDIRECT_URI: 'https://correicao-mp.vercel.app/login.html',
 };
