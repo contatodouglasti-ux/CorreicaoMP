@@ -12,7 +12,7 @@ body {
 .banner {
   width: 100%;
   min-height: 200px;
-  background-image: url("logo.png");
+  background-image: url(logo.png);
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
@@ -310,4 +310,75 @@ button {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* ── Chips de subtópico ── */
+.chip-bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px;}
+.chip{
+  padding:7px 14px;border-radius:20px;border:2px solid var(--accent,#1C799B);
+  background:#fff;color:var(--accent,#1C799B);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.chip:hover{background:#eef7f8;}
+.chip-ativo{background:var(--accent,#1C799B);color:#fff;}
+.chip-aviso{color:#888;font-style:italic;margin:12px 0;}
+.subtopico-title{
+  font-size:15px;font-weight:700;color:var(--accent,#1C799B);
+  margin:24px 0 10px;padding-bottom:6px;
+  border-bottom:2px solid var(--accent,#1C799B);
+}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  padding:13px 13px;border-radius:10px;font-size:14px;font-weight:600;
+  box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+  opacity:0;pointer-events:none;white-space:normal;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
+.toast-ok{background:#1C799B;color:#fff;}
+.toast-erro{background:#c0392b;color:#fff;}
+
+/* ── Badge de usuário ── */
+#userBadge{
+  position:fixed;top:12px;right:16px;z-index:1000;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);
+  border:1px solid #dde3e8;border-radius:24px;
+  padding:6px 14px 6px 10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.10);
+  font-size:13px;font-weight:600;color:#263238;
+  pointer-events:none;
+}
+#userBadge .avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:#1C799B;color:#fff;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+/* ── Spinner de carregamento ── */
+#loadingOverlay{
+  position:fixed;inset:0;background:rgba(255,255,255,0.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9000;gap:14px;font-size:15px;color:#546E7A;font-weight:600;
+}
+#loadingOverlay .spinner{
+  width:36px;height:36px;border:4px solid #d0e8f0;
+  border-top-color:#1C799B;border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Badge de seção enviada ── */
+.badge-enviada{
+  display:inline-block;margin-left:8px;padding:2px 8px;
+  border-radius:12px;font-size:11px;font-weight:700;
+  background:#d4edda;color:#155724;vertical-align:middle;
+}
+
+/* ── Modo somente leitura ── */
+.modo-leitura-aviso{
+  background:#fff3cd;border:1px solid #ffc107;border-radius:8px;
+  padding:12px 16px;margin-bottom:16px;font-size:13px;color:#856404;font-weight:600;
 }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Login Microsoft</title>
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
+  <script src="config.js"></script>
   <style>
     :root{--bg:#f4f6f7;--card:#fff;--accent:#1C799B;--text:#263238;--muted:#546E7A}
     html,body{height:100%;margin:0;font-family:Segoe UI,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -26,7 +27,8 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>MPAM CGMP</h1><h2>Login Microsoft</h2>
+      <h1>MPAM CGMP</h1>
+      <h2>Login Microsoft</h2>
       <p>Entre com sua conta Microsoft para acessar a aplicação.</p>
       <label for="emailInput">E-mail</label>
       <input id="emailInput" type="email" placeholder="seu@exemplo.com" autocomplete="username" />
@@ -38,77 +40,59 @@
       <div class="footer">Após o login você será redirecionado para a página principal.</div>
     </div>
   </div>
+
   <script>
-    const debugEl = document.getElementById('debug');
+    const debugEl    = document.getElementById('debug');
     const emailInput = document.getElementById('emailInput');
-    const btnLogin = document.getElementById('btnLogin');
+    const btnLogin   = document.getElementById('btnLogin');
 
-    // Defina aqui o Client ID, tenant e redirect URI exatos da sua aplicação Azure AD.
-    const CLIENT_ID = 'db712dfb-57de-488e-af9f-12bee87fa61c';
-    const TENANT = '84a9248e-396f-44df-84a9-4379e11007ab';
-    const REDIRECT_URI = 'http://localhost:5500/login.html';
-
-    function log(...args){
-      debugEl.textContent = args.map(a=>typeof a==='object'?JSON.stringify(a,null,2):String(a)).join(' ');
+    function log(...args) {
+      debugEl.textContent = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
       console.log(...args);
     }
 
     const savedEmail = localStorage.getItem('msal_email');
-    if(savedEmail) emailInput.value = savedEmail;
+    if (savedEmail) emailInput.value = savedEmail;
 
-    function getConfig(){
-      const email = (emailInput.value || '').trim();
-      return { clientId: CLIENT_ID, tenant: TENANT, email, redirectUri: REDIRECT_URI };
+    function getConfig() {
+      return {
+        clientId:    CONFIG.MSAL_CLIENT_ID,
+        tenant:      CONFIG.MSAL_TENANT,
+        email:       (emailInput.value || '').trim(),
+        redirectUri: CONFIG.MSAL_REDIRECT_URI,
+      };
     }
 
-    function initMsal(cfg){
-      if(!cfg) return null;
-      try{
-        const authority = cfg.tenant
-          ? `https://login.microsoftonline.com/${encodeURIComponent(cfg.tenant)}`
-          : 'https://login.microsoftonline.com/common';
+    function initMsal(cfg) {
+      if (!cfg) return null;
+      try {
+        const authority  = `https://login.microsoftonline.com/${encodeURIComponent(cfg.tenant)}`;
         const msalConfig = { auth: { clientId: cfg.clientId, authority, redirectUri: cfg.redirectUri } };
         return new msal.PublicClientApplication(msalConfig);
-      }catch(e){
-        log('Erro ao inicializar MSAL:', e);
-        return null;
-      }
+      } catch (e) { log('Erro ao inicializar MSAL:', e); return null; }
     }
 
-    btnLogin.addEventListener('click', ()=>{
+    btnLogin.addEventListener('click', () => {
       const cfg = getConfig();
-      if(!cfg.clientId || cfg.clientId.includes('COLOQUE_SEU_CLIENT_ID_AQUI')){
-        log('O aplicativo não está configurado. Edite login.html e defina o Client ID.');
-        return;
-      }
       localStorage.setItem('msal_email', cfg.email || '');
       const msalInstance = initMsal(cfg);
-      if(!msalInstance) return;
+      if (!msalInstance) return;
       log(`Iniciando loginRedirect com redirectUri: ${cfg.redirectUri}`);
       msalInstance.loginRedirect({ scopes: ['user.read'], loginHint: cfg.email, prompt: 'login' });
     });
 
-    (function autoInit(){
-      const cfg = getConfig();
-      if(cfg){
-        const msalInstance = initMsal(cfg);
-        if(msalInstance){
-          log('MSAL inicializado. Aguardando login...');
-          msalInstance.handleRedirectPromise().then(response=>{
-            if(response && response.account){
-              log('Login concluído:', response.account.username);
-              localStorage.setItem('msalAccount', JSON.stringify(response.account));
-              
-setTimeout(() => {
-      window.location.href = '/index.html';
-    },2000);
-
-            }
-          }).catch(err=> log('Erro ao tratar redirect:', err.errorMessage || err.message || err));
+    (function autoInit() {
+      const cfg         = getConfig();
+      const msalInstance = initMsal(cfg);
+      if (!msalInstance) { log('Digite seu e-mail e clique em Entrar.'); return; }
+      log('MSAL inicializado. Aguardando login...');
+      msalInstance.handleRedirectPromise().then(response => {
+        if (response && response.account) {
+          log('Login concluído:', response.account.username);
+          localStorage.setItem('msalAccount', JSON.stringify(response.account));
+          setTimeout(() => { window.location.href = '/index.html'; }, 2000);
         }
-      } else {
-        log('Digite seu e-mail e clique em Entrar.');
-      }
+      }).catch(err => log('Erro ao tratar redirect:', err.errorMessage || err.message || err));
     })();
   </script>
 </body>
