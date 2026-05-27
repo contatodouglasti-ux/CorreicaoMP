@@ -1,0 +1,8 @@
+# Secrets — nunca versionar
+.env
+
+# Editores e SO
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/

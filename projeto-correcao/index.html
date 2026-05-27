@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Correição — MPAM CGMP</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Proteção de rota: executa ANTES de qualquer renderização -->
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem('msalAccount')) {
+          document.documentElement.style.visibility = 'hidden';
+          window.location.replace('/login.html');
+        }
+      } catch (e) {
+        document.documentElement.style.visibility = 'hidden';
+        window.location.replace('/login.html');
+      }
+    })();
+  </script>
+
+  <!-- SDKs externos -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Badge do usuário -->
+<div id="userBadge" style="display:none">
+  <div class="avatar" id="userAvatar">?</div>
+  <span id="userName">Carregando…</span>
+</div>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <span id="loadingMsg">Carregando…</span>
+</div>
+
+<!-- Botão menu mobile (só aparece em telas pequenas via CSS) -->
+<button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+
+<!-- Overlay escuro (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+
+<!-- ══════════════════════════════════════════
+     LAYOUT PRINCIPAL
+══════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR FIXA -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Logo no topo -->
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="MPAM CGMP" />
+    </div>
+
+    <!-- Itens scrolláveis (seções + ações) -->
+    <div class="sidebar-scroll" id="sidebarScroll"></div>
+
+    <!-- Rodapé: ações fixas -->
+    <div class="sidebar-footer">
+      <div class="sidebar-sep"></div>
+      <div class="sidebar-item" onclick="novaCorreicao()">
+        <span style="font-size:15px">➕</span>
+        <span>Nova correição</span>
+      </div>
+      <div class="sidebar-item" onclick="abrirHistorico()">
+        <span style="font-size:15px">📋</span>
+        <span>Histórico</span>
+      </div>
+      <div class="sidebar-sep"></div>
+      <div class="sidebar-item" onclick="logout()">
+        <span style="font-size:15px">🚪</span>
+        <span>Sair</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main-content">
+
+    <!-- Barra de progresso -->
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Banner -->
+    <div class="banner"></div>
+
+    <!-- Formulário -->
+    <div class="container" id="formContainer"></div>
+
+    <!-- Histórico -->
+    <div class="container" id="historicoContainer" style="display:none;"></div>
+
+    <!-- Botão enviar tudo -->
+    <div id="enviarTudoWrap" style="text-align:center;padding:0 24px 32px;">
+      <button class="btn-primary" style="min-width:200px;padding:13px 24px;font-size:15px;" onclick="enviarTudo()">
+        Enviar tudo
+      </button>
+    </div>
+
+  </div><!-- /main-content -->
+
+</div><!-- /app-layout -->
+
+<!-- ── Scripts (ordem de dependência) ── -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/Secoes.js"></script>
+<script src="js/form.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/historico.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

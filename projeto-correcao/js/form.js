@@ -1,0 +1,234 @@
+/**
+ * form.js
+ * Renderização do formulário por seções, validação de campos
+ * e navegação entre seções.
+ * Depende de: ui.js, app.js (estado global)
+ */
+
+/* ── Renderização ───────────────────────────────────────── */
+
+function criarForm() {
+  const c = document.getElementById('formContainer');
+
+  form.secoes.forEach((sec, i) => {
+    const d = document.createElement('div');
+    d.className = 'section';
+    if (i === 0) d.classList.add('active');
+
+    const h = document.createElement('h2');
+    h.innerText = sec.nome;
+    d.appendChild(h);
+
+    if (sec.subtopicos) {
+      const chipBar   = document.createElement('div');
+      chipBar.className = 'chip-bar';
+      const camposWrap  = document.createElement('div');
+      camposWrap.id   = 'campos-especificos';
+      const ativos    = new Set();
+
+      function atualizarCampos() {
+        camposWrap.innerHTML = '';
+        if (ativos.size === 0) {
+          const aviso = document.createElement('p');
+          aviso.className = 'chip-aviso';
+          aviso.innerText = 'Selecione um ou mais tópicos acima para exibir os campos.';
+          camposWrap.appendChild(aviso);
+          return;
+        }
+        sec.subtopicos.forEach(sub => {
+          if (!ativos.has(sub.prefixo)) return;
+          const gt = document.createElement('h3');
+          gt.className = 'subtopico-title';
+          gt.innerText = sub.nome;
+          camposWrap.appendChild(gt);
+          sec.campos
+            .filter(c => c.id.startsWith(sub.prefixo + '.'))
+            .forEach(campo => renderCampo(camposWrap, campo));
+        });
+        carregar();
+      }
+
+      sec.subtopicos.forEach(sub => {
+        const chip = document.createElement('button');
+        chip.type      = 'button';
+        chip.className = 'chip';
+        chip.innerText = sub.nome;
+        chip.dataset.prefixo = sub.prefixo;
+        chip.onclick   = () => {
+          if (ativos.has(sub.prefixo)) {
+            ativos.delete(sub.prefixo);
+            chip.classList.remove('chip-ativo');
+          } else {
+            ativos.add(sub.prefixo);
+            chip.classList.add('chip-ativo');
+          }
+          atualizarCampos();
+        };
+        chipBar.appendChild(chip);
+      });
+      d.appendChild(chipBar);
+      atualizarCampos();
+      d.appendChild(camposWrap);
+    } else {
+      sec.campos.forEach(campo => renderCampo(d, campo));
+    }
+
+    const nav = document.createElement('div');
+    nav.className = 'nav';
+    if (i > 0) nav.appendChild(btn('Voltar', 'btn-gray', () => mostrar(i - 1)));
+    nav.appendChild(btn('Próximo', 'btn-primary', () => mostrar(i + 1)));
+    nav.appendChild(btn('Salvar seção', 'btn-green', () => salvarSecao(i)));
+    d.appendChild(nav);
+    c.appendChild(d);
+  });
+
+  atualizarBarra();
+}
+
+function renderCampo(parent, campo) {
+  const wrapper = document.createElement('div');
+  wrapper.dataset.campoId = campo.id;
+  if (campo.dependeDe) {
+    wrapper.dataset.dependeDeId    = campo.dependeDe.id;
+    wrapper.dataset.dependeDeValor = campo.dependeDe.valor;
+  }
+  parent.appendChild(wrapper);
+
+  const l = document.createElement('label');
+  l.className = 'required';
+  l.innerText = campo.pergunta;
+  wrapper.appendChild(l);
+
+  const tiposTexto = { textarea: 'textarea', text: 'text', number: 'number', date: 'date', time: 'time' };
+
+  if (campo.tipo === 'textarea') {
+    const t = document.createElement('textarea');
+    t.id = campo.id; t.required = true; t.oninput = autoSalvar;
+    wrapper.appendChild(t);
+  } else if (['text', 'number', 'date', 'time'].includes(campo.tipo)) {
+    const inp   = document.createElement('input');
+    inp.type    = campo.tipo;
+    inp.id      = campo.id;
+    inp.required = true;
+    inp[campo.tipo === 'text' || campo.tipo === 'number' ? 'oninput' : 'onchange'] = autoSalvar;
+    wrapper.appendChild(inp);
+  } else if (campo.tipo === 'radio') {
+    const dv = document.createElement('div');
+    dv.className = 'radio-group';
+    campo.opcoes.forEach(op => {
+      const lbl = document.createElement('label');
+      const r   = document.createElement('input');
+      r.type    = 'radio'; r.name = campo.id; r.value = op; r.required = true;
+      r.onchange = () => { avaliarCondicionais(); autoSalvar(); };
+      lbl.appendChild(r);
+      lbl.append(' ' + op);
+      dv.appendChild(lbl);
+    });
+    wrapper.appendChild(dv);
+  }
+}
+
+/* ── Condicionais ───────────────────────────────────────── */
+
+function avaliarCondicionais() {
+  document.querySelectorAll('[data-depende-de-id]').forEach(wrapper => {
+    const controlId     = wrapper.dataset.dependeDeId;
+    const valorEsperado = wrapper.dataset.dependeDeValor;
+    const controlEl     = document.querySelector(`input[name="${controlId}"]:checked`);
+    const valorAtual    = controlEl ? controlEl.value : null;
+    const obrigatorio   = valorAtual === valorEsperado;
+    wrapper.querySelectorAll('input, textarea, select').forEach(el => el.required = obrigatorio);
+    const lbl = wrapper.querySelector('label');
+    if (lbl) lbl.className = obrigatorio ? 'required' : '';
+  });
+}
+
+/* ── Navegação e progresso ──────────────────────────────── */
+
+function mostrar(i) {
+  const secs = document.querySelectorAll('.section');
+  if (i < 0 || i >= secs.length) return;
+  secs.forEach(s => s.classList.remove('active'));
+  secs[i].classList.add('active');
+  atual = i;
+  atualizarBarra();
+  destacarItemAtivo(i);
+  // scroll suave ao topo do conteúdo ao trocar seção
+  document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function atualizarBarra() {
+  const perc = ((atual + 1) / form.secoes.length) * 100;
+  document.getElementById('progressBar').style.width = perc + '%';
+}
+
+/* ── Coleta e carga de dados ────────────────────────────── */
+
+function coletar(sec = null) {
+  const base   = sec !== null ? document.querySelectorAll('.section')[sec] : document;
+  const inputs = base.querySelectorAll('input, textarea');
+  const d      = {};
+  inputs.forEach(i => {
+    if (i.type === 'radio') { if (i.checked) d[i.name] = String(i.value); }
+    else { if (i.id) d[i.id] = String(i.value); }
+  });
+  return d;
+}
+
+function carregar() {
+  const dadosSalvos = window._dadosCarregados || {};
+  Object.keys(dadosSalvos).forEach(k => {
+    const el = document.getElementById(k) || document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
+    if (!el) return;
+    if (el.type === 'radio') {
+      const r = document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
+      if (r) r.checked = true;
+    } else {
+      el.value = dadosSalvos[k];
+    }
+  });
+  avaliarCondicionais();
+}
+
+/* ── Validação ──────────────────────────────────────────── */
+
+function limparInvalidos(base) {
+  base.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+}
+
+function encontrarInvalidos(base) {
+  limparInvalidos(base);
+  const invalids  = [];
+  const radiosProc = new Set();
+
+  base.querySelectorAll('input, textarea').forEach(el => {
+    if (el.type === 'radio') {
+      if (radiosProc.has(el.name)) return;
+      radiosProc.add(el.name);
+      const radios = Array.from(base.querySelectorAll(`input[name="${el.name}"]`));
+      if (el.required && !radios.some(r => r.checked)) {
+        const grupo = radios[0] && radios[0].closest('.radio-group');
+        if (grupo) { grupo.classList.add('invalid'); invalids.push(grupo); }
+        else        { radios[0].classList.add('invalid'); invalids.push(radios[0]); }
+      }
+      return;
+    }
+    if (el.required && (!el.value || !el.value.toString().trim())) {
+      el.classList.add('invalid');
+      invalids.push(el);
+    }
+  });
+  return invalids;
+}
+
+function focusFirstInvalid(invalids) {
+  if (!invalids.length) return;
+  const first = invalids[0];
+  if (first.classList.contains('radio-group')) {
+    const r = first.querySelector('input[type="radio"]');
+    if (r) r.focus();
+  } else {
+    first.focus();
+  }
+  first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
