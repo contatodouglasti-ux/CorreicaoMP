@@ -4,7 +4,7 @@
  * badge de usuário, bloqueio/desbloqueio de seções.
  */
 
-/* ── Loading Overlay ────────────────────────────────────── */
+/* ── Loading Overlay ──── */
 
 function mostrarLoading(msg = 'Carregando…') {
   document.getElementById('loadingMsg').textContent = msg;
@@ -15,7 +15,7 @@ function esconderLoading() {
   document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-/* ── Toast ──────────────────────────────────────────────── */
+/* ── Toast ──── */
 
 function showToast(msg, tipo) {
   const t = document.getElementById('toast');
@@ -27,14 +27,14 @@ function showToast(msg, tipo) {
   t._timer = setTimeout(() => t.classList.remove('show'), 4000);
 }
 
-/* ── Sidebar — mobile toggle ────────────────────────────── */
+/* ── Sidebar — mobile toggle ──── */
 
 function toggleMenu() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebarOverlay').classList.toggle('open');
 }
 
-/* ── Sidebar — renderização ─────────────────────────────── */
+/* ── Sidebar — renderização ──── */
 
 function criarMenu() {
   const scroll = document.getElementById('sidebarScroll');
@@ -45,6 +45,26 @@ function criarMenu() {
   titulo.className = 'sidebar-title';
   titulo.textContent = 'Seções';
   scroll.appendChild(titulo);
+
+  // Índices do grupo colapsável "ATUAÇÃO GERAL" (seções 5 a 17)
+  const GRUPO_INICIO = 5;
+  const GRUPO_FIM    = 17;
+
+  // Cabeçalho colapsável do grupo
+  const grupoHeader = document.createElement('div');
+  grupoHeader.className = 'sidebar-grupo-header';
+  grupoHeader.id        = 'menu-grupo-atuacao';
+  grupoHeader.innerHTML = '<span class="grupo-seta">▶</span><span class="grupo-label">ATUAÇÃO GERAL</span>';
+
+  const grupoFilhos = document.createElement('div');
+  grupoFilhos.className = 'sidebar-grupo-filhos';
+  grupoFilhos.style.display = 'none';
+
+  grupoHeader.onclick = () => {
+    const aberto = grupoFilhos.style.display !== 'none';
+    grupoFilhos.style.display = aberto ? 'none' : 'block';
+    grupoHeader.querySelector('.grupo-seta').textContent = aberto ? '▶' : '▼';
+  };
 
   // Itens de seção
   form.secoes.forEach((s, i) => {
@@ -71,13 +91,22 @@ function criarMenu() {
       document.getElementById('sidebarOverlay').classList.remove('open');
     };
 
-    scroll.appendChild(item);
+    if (i === GRUPO_INICIO) {
+      // Adiciona o cabeçalho do grupo antes do primeiro sub-item
+      scroll.appendChild(grupoHeader);
+      scroll.appendChild(grupoFilhos);
+    }
+
+    if (i >= GRUPO_INICIO && i <= GRUPO_FIM) {
+      item.style.paddingLeft = '28px'; // indentação visual
+      grupoFilhos.appendChild(item);
+    } else {
+      scroll.appendChild(item);
+    }
   });
-
-
 }
 
-/* ── Destacar item ativo na sidebar ─────────────────────── */
+/* ── Destacar item ativo na sidebar ──── */
 
 function destacarItemAtivo(i) {
   document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('ativo'));
@@ -85,7 +114,7 @@ function destacarItemAtivo(i) {
   if (item) item.classList.add('ativo');
 }
 
-/* ── Badges de seção ────────────────────────────────────── */
+/* ── Badges de seção ──── */
 
 function atualizarMenuBadge(i, enviada = true) {
   const item = document.getElementById(`menu-sec-${i}`);
@@ -101,7 +130,7 @@ function atualizarMenuBadge(i, enviada = true) {
   }
 }
 
-/* ── Bloqueio / desbloqueio ─────────────────────────────── */
+/* ── Bloqueio / desbloqueio ──── */
 
 function bloquearSecao(i) {
   const section = document.querySelectorAll('.section')[i];
@@ -126,7 +155,7 @@ function desbloquearSecao(i, btnEditar) {
   if (btnEditar) btnEditar.remove();
 }
 
-/* ── Aviso de modo leitura ──────────────────────────────── */
+/* ── Aviso de modo leitura ──── */
 
 function mostrarAvisoLeitura() {
   if (document.querySelector('.modo-leitura-aviso')) return;
@@ -136,7 +165,7 @@ function mostrarAvisoLeitura() {
   document.getElementById('formContainer').prepend(aviso);
 }
 
-/* ── Utilitários ─────────────────────────────────────────── */
+/* ── Utilitários ──── */
 
 function escapeHtml(s) {
   return String(s)

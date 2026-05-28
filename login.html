@@ -7,80 +7,293 @@
   <script src="https://alcdn.msauth.net/browser/2.37.0/js/msal-browser.min.js"></script>
   <script src="js/config.js"></script>
   <style>
-    :root { --bg:#f4f6f7; --card:#fff; --accent:#1C799B; --text:#263238; --muted:#546E7A }
-    html,body { height:100%; margin:0; font-family:Segoe UI,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text) }
-    .wrap  { min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px }
-    .card  { width:100%; max-width:520px; background:var(--card); border-radius:14px; box-shadow:0 16px 40px rgba(0,0,0,0.09); padding:32px }
-    h1     { margin:0 0 10px; font-size:26px; color:var(--accent) }
-    p      { margin:0 0 24px; color:var(--muted); line-height:1.6 }
-    label  { font-size:14px; color:var(--muted); display:block; margin-bottom:8px }
-    input  { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #d7e3eb; font-size:15px; color:var(--text); outline:none }
-    input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(28,121,155,0.12) }
-    .buttons { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px }
-    button   { flex:1 1 140px; border:none; border-radius:10px; padding:12px 16px; font-size:15px; font-weight:700; cursor:pointer }
-    .btn-primary   { background:var(--accent); color:#fff }
-    .debug  { margin-top:20px; background:#f7f9f9; border-radius:10px; padding:14px; min-height:120px; overflow:auto; font-family:monospace; font-size:13px; color:#102027; white-space:pre-wrap }
-    .footer { margin-top:16px; font-size:13px; color:var(--muted); text-align:center }
+    :root {
+      --accent: #1C799B;
+      --accent-dark: #145f7a;
+      --bg: #f0f4f6;
+      --card: #fff;
+      --text: #263238;
+      --muted: #546E7A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Fundo com gradiente animado ── */
+    body {
+      background: linear-gradient(135deg, #e8f4f8 0%, #f0f4f6 50%, #e2eff5 100%);
+      background-size: 400% 400%;
+      animation: bgShift 8s ease infinite;
+    }
+    @keyframes bgShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ── Wrap centralizado ── */
+    .wrap {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── Card ── */
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(28,121,155,0.08);
+      overflow: hidden;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    /* Faixa colorida no topo */
+    .card-header {
+      background: linear-gradient(135deg, var(--accent), #2a9bc4);
+      padding: 28px 32px 24px;
+      color: #fff;
+    }
+    .card-header .brand {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    .card-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .card-header p {
+      font-size: 13px;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    /* Corpo do card */
+    .card-body { padding: 28px 32px 32px; }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #d7e3eb;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #f8fbfc;
+    }
+    input[type="email"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(28,121,155,0.10);
+      background: #fff;
+    }
+
+    .hint {
+      margin-top: 7px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Botão Entrar ── */
+    .btn-login {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #2a9bc4);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      box-shadow: 0 4px 14px rgba(28,121,155,0.30);
+    }
+    .btn-login:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(28,121,155,0.35); }
+    .btn-login:active { transform: translateY(0); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ══════════════════════════════════════════
+       TELA DE LOADING (substitui o card)
+    ══════════════════════════════════════════ */
+
+    .loading-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 52px 32px;
+      gap: 0;
+    }
+
+    /* Anel animado */
+    .ring {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 5px solid #d0e8f0;
+      border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 28px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .loading-sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Barra de progresso indeterminada */
+    .loading-bar-wrap {
+      width: 100%;
+      max-width: 280px;
+      height: 4px;
+      background: #d0e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .loading-bar {
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, var(--accent), #4FB8EE);
+      border-radius: 4px;
+      animation: slide 1.4s ease-in-out infinite;
+    }
+    @keyframes slide {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    /* Animação de saída do card */
+    .card.saindo {
+      opacity: 0;
+      transform: scale(0.96) translateY(-8px);
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1>MPAM CGMP</h1>
-      <h2>Login Microsoft</h2>
-      <p>Entre com sua conta Microsoft para acessar a aplicação.</p>
-      <label for="emailInput">E-mail</label>
-      <input id="emailInput" type="email" placeholder="seu@mpam.mp.br" autocomplete="username" />
-      <p style="margin-top:8px;font-size:13px;color:#546E7A">
-        A senha será solicitada diretamente na página segura da Microsoft.
-      </p>
-      <div class="buttons">
-        <button id="btnLogin" class="btn-primary">Entrar</button>
+    <div class="card" id="card">
+
+      <!-- Cabeçalho colorido -->
+      <div class="card-header">
+        <div class="brand">Ministério Público do Amazonas</div>
+        <h1>MPAM CGMP</h1>
+        <p>Entre com sua conta Microsoft para acessar o sistema de correição.</p>
       </div>
-      <div class="debug" id="debug">Digite seu e-mail e clique em Entrar.</div>
-      <div class="footer">Após o login você será redirecionado para a página principal.</div>
+
+      <!-- Formulário -->
+      <div class="card-body" id="cardBody">
+        <label for="emailInput">E-mail institucional</label>
+        <input id="emailInput" type="email" placeholder="seu@mpam.mp.br" autocomplete="username" />
+        <p class="hint">A senha será solicitada diretamente na página segura da Microsoft.</p>
+
+        <button id="btnLogin" class="btn-login">Entrar</button>
+
+        <p class="footer-note">Após o login você será redirecionado automaticamente.</p>
+      </div>
+
+      <!-- Tela de loading (exibida após login bem-sucedido) -->
+      <div class="loading-screen" id="loadingScreen">
+        <div class="ring"></div>
+        <div class="loading-title">Autenticado!</div>
+        <div class="loading-sub" id="loadingSubText">Carregando o sistema…</div>
+        <div class="loading-bar-wrap">
+          <div class="loading-bar"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script>
-    const debugEl    = document.getElementById('debug');
-    const emailInput = document.getElementById('emailInput');
-    const btnLogin   = document.getElementById('btnLogin');
-
-    function log(...args) {
-      debugEl.textContent = args
-        .map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a))
-        .join(' ');
-      console.log(...args);
-    }
+    const emailInput    = document.getElementById('emailInput');
+    const btnLogin      = document.getElementById('btnLogin');
+    const cardBody      = document.getElementById('cardBody');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const card          = document.getElementById('card');
+    const loadingSub    = document.getElementById('loadingSubText');
 
     // Restaura e-mail salvo
-    const savedEmail = localStorage.getItem('msal_email');
-    if (savedEmail) emailInput.value = savedEmail;
+    const saved = localStorage.getItem('msal_email');
+    if (saved) emailInput.value = saved;
 
     function initMsal() {
       try {
-        const authority  = `https://login.microsoftonline.com/${encodeURIComponent(CONFIG.msal.tenantId)}`;
-        const msalConfig = {
+        const authority = `https://login.microsoftonline.com/${encodeURIComponent(CONFIG.msal.tenantId)}`;
+        return new msal.PublicClientApplication({
           auth: {
             clientId:    CONFIG.msal.clientId,
             authority,
             redirectUri: CONFIG.msal.redirectUri,
           },
-        };
-        return new msal.PublicClientApplication(msalConfig);
+        });
       } catch (e) {
-        log('Erro ao inicializar MSAL:', e);
+        console.error('Erro ao inicializar MSAL:', e);
         return null;
       }
+    }
+
+    /* Troca formulário pelo loading dentro do card */
+    function mostrarLoading(nome) {
+      cardBody.style.display = 'none';
+      loadingSub.textContent = nome
+        ? `Bem-vindo, ${nome}! Preparando o sistema…`
+        : 'Carregando o sistema…';
+      loadingScreen.style.display = 'flex';
     }
 
     btnLogin.addEventListener('click', () => {
       const email = (emailInput.value || '').trim();
       localStorage.setItem('msal_email', email);
+
+      btnLogin.disabled      = true;
+      btnLogin.textContent   = 'Redirecionando…';
+
       const msalInstance = initMsal();
-      if (!msalInstance) return;
-      log(`Iniciando loginRedirect com redirectUri: ${CONFIG.msal.redirectUri}`);
+      if (!msalInstance) { btnLogin.disabled = false; btnLogin.textContent = 'Entrar'; return; }
+
       msalInstance.loginRedirect({
         scopes:    ['user.read'],
         loginHint: email,
@@ -92,16 +305,22 @@
     (function autoInit() {
       const msalInstance = initMsal();
       if (!msalInstance) return;
-      log('MSAL inicializado. Aguardando login…');
+
       msalInstance.handleRedirectPromise()
         .then(response => {
           if (response && response.account) {
-            log('Login concluído:', response.account.username);
             localStorage.setItem('msalAccount', JSON.stringify(response.account));
-            setTimeout(() => { window.location.href = '/index.html'; }, 2000);
+            const nome = response.account.name || response.account.username || '';
+            mostrarLoading(nome);
+            // Redireciona após 2s para o usuário ver o loading
+            setTimeout(() => { window.location.href = '/index.html'; }, 2200);
           }
         })
-        .catch(err => log('Erro ao tratar redirect:', err.errorMessage || err.message || err));
+        .catch(err => {
+          console.error('Erro redirect:', err.errorMessage || err.message || err);
+          btnLogin.disabled    = false;
+          btnLogin.textContent = 'Entrar';
+        });
     })();
   </script>
 </body>
