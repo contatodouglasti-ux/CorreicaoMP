@@ -562,4 +562,41 @@ button {
   background: rgba(79,184,238,0.15);
   color: #4FB8EE;
   border-left-color: #4FB8EE;
+}/* ════
+   CAMPO NUMÉRICO — linha horizontal
+════ */
+
+.campo-numero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #d0dde3;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  gap: 12px;
+}
+
+.campo-numero-label {
+  flex: 1;
+  font-weight: 600;
+  color: #263238;
+  margin-top: 0;
+}
+
+.campo-numero-input {
+  width: 90px !important;
+  text-align: right;
+  border: 1px solid #B0BEC5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #263238;
+  flex-shrink: 0;
+}
+
+.campo-numero-input.invalid {
+  border-color: #ff4d4f;
+  background: #fff0f0;
 }

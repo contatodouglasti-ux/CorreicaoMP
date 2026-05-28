@@ -5,7 +5,7 @@
  * Depende de: ui.js, app.js (estado global)
  */
 
-/* ── Renderização ───────────────────────────────────────── */
+/* ── Renderização ──── */
 
 function criarForm() {
   const c = document.getElementById('formContainer');
@@ -94,23 +94,41 @@ function renderCampo(parent, campo) {
   }
   parent.appendChild(wrapper);
 
+  if (campo.tipo === 'number') {
+    // Layout horizontal: label à esquerda, input pequeno à direita
+    wrapper.className = 'campo-numero-row';
+
+    const l = document.createElement('label');
+    l.className = 'required campo-numero-label';
+    l.innerText = campo.pergunta;
+    l.htmlFor   = campo.id;
+    wrapper.appendChild(l);
+
+    const inp     = document.createElement('input');
+    inp.type      = 'number';
+    inp.id        = campo.id;
+    inp.required  = true;
+    inp.className = 'campo-numero-input';
+    inp.oninput   = autoSalvar;
+    wrapper.appendChild(inp);
+    return;
+  }
+
   const l = document.createElement('label');
   l.className = 'required';
   l.innerText = campo.pergunta;
   wrapper.appendChild(l);
 
-  const tiposTexto = { textarea: 'textarea', text: 'text', number: 'number', date: 'date', time: 'time' };
-
   if (campo.tipo === 'textarea') {
     const t = document.createElement('textarea');
     t.id = campo.id; t.required = true; t.oninput = autoSalvar;
     wrapper.appendChild(t);
-  } else if (['text', 'number', 'date', 'time'].includes(campo.tipo)) {
-    const inp   = document.createElement('input');
-    inp.type    = campo.tipo;
-    inp.id      = campo.id;
+  } else if (['text', 'date', 'time'].includes(campo.tipo)) {
+    const inp    = document.createElement('input');
+    inp.type     = campo.tipo;
+    inp.id       = campo.id;
     inp.required = true;
-    inp[campo.tipo === 'text' || campo.tipo === 'number' ? 'oninput' : 'onchange'] = autoSalvar;
+    inp[campo.tipo === 'text' ? 'oninput' : 'onchange'] = autoSalvar;
     wrapper.appendChild(inp);
   } else if (campo.tipo === 'radio') {
     const dv = document.createElement('div');
@@ -128,7 +146,7 @@ function renderCampo(parent, campo) {
   }
 }
 
-/* ── Condicionais ───────────────────────────────────────── */
+/* ── Condicionais ──── */
 
 function avaliarCondicionais() {
   document.querySelectorAll('[data-depende-de-id]').forEach(wrapper => {
@@ -143,7 +161,7 @@ function avaliarCondicionais() {
   });
 }
 
-/* ── Navegação e progresso ──────────────────────────────── */
+/* ── Navegação e progresso ──── */
 
 function mostrar(i) {
   const secs = document.querySelectorAll('.section');
@@ -153,7 +171,6 @@ function mostrar(i) {
   atual = i;
   atualizarBarra();
   destacarItemAtivo(i);
-  // scroll suave ao topo do conteúdo ao trocar seção
   document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -162,7 +179,7 @@ function atualizarBarra() {
   document.getElementById('progressBar').style.width = perc + '%';
 }
 
-/* ── Coleta e carga de dados ────────────────────────────── */
+/* ── Coleta e carga de dados ──── */
 
 function coletar(sec = null) {
   const base   = sec !== null ? document.querySelectorAll('.section')[sec] : document;
@@ -190,7 +207,7 @@ function carregar() {
   avaliarCondicionais();
 }
 
-/* ── Validação ──────────────────────────────────────────── */
+/* ── Validação ──── */
 
 function limparInvalidos(base) {
   base.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
@@ -198,7 +215,7 @@ function limparInvalidos(base) {
 
 function encontrarInvalidos(base) {
   limparInvalidos(base);
-  const invalids  = [];
+  const invalids   = [];
   const radiosProc = new Set();
 
   base.querySelectorAll('input, textarea').forEach(el => {
