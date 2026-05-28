@@ -107,27 +107,42 @@ function renderCampo(parent, campo) {
     const inp     = document.createElement('input');
     inp.type      = 'number';
     inp.id        = campo.id;
-    inp.required  = true;
+    inp.required  = campo.obrigatorio !== false;
     inp.className = 'campo-numero-input';
-    inp.oninput   = autoSalvar;
+    inp.min       = '0';
+   inp.onkeydown  = function (e) { if (e.key === '-' || e.key === '+') e.preventDefault(); };
+inp.oninput    = function () {
+  const v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 0) this.value = '';
+  autoSalvar();
+};
     wrapper.appendChild(inp);
     return;
   }
 
+  const obrigatorio = campo.obrigatorio !== false;
+
   const l = document.createElement('label');
-  l.className = 'required';
+  l.className = obrigatorio ? 'required' : '';
   l.innerText = campo.pergunta;
   wrapper.appendChild(l);
 
   if (campo.tipo === 'textarea') {
     const t = document.createElement('textarea');
-    t.id = campo.id; t.required = true; t.oninput = autoSalvar;
+    t.id = campo.id; t.required = obrigatorio;
+    t.style.overflow = 'hidden';
+    t.style.resize   = 'none';
+    t.oninput = function () {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+      autoSalvar();
+    };
     wrapper.appendChild(t);
   } else if (['text', 'date', 'time'].includes(campo.tipo)) {
     const inp    = document.createElement('input');
     inp.type     = campo.tipo;
     inp.id       = campo.id;
-    inp.required = true;
+    inp.required = obrigatorio;
     inp[campo.tipo === 'text' ? 'oninput' : 'onchange'] = autoSalvar;
     wrapper.appendChild(inp);
   } else if (campo.tipo === 'radio') {
@@ -136,7 +151,7 @@ function renderCampo(parent, campo) {
     campo.opcoes.forEach(op => {
       const lbl = document.createElement('label');
       const r   = document.createElement('input');
-      r.type    = 'radio'; r.name = campo.id; r.value = op; r.required = true;
+      r.type    = 'radio'; r.name = campo.id; r.value = op; r.required = obrigatorio;
       r.onchange = () => { avaliarCondicionais(); autoSalvar(); };
       lbl.appendChild(r);
       lbl.append(' ' + op);
@@ -202,6 +217,11 @@ function carregar() {
       if (r) r.checked = true;
     } else {
       el.value = dadosSalvos[k];
+      // Re-expande textareas ao carregar dados salvos
+      if (el.tagName === 'TEXTAREA') {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+      }
     }
   });
   avaliarCondicionais();

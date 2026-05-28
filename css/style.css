@@ -234,7 +234,9 @@ textarea.invalid {
   border-color: #ff4d4f;
   background: #fff0f0;
 }
-
+textarea {
+  min-height: 50px;
+}
 /* Radio */
 .radio-group {
   display: flex;
