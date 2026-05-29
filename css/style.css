@@ -292,6 +292,7 @@ textarea {
   cursor: pointer;
   transition: all .18s;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 .chip:hover    { background: #7bd8e2; }
 .chip-ativo    { background: #1C799B; color: #ffffff; }
