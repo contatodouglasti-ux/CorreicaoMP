@@ -37,3 +37,6 @@ Object.freeze(CONFIG);
 Object.freeze(CONFIG.msal);
 Object.freeze(CONFIG.supabase);
 Object.freeze(CONFIG.powerAutomate);
+
+
+

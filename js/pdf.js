@@ -14,7 +14,6 @@ async function baixarPDF(reg) {
     if (error) throw error;
     const dados = data.dados || {};
 
-    // Container temporário anexado ao DOM para renderização correta
     const wrapper = document.createElement('div');
     wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:190mm;background:#fff;font-family:Arial,sans-serif;color:#263238;font-size:12px;line-height:1.5;box-sizing:border-box;padding:0;margin:0;';
     document.body.appendChild(wrapper);
@@ -23,9 +22,16 @@ async function baixarPDF(reg) {
 <style>
   * { box-sizing: border-box; }
   .pdf-page     { width:190mm; padding:10mm; font-family:Arial,sans-serif; font-size:12px; color:#263238; }
-  h1, h2        { page-break-after: avoid; }
-  .pdf-secao    { page-break-before: auto; page-break-after: avoid; }
-  .pdf-campo    { margin-bottom:12px; page-break-inside:avoid; break-inside:avoid; }
+  h1, h2, h3    { page-break-after: avoid; break-after: avoid; }
+  .pdf-secao    { page-break-before: auto; break-before: auto; }
+  .pdf-campo    {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    display: table;
+    width: 100%;
+  }
   .pdf-pergunta { font-weight:bold; margin-bottom:4px; word-break:break-word; }
   .pdf-valor    { background:#f5f7f9; padding:8px; border-radius:4px; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word; max-width:100%; }
 </style>
@@ -42,8 +48,6 @@ async function baixarPDF(reg) {
 
     const pdfPage = wrapper.querySelector('#pdf-conteudo');
 
-    // Renderiza um campo e o anexa ao container.
-    // Retorna true se havia valor, false se estava vazio.
     const renderCampo = (campo, container) => {
       const valor = dados[campo.id];
       if (!valor) return false;
@@ -66,13 +70,16 @@ async function baixarPDF(reg) {
     };
 
     form.secoes.forEach(sec => {
-      // Monta o conteúdo da seção num fragmento temporário
       const frag = document.createDocumentFragment();
       let secTemConteudo = false;
 
       if (sec.subtopicos) {
         sec.subtopicos.forEach(sub => {
-          const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+          // Suporte a prefixo como string ou array
+          const prefixos = Array.isArray(sub.prefixo) ? sub.prefixo : [sub.prefixo];
+          const camposDaSub = sec.campos.filter(c =>
+            prefixos.some(p => c.id === p || c.id.startsWith(p + '.'))
+          );
           const fragSub = document.createDocumentFragment();
           let subTemConteudo = false;
 
@@ -80,10 +87,9 @@ async function baixarPDF(reg) {
             if (renderCampo(campo, fragSub)) subTemConteudo = true;
           });
 
-          // Só adiciona o título do subtópico se ele tiver campos respondidos
           if (subTemConteudo) {
             const subTitle = document.createElement('h3');
-            subTitle.textContent  = sub.nome;
+            subTitle.textContent   = sub.nome;
             subTitle.style.cssText = 'font-size:13px;color:#37474F;margin-top:10px;';
             frag.appendChild(subTitle);
             frag.appendChild(fragSub);
@@ -96,7 +102,6 @@ async function baixarPDF(reg) {
         });
       }
 
-      // Só adiciona o título da seção se houver ao menos um campo respondido
       if (secTemConteudo) {
         const h2 = document.createElement('h2');
         h2.className   = 'pdf-secao';
@@ -107,12 +112,12 @@ async function baixarPDF(reg) {
     });
 
     const opt = {
-      margin:      10,
+      margin:      [10, 10, 15, 10],
       filename:    `correicao-${data.id}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
       jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:   { mode: ['css'], avoid: ['.pdf-campo', 'h2'] },
+      pagebreak:   { mode: ['css', 'legacy'], avoid: ['.pdf-campo', 'h2', 'h3'] },
     };
 
     await html2pdf().set(opt).from(pdfPage).save();

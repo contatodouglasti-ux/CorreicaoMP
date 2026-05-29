@@ -36,13 +36,15 @@ function criarForm() {
           return;
         }
         sec.subtopicos.forEach(sub => {
-          if (!ativos.has(sub.prefixo)) return;
+          const chave = Array.isArray(sub.prefixo) ? sub.prefixo.join(',') : sub.prefixo;
+          if (!ativos.has(chave)) return;
           const gt = document.createElement('h3');
           gt.className = 'subtopico-title';
           gt.innerText = sub.nome;
           camposWrap.appendChild(gt);
+          const prefixos = Array.isArray(sub.prefixo) ? sub.prefixo : [sub.prefixo];
           sec.campos
-            .filter(c => c.id.startsWith(sub.prefixo + '.'))
+            .filter(c => prefixos.some(p => c.id === p || c.id.startsWith(p + '.')))
             .forEach(campo => renderCampo(camposWrap, campo));
         });
         carregar();
@@ -53,13 +55,14 @@ function criarForm() {
         chip.type      = 'button';
         chip.className = 'chip';
         chip.innerText = sub.nome;
-        chip.dataset.prefixo = sub.prefixo;
+        const chaveAtivo = Array.isArray(sub.prefixo) ? sub.prefixo.join(',') : sub.prefixo;
+        chip.dataset.prefixo = chaveAtivo;
         chip.onclick   = () => {
-          if (ativos.has(sub.prefixo)) {
-            ativos.delete(sub.prefixo);
+          if (ativos.has(chaveAtivo)) {
+            ativos.delete(chaveAtivo);
             chip.classList.remove('chip-ativo');
           } else {
-            ativos.add(sub.prefixo);
+            ativos.add(chaveAtivo);
             chip.classList.add('chip-ativo');
           }
           atualizarCampos();
@@ -195,6 +198,7 @@ function atualizarBarra() {
 }
 
 /* ── Coleta e carga de dados ──── */
+
 
 function coletar(sec = null) {
   const base   = sec !== null ? document.querySelectorAll('.section')[sec] : document;

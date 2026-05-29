@@ -48,13 +48,13 @@ function criarMenu() {
 
   // Índices do grupo colapsável "ATUAÇÃO GERAL" (seções 5 a 17)
   const GRUPO_INICIO = 5;
-  const GRUPO_FIM    = 17;
+  const GRUPO_FIM    = 6;
 
   // Cabeçalho colapsável do grupo
   const grupoHeader = document.createElement('div');
   grupoHeader.className = 'sidebar-grupo-header';
   grupoHeader.id        = 'menu-grupo-atuacao';
-  grupoHeader.innerHTML = '<span class="grupo-seta">▶</span><span class="grupo-label">ATUAÇÃO GERAL</span>';
+  grupoHeader.innerHTML = '<span class="grupo-seta">▶</span><span class="grupo-label">INFORMAÇÕES GERAIS</span>';
 
   const grupoFilhos = document.createElement('div');
   grupoFilhos.className = 'sidebar-grupo-filhos';
