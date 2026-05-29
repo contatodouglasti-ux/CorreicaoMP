@@ -288,13 +288,13 @@ textarea {
   background: #fff;
   color: #1C799B;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: normal;
   cursor: pointer;
   transition: all .18s;
   white-space: nowrap;
 }
-.chip:hover    { background: #eef7f8; }
-.chip-ativo    { background: #1C799B; color: #fff; }
+.chip:hover    { background: #7bd8e2; }
+.chip-ativo    { background: #1C799B; color: #ffffff; }
 .chip-aviso    { color: #888; font-style: italic; margin: 12px 0; }
 .subtopico-title {
   font-size: 15px;
