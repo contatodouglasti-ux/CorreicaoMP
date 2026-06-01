@@ -110,7 +110,8 @@ async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
 async function finalizarRegistro(id, dados) {
   return sb.from('correicoes').update({
     dados,
-    finalizado:   true,
+    finalizado:    true,
+    finalizado_em: new Date().toISOString(),
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }

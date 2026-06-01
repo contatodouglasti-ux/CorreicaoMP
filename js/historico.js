@@ -74,11 +74,18 @@ function renderHistorico(registros, container) {
     btnAbrir.onclick = () => carregarRegistro(reg.id, reg.finalizado);
     btnPDF.onclick   = () => baixarPDF(reg);
 
+    const temSecao = reg.secoes_ok && Object.keys(reg.secoes_ok).length > 0;
+
     if (reg.finalizado) {
       btnExcluir.disabled          = true;
       btnExcluir.style.opacity     = '0.5';
       btnExcluir.style.cursor      = 'not-allowed';
       btnExcluir.title             = 'Registros finalizados não podem ser excluídos';
+    } else if (!temSecao) {
+      btnExcluir.disabled          = true;
+      btnExcluir.style.opacity     = '0.5';
+      btnExcluir.style.cursor      = 'not-allowed';
+      btnExcluir.title             = 'Envie ao menos uma seção antes de excluir';
     } else {
       btnExcluir.onclick = () => _confirmarExclusao(reg.id);
     }
@@ -94,7 +101,7 @@ async function _confirmarExclusao(id) {
   try {
     await excluirRegistro(id);
     showToast('Registro excluído com sucesso ✅', 'ok');
-    abrirHistorico();
+    location.reload();
   } catch (err) {
     console.error(err);
     showToast(err.message || 'Erro ao excluir registro.', 'erro');

@@ -5,13 +5,13 @@
  * Depende de: config.js, auth.js, db.js, ui.js, form.js, historico.js, pdf.js, Secoes.js
  */
 
-/* ── Estado global ──────────────────────────────────────── */
+/* ── Estado global ──── */
 
 let atual      = 0;
 let registroId = null;   // UUID do registro ativo no Supabase
 let modoLeitura = false; // true = formulário bloqueado (já finalizado)
 
-/* ── Auto-save (debounce 1,5s) ──────────────────────────── */
+/* ── Auto-save (debounce 1,5s) ──── */
 
 let _autoSalvarTimer = null;
 
@@ -26,7 +26,7 @@ function autoSalvar() {
   }, 1500);
 }
 
-/* ── Salvar seção ───────────────────────────────────────── */
+/* ── Salvar seção ──── */
 
 async function salvarSecao(i) {
   if (modoLeitura) {
@@ -41,6 +41,21 @@ async function salvarSecao(i) {
     focusFirstInvalid(invalidos);
     showToast('Preencha todos os campos obrigatórios antes de salvar a seção.', 'erro');
     return;
+  }
+
+  // Valida chip-bar de subtópicos: pelo menos um chip deve estar ativo
+  const chipBar = section.querySelector('.chip-bar');
+  if (chipBar) {
+    const algumAtivo = chipBar.querySelector('.chip-ativo');
+    if (!algumAtivo) {
+      mostrar(i);
+      chipBar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      chipBar.style.outline = '2px solid #fc8181';
+      chipBar.style.borderRadius = '6px';
+      setTimeout(() => { chipBar.style.outline = ''; chipBar.style.borderRadius = ''; }, 3000);
+      showToast('Selecione pelo menos um subtópico antes de salvar a seção.', 'erro');
+      return;
+    }
   }
 
   mostrarLoading('Salvando seção…');
@@ -66,7 +81,7 @@ async function salvarSecao(i) {
   }
 }
 
-/* ── Enviar tudo ────────────────────────────────────────── */
+/* ── Enviar tudo ──── */
 
 async function enviarTudo() {
   if (modoLeitura) {
@@ -122,7 +137,7 @@ async function enviarTudo() {
   }
 }
 
-/* ── Nova correição ─────────────────────────────────────── */
+/* ── Nova correição ──── */
 
 async function novaCorreicao() {
   if (registroId && !modoLeitura) {
@@ -162,7 +177,7 @@ async function novaCorreicao() {
   }
 }
 
-/* ── Inicialização ──────────────────────────────────────── */
+/* ── Inicialização ──── */
 
 async function init() {
   mostrarLoading('Carregando…');

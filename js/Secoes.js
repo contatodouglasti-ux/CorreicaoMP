@@ -3,10 +3,17 @@ const form = {
  {
     "nome": "Dados gerais",
     "campos": [
+      {"id": "1.1", "pergunta": "Unidade correicionada:.", "tipo": "textarea"},
+      {"id": "1.2", "pergunta": "Data da Correição", "tipo": "textarea"},
+      {"id": "1.3", "pergunta": "Mambro responsável pelo preenchimento", "tipo": "textarea"},
+      {"id": "1.4", "pergunta": "Designação", "tipo": "textarea"},
       {"id": "1", "pergunta": "Ato(s) normativo(s) que fixa(m) as atribuições do órgão correicionado (com indicação dos artigos).", "tipo": "textarea"},
       {"id": "2", "pergunta": "Descrição detalhada das atribuições.", "tipo": "textarea"},
       {"id": "3", "pergunta": "Órgão(s) jurisdicional(is) perante o(s) qual(is) atua.", "tipo": "textarea"},
       {"id": "4", "pergunta": "Municípios que compõem a área de atuação e população abrangida.", "tipo": "textarea"}
+      
+
+
     ]
   },
   {
@@ -291,7 +298,7 @@ const form = {
    "nome": "Dados Específicos por Área",
     "subtopicos": [
       { "id":"sub50", "nome":"INFÂNCIA E JUVENTUDE",   "prefixo": ["54","55","56","57","58","59","60","61","62","63", "64","65","66","67","68","69"] },
-      { "id":"sub32", "nome":"crianças e adolescentes",   "prefixo":["70","71","72"] },
+      { "id":"sub32", "nome":"crianças e adolescentes ( criminal )",   "prefixo":["70","71","72"] },
       { "id":"sub33", "nome": "Educação",    "prefixo": ["73","74","75","76","77","78","79","80","81","82","83","84"] },
       { "id":"sub34", "nome":"família",  "prefixo": ["85","86","87","88","89","90"]},
       { "id":"sub35", "nome":"Violencia contra a mulher",      "prefixo": ["91","92","93","94","95","96","97","98","99","100"] },
