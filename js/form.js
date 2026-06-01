@@ -40,7 +40,7 @@ function criarForm() {
           if (!ativos.has(chave)) return;
           const gt = document.createElement('h3');
           gt.className = 'subtopico-title';
-          gt.innerText = sub.nome;
+          gt.innerText = sub.titulo || sub.nome;
           camposWrap.appendChild(gt);
           const prefixos = Array.isArray(sub.prefixo) ? sub.prefixo : [sub.prefixo];
           sec.campos

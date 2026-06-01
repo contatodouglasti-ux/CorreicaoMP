@@ -80,8 +80,26 @@ const form = {
         {"id": "26.n", "pergunta": "Reuniões", "tipo": "number"},
         {"id": "26.o", "pergunta": "Audiências públicas", "tipo": "number"},
         {"id": "26.p", "pergunta": "Audiências judiciais", "tipo": "number"},
-        {"id": "26.q", "pergunta": "Inspeções/Visitas", "tipo": "number"},
-        {"id": "27.a", "pergunta": "Processos cíveis recebidos", "tipo": "number"},
+        {"id": "26.q", "pergunta": "Inspeções/Visitas", "tipo": "number"}
+      ]
+  },
+  {
+    "nome": "Dados específicos",
+    "subtopicos": [
+      { "id":"sub27", "nome":"infância e juventude",              "prefixo":"27" , "titulo":"Dados específicos sobre tutela da infância e juventude" },
+      { "id":"sub28", "nome":"crimes contra crianças e adolescentes",              "prefixo":"28", "titulo":"Dados específicos sobre crimes contra crianças e adolescentes"  },
+      { "id":"sub29", "nome":"educação",              "prefixo":"29" , "titulo":"Dados específicos sobre tutela da educação" },
+      { "id":"sub30", "nome":"saúde",              "prefixo":"30" , "titulo":"Dados específicos sobre atuação na defesa da saúde" },
+      { "id":"sub31", "nome":"FAMÍLIA",              "prefixo":"31" , "titulo":"Dados específicos sobre tutela da família" },
+      { "id":"sub32", "nome":"VIO. DOMÉSTICA",        "prefixo":"32" , "titulo":"Violência doméstica e familiar contra a mulher" },
+      { "id":"sub33", "nome":"DISCRIMINAÇÃO",          "prefixo":"33" , "titulo":"Enfrentamento à discriminação racial, à população LGBTQIAPN+ e aos povos e comunidades tradicionais" },
+      { "id":"sub34", "nome":"PES. C/ DEFICIÊNCIA",   "prefixo":"34" , "titulo":"Atuação na defesa das pessoas com deficiência" },
+      { "id":"sub35", "nome":"SEGURANÇA PÚBLICA",      "prefixo":"35" , "titulo":"Controle externo da atividade policial e segurança pública" },
+      { "id":"sub36", "nome":"PATRIMÔNIO PÚBLICO",     "prefixo":"36" , "titulo":"Patrimônio público" },
+      { "id":"sub37", "nome":"MEIO AMBIENTE",          "prefixo":"37" , "titulo":"Tutela do meio ambiente" }
+    ],
+    "campos": [
+      {"id": "27.a", "pergunta": "Processos cíveis recebidos", "tipo": "number"},
         {"id": "27.b", "pergunta": "Notícias de Fato (NF) autuadas", "tipo": "number"},
         {"id": "27.c", "pergunta": "Inquéritos Civis (IC) instaurados", "tipo": "number"},
         {"id": "27.d", "pergunta": "Procedimentos Preparatórios (PP) instaurados", "tipo": "number"},
@@ -129,21 +147,7 @@ const form = {
         {"id": "30.n", "pergunta": "Reuniões", "tipo": "number"},
         {"id": "30.o", "pergunta": "Audiências públicas", "tipo": "number"},
         {"id": "30.p", "pergunta": "Audiências judiciais", "tipo": "number"},
-        {"id": "30.q", "pergunta": "Inspeções/Visitas", "tipo": "number"}
-      ]
-  },
-  {
-    "nome": "Dados específicos",
-    "subtopicos": [
-      { "id":"sub31", "nome":"FAMÍLIA",              "prefixo":"31" },
-      { "id":"sub32", "nome":"VIO. DOMÉSTICA",        "prefixo":"32" },
-      { "id":"sub33", "nome":"DISCRIMINAÇÃO",          "prefixo":"33" },
-      { "id":"sub34", "nome":"PES. C/ DEFICIÊNCIA",   "prefixo":"34" },
-      { "id":"sub35", "nome":"SEGURANÇA PÚBLICA",      "prefixo":"35" },
-      { "id":"sub36", "nome":"PATRIMÔNIO PÚBLICO",     "prefixo":"36" },
-      { "id":"sub37", "nome":"MEIO AMBIENTE",          "prefixo":"37" }
-    ],
-    "campos": [
+        {"id": "30.q", "pergunta": "Inspeções/Visitas", "tipo": "number"},
       {"id": "31.a", "pergunta": "Processos cíveis recebidos", "tipo": "number"},
       {"id": "31.b", "pergunta": "Notícias de Fato (NF) autuadas", "tipo": "number"},
       {"id": "31.c", "pergunta": "Inquéritos Civis (IC) instaurados", "tipo": "number"},
@@ -297,17 +301,17 @@ const form = {
   },{
    "nome": "Dados Específicos por Área",
     "subtopicos": [
-      { "id":"sub50", "nome":"INFÂNCIA E JUVENTUDE",   "prefixo": ["54","55","56","57","58","59","60","61","62","63", "64","65","66","67","68","69"] },
-      { "id":"sub32", "nome":"crianças e adolescentes ( criminal )",   "prefixo":["70","71","72"] },
-      { "id":"sub33", "nome": "Educação",    "prefixo": ["73","74","75","76","77","78","79","80","81","82","83","84"] },
-      { "id":"sub34", "nome":"família",  "prefixo": ["85","86","87","88","89","90"]},
-      { "id":"sub35", "nome":"Violencia contra a mulher",      "prefixo": ["91","92","93","94","95","96","97","98","99","100"] },
-      { "id":"sub36", "nome":"Combate à Discriminação",     "prefixo": ["101","102","103","104","105","106","107"]},
-      { "id":"sub37", "nome":"Pessoas com Deficiência",          "prefixo": ["108","109","110","111","112","113"]},
-      { "id":"sub38", "nome":"Segurança Pública e Ex. Penal",          "prefixo": ["114","115","116","117","118","119"]},
-      { "id":"sub37", "nome":"Probidade e Acesso à Informação",          "prefixo": ["120","121","122"]},
-      { "id":"sub37", "nome":"Saúde",          "prefixo": ["123","124","125","126","127","128","129","130","131","132"]},
-      { "id":"sub37", "nome":"Meio Ambiente",       "prefixo": ["133","134","135","136"]},
+      { "id":"sub50", "nome":"INFÂNCIA E JUVENTUDE",   "prefixo": ["54","55","56","57","58","59","60","61","62","63", "64","65","66","67","68","69"], "titulo":"TUTELA DA INFÂNCIA E JUVENTUDE CÍVEL" },
+      { "id":"sub32", "nome":"crianças e adolescentes ( criminal )",   "prefixo":["70","71","72"], "titulo":"CRIMES CONTRA CRIANÇAS E ADOLESCENTES" },
+      { "id":"sub33", "nome": "Educação",    "prefixo": ["73","74","75","76","77","78","79","80","81","82","83","84"] , "titulo":"TUTELA DA EDUCAÇÃO" },
+      { "id":"sub34", "nome":"família",  "prefixo": ["85","86","87","88","89","90"], "titulo":"TUTELA DA FAMÍLIA" },
+      { "id":"sub35", "nome":"Violencia contra a mulher",      "prefixo": ["91","92","93","94","95","96","97","98","99","100"] , "titulo":"VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER" },
+      { "id":"sub36", "nome":"Combate à Discriminação",     "prefixo": ["101","102","103","104","105","106","107"] , "titulo":"ENFRENTAMENTO À DISCRIMINAÇÃO RACIAL, À POPULAÇÃO LGBTQIAPN+ E AOS POVOS E COMUNIDADES TRADICIONAIS" },
+      { "id":"sub37", "nome":"Pessoas com Deficiência",          "prefixo": ["108","109","110","111","112","113"], "titulo":"ATUAÇÃO NA DEFESA DAS PESSOAS COM DEFICIÊNCIA" },
+      { "id":"sub38", "nome":"Segurança Pública e Ex. Penal",          "prefixo": ["114","115","116","117","118","119"], "titulo":"EXECUÇÃO PENAL, CONTROLE EXTERNO DA ATIVIDADE POLICIAL E SEGURANÇA PÚBLICA" },
+      { "id":"sub37", "nome":"Probidade e Acesso à Informação",          "prefixo": ["120","121","122"], "titulo":"PATRIMÔNIO PÚBLICO, PROBIDADE ADMINISTRATIVA E ACESSO À INFORMAÇÃO" },
+      { "id":"sub37", "nome":"Saúde",          "prefixo": ["123","124","125","126","127","128","129","130","131","132"], "titulo":"TUTELA DA SAÚDE" },
+      { "id":"sub37", "nome":"Meio Ambiente",       "prefixo": ["133","134","135","136"], "titulo":"TUTELA DO MEIO AMBIENTE" },
         ],
     "campos": [
       {"id": "54", "pergunta": "O(a) membro(a) realiza ou participa de Reuniões periódicas com a rede para discussão de casos ou para implementação de políticas públicas na área da infância e juventude, com construção de fluxos e protocolos, atuando extrajudicialmente para garantir o pleno funcionamento da rede de proteção à criança e ao adolescente, conforme o artigo 4º da Recomendação nº 33/2016?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
