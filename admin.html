@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin — MPAM CGMP</title>
+
+  <!-- Proteção de rota -->
+  <script>
+    (function () {
+      try {
+        if (!localStorage.getItem('msalAccount')) {
+          document.documentElement.style.visibility = 'hidden';
+          window.location.replace('/login.html');
+        }
+      } catch (e) {
+        window.location.replace('/login.html');
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --accent:   #1C799B;
+      --dark:     #124b5f;
+      --bg:       #f0f4f6;
+      --card:     #fff;
+      --text:     #263238;
+      --muted:    #546E7A;
+      --border:   #d7e3eb;
+      --green:    #2E9E8F;
+      --red:      #e74c3c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--dark);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-brand img {
+      height: 32px;
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .topbar-badge {
+      background: rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4FB8EE;
+      border: 1px solid rgba(79,184,238,0.3);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .topbar-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-sair {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-sair:hover { background: rgba(255,255,255,0.18); }
+
+    /* ── Conteúdo ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ── Barra de filtros ── */
+    .filtros {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+
+    .filtros input[type="text"] {
+      flex: 1;
+      min-width: 220px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filtros input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
+    }
+
+    .filtros select {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-gray    { background: #e2eaee; color: var(--text); }
+    .btn-green   { background: var(--green); color: #fff; }
+    .btn-danger  { background: var(--red); color: #fff; }
+
+    /* ── Contador ── */
+    .contador {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* ── Tabela ── */
+    .tabela-wrap {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--dark);
+      color: #fff;
+    }
+
+    thead th {
+      padding: 13px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #eef2f5;
+      transition: background 0.12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f5f9fb; }
+
+    tbody td {
+      padding: 13px 16px;
+      font-size: 14px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .td-nome {
+      font-weight: 600;
+    }
+
+    .td-email {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .status-finalizado  { background: #d4edda; color: #155724; }
+    .status-andamento   { background: #fff3cd; color: #856404; }
+
+    .acoes {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .acoes .btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* ── Estado vazio / loading ── */
+    .estado-vazio {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .estado-vazio .icone { font-size: 40px; margin-bottom: 12px; }
+    .estado-vazio p      { font-size: 15px; }
+
+    /* ── Loading overlay ── */
+    #loadingOverlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,0.85);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9000; gap: 14px;
+      font-size: 15px; color: var(--muted); font-weight: 600;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 4px solid #d0e8f0;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      padding: 13px 18px; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+      z-index: 9999; opacity: 0;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast-ok   { background: var(--accent); color: #fff; }
+    .toast-erro { background: var(--red); color: #fff; }
+
+    /* ── Modal de detalhes ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 780px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+    }
+
+    .modal-header {
+      background: var(--dark);
+      color: #fff;
+      padding: 18px 24px;
+      border-radius: 14px 14px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .modal-header h2 { font-size: 16px; margin-bottom: 2px; }
+    .modal-header .sub { font-size: 12px; opacity: 0.7; }
+
+    .modal-close {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.25); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 24px;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Seções dentro do modal */
+    .detalhe-secao {
+      margin-bottom: 24px;
+    }
+
+    .detalhe-secao h3 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .detalhe-subtitulo {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 14px 0 8px;
+    }
+
+    .detalhe-campo {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: #f7f9fa;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .detalhe-pergunta {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .detalhe-valor {
+      font-size: 14px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .sem-dados {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    /* ── Impressão ── */
+    @media print {
+      /* Oculta tudo exceto o conteúdo do modal */
+      body > *                          { display: none !important; }
+      #printArea                        { display: block !important; }
+
+      #printArea                        { margin: 0; padding: 0; }
+
+      .print-header {
+        display: block !important;
+        width: 100%;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #1C799B;
+      }
+      .print-header img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto;
+        display: block;
+      }
+
+      .print-meta {
+        font-size: 11px;
+        color: #546E7A;
+        margin-bottom: 20px;
+        line-height: 1.7;
+      }
+
+      .print-secao        { margin-bottom: 20px; page-break-inside: avoid; }
+      .print-secao h3 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #1C799B;
+        border-bottom: 1.5px solid #1C799B;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        page-break-after: avoid;
+      }
+      .print-subtitulo {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #546E7A;
+        margin: 10px 0 6px;
+        page-break-after: avoid;
+      }
+      .print-campo {
+        margin-bottom: 8px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .print-pergunta {
+        font-size: 10px;
+        font-weight: 700;
+        color: #546E7A;
+        margin-bottom: 2px;
+      }
+      .print-valor {
+        font-size: 11px;
+        color: #263238;
+        background: #f5f7f9;
+        padding: 5px 8px;
+        border-left: 2px solid #1C799B;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+      .print-assinatura {
+        page-break-before: always;
+        border-top: 2px solid #1C799B;
+        padding-top: 14px;
+        font-size: 11px;
+        color: #263238;
+      }
+      .print-assinatura .label {
+        font-weight: 700;
+        color: #1C799B;
+        margin-bottom: 8px;
+      }
+      .print-assinatura table { width: 100%; border-collapse: collapse; }
+      .print-assinatura td    { padding: 3px 12px 3px 0; vertical-align: top; }
+    }
+
+    /* printArea oculto na tela */
+    #printArea { display: none; }
+
+    /* ── Responsivo ── */
+    @media (max-width: 700px) {
+      .topbar { padding: 0 16px; }
+      .page   { padding: 20px 14px 40px; }
+      table   { font-size: 13px; }
+      thead th, tbody td { padding: 10px 12px; }
+      .topbar-title { font-size: 13px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Loading -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <span id="loadingMsg">Verificando acesso…</span>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Topbar -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <img src="assets/logo2.png" alt="MPAM" />
+    <span class="topbar-badge">Painel Admin</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-user">
+      <div class="topbar-avatar" id="adminAvatar">?</div>
+      <span id="adminNome">—</span>
+    </div>
+    <button class="btn-sair" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<!-- Conteúdo -->
+<main class="page">
+
+  <div class="page-header">
+    <h1>Registros de Correição</h1>
+    <p>Visualize e filtre todos os registros cadastrados no sistema.</p>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <input
+      type="text"
+      id="filtroNome"
+      placeholder="🔍  Filtrar por nome do membro..."
+      oninput="filtrarDebounce()"
+    />
+    <select id="filtroStatus" onchange="buscar()">
+      <option value="">Todos os status</option>
+      <option value="true">Finalizados</option>
+      <option value="false">Em andamento</option>
+    </select>
+    <button class="btn btn-primary" onclick="buscar()">Buscar</button>
+    <button class="btn btn-gray"    onclick="limparFiltros()">Limpar</button>
+  </div>
+
+  <div class="contador" id="contador"></div>
+
+  <!-- Tabela -->
+  <div class="tabela-wrap" id="tabelaWrap">
+    <div class="estado-vazio">
+      <div class="icone">📋</div>
+      <p>Carregando registros…</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- Modal de detalhes -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharModalClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitulo">Detalhes do Registro</h2>
+        <div class="sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-green" id="modalBtnPDF" onclick="imprimirModal()">🖨️ Imprimir / PDF</button>
+      <button class="btn btn-gray"  onclick="fecharModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Área de impressão (oculta na tela, visível só no print) -->
+<div id="printArea"></div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/Secoes.js"></script>
+<script src="js/db-admin.js"></script>
+<script src="js/pdf.js"></script>
+
+<script>
+  /* ── Estado ── */
+  let registroAtualId = null;
+  let _filtroTimer    = null;
+
+  /* ── Helpers de UI ── */
+  function mostrarLoading(msg = 'Carregando…') {
+    document.getElementById('loadingMsg').textContent = msg;
+    document.getElementById('loadingOverlay').style.display = 'flex';
+  }
+  function esconderLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+  function showToast(msg, tipo) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = 'toast ' + (tipo === 'erro' ? 'toast-erro' : 'toast-ok');
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 4000);
+  }
+  function escapeHtml(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Badge de usuário ── */
+  function initBadge() {
+    const nome = getNomeUsuario();
+    const iniciais = nome.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase() || '?';
+    document.getElementById('adminAvatar').textContent = iniciais;
+    document.getElementById('adminNome').textContent   = nome;
+  }
+
+  /* ── Busca e renderização ── */
+  async function buscar() {
+    const nome   = document.getElementById('filtroNome').value;
+    const status = document.getElementById('filtroStatus').value;
+
+    mostrarLoading('Buscando registros…');
+    try {
+      let dados = await buscarTodosRegistros(nome);
+
+      // Filtro de status no client (evita query extra)
+      if (status === 'true')  dados = dados.filter(r => r.finalizado === true);
+      if (status === 'false') dados = dados.filter(r => r.finalizado === false);
+
+      renderTabela(dados);
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao buscar registros.', 'erro');
+    } finally {
+      esconderLoading();
+    }
+  }
+
+  function filtrarDebounce() {
+    clearTimeout(_filtroTimer);
+    _filtroTimer = setTimeout(buscar, 400);
+  }
+
+  function limparFiltros() {
+    document.getElementById('filtroNome').value   = '';
+    document.getElementById('filtroStatus').value = '';
+    buscar();
+  }
+
+  function renderTabela(registros) {
+    const wrap = document.getElementById('tabelaWrap');
+    document.getElementById('contador').textContent =
+      registros.length === 0
+        ? 'Nenhum registro encontrado.'
+        : `${registros.length} registro${registros.length > 1 ? 's' : ''} encontrado${registros.length > 1 ? 's' : ''}.`;
+
+    if (registros.length === 0) {
+      wrap.innerHTML = `
+        <div class="estado-vazio">
+          <div class="icone">🔍</div>
+          <p>Nenhum registro encontrado com os filtros aplicados.</p>
+        </div>`;
+      return;
+    }
+
+    const linhas = registros.map(r => {
+      const data       = new Date(r.criado_em).toLocaleDateString('pt-BR');
+      const hora       = new Date(r.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+      const secoesOk   = Object.keys(r.secoes_ok || {}).length;
+      const totalSecoes = form.secoes.length;
+      const statusHtml = r.finalizado
+        ? '<span class="status-badge status-finalizado">✅ Finalizado</span>'
+        : `<span class="status-badge status-andamento">⏳ Em andamento (${secoesOk}/${totalSecoes})</span>`;
+
+      return `
+        <tr>
+          <td>
+            <div class="td-nome">${escapeHtml(r.nome || '—')}</div>
+            <div class="td-email">${escapeHtml(r.user_id)}</div>
+          </td>
+          <td>${statusHtml}</td>
+          <td style="white-space:nowrap;color:var(--muted);font-size:13px;">
+            ${data}<br><span style="font-size:11px">${hora}</span>
+          </td>
+          <td>
+            <div class="acoes">
+              <button class="btn btn-primary" onclick="abrirModal('${r.id}')">👁 Ver</button>
+              <button class="btn btn-green"   onclick="baixarPDFAdmin('${r.id}')">📄 PDF</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+
+    wrap.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Membro</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+      </table>`;
+  }
+
+  /* ── Modal de detalhes ── */
+  async function abrirModal(id) {
+    registroAtualId = id;
+    mostrarLoading('Carregando detalhes…');
+    try {
+      const reg   = await carregarRegistroAdmin(id);
+      const dados = reg.dados || {};
+
+      document.getElementById('modalTitulo').textContent =
+        `${reg.nome || reg.user_id}`;
+      document.getElementById('modalSub').textContent =
+        `${reg.user_id} · ${new Date(reg.criado_em).toLocaleString('pt-BR')}`;
+
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+
+      let temConteudo = false;
+
+      form.secoes.forEach(sec => {
+        const secDiv = document.createElement('div');
+        secDiv.className = 'detalhe-secao';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = sec.nome;
+        secDiv.appendChild(h3);
+
+        let secTemConteudo = false;
+
+        if (sec.subtopicos) {
+          sec.subtopicos.forEach(sub => {
+            const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+            const fragSub = [];
+
+            camposDaSub.forEach(campo => {
+              const valor = dados[campo.id];
+              if (!valor) return;
+              fragSub.push({ pergunta: campo.pergunta, valor });
+            });
+
+            if (fragSub.length === 0) return;
+
+            const subDiv = document.createElement('div');
+            subDiv.className = 'detalhe-subtitulo';
+            subDiv.textContent = sub.nome;
+            secDiv.appendChild(subDiv);
+
+            fragSub.forEach(({ pergunta, valor }) => {
+              secDiv.appendChild(criarCampoDetalhe(pergunta, valor));
+            });
+
+            secTemConteudo = true;
+          });
+        } else {
+          sec.campos.forEach(campo => {
+            const valor = dados[campo.id];
+            if (!valor) return;
+            secDiv.appendChild(criarCampoDetalhe(campo.pergunta, valor));
+            secTemConteudo = true;
+          });
+        }
+
+        if (secTemConteudo) {
+          body.appendChild(secDiv);
+          temConteudo = true;
+        }
+      });
+
+      if (!temConteudo) {
+        body.innerHTML = '<p class="sem-dados">Este registro não possui campos preenchidos.</p>';
+      }
+
+      document.getElementById('modalOverlay').classList.add('open');
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao carregar detalhes.', 'erro');
+    } finally {
+      esconderLoading();
+    }
+  }
+
+  function criarCampoDetalhe(pergunta, valor) {
+    const div = document.createElement('div');
+    div.className = 'detalhe-campo';
+    div.innerHTML = `
+      <div class="detalhe-pergunta">${escapeHtml(pergunta)}</div>
+      <div class="detalhe-valor">${escapeHtml(valor)}</div>`;
+    return div;
+  }
+
+  function fecharModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    registroAtualId = null;
+  }
+
+  function fecharModalClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) fecharModal();
+  }
+
+  async function gerarPDFModal() {
+    if (!registroAtualId) return;
+    await baixarPDFAdmin(registroAtualId);
+  }
+
+  function imprimirModal() {
+    if (!registroAtualId) return;
+
+    // Lê os dados já renderizados no modal
+    const titulo  = document.getElementById('modalTitulo').textContent;
+    const sub     = document.getElementById('modalSub').textContent;
+    const bodyEl  = document.getElementById('modalBody');
+    const print   = document.getElementById('printArea');
+
+    // Monta o HTML de impressão a partir do conteúdo do modal
+    let html = `
+      <div class="print-header">
+        <img src="assets/logo.png" alt="MPAM CGMP" />
+      </div>
+      <div class="print-meta">
+        <strong>${escapeHtml(titulo)}</strong><br>
+        ${escapeHtml(sub)}
+      </div>`;
+
+    // Percorre as seções renderizadas no modal e converte para classes de print
+    bodyEl.querySelectorAll('.detalhe-secao').forEach(secEl => {
+      const secTitulo = secEl.querySelector('h3')?.textContent || '';
+      html += `<div class="print-secao"><h3>${escapeHtml(secTitulo)}</h3>`;
+
+      secEl.childNodes.forEach(node => {
+        if (node.nodeType !== 1) return;
+        if (node.tagName === 'H3') return; // já adicionado
+
+        // Subtítulo
+        if (node.classList.contains('detalhe-subtitulo')) {
+          html += `<div class="print-subtitulo">${escapeHtml(node.textContent)}</div>`;
+          return;
+        }
+
+        // Campo
+        if (node.classList.contains('detalhe-campo')) {
+          const perg = node.querySelector('.detalhe-pergunta')?.textContent || '';
+          const val  = node.querySelector('.detalhe-valor')?.textContent   || '';
+          html += `
+            <div class="print-campo">
+              <div class="print-pergunta">${escapeHtml(perg)}</div>
+              <div class="print-valor">${escapeHtml(val)}</div>
+            </div>`;
+        }
+      });
+
+      html += '</div>';
+    });
+
+    // Assinatura
+    html += `
+      <div class="print-assinatura">
+        <div class="label">✅ Assinatura de Envio</div>
+        <table>
+          <tr>
+            <td><b>Usuário:</b> ${escapeHtml(titulo)}</td>
+            <td><b>Gerado em:</b> ${new Date().toLocaleString('pt-BR')}</td>
+          </tr>
+        </table>
+      </div>`;
+
+    print.innerHTML = html;
+    window.print();
+  }
+
+  /* ── Init ── */
+  (async function init() {
+    try {
+      await verificarAdmin();
+      initBadge();
+      await buscar();
+    } catch (err) {
+      // verificarAdmin já redireciona
+    } finally {
+      esconderLoading();
+    }
+  })();
+</script>
+
+</body>
+</html>

@@ -7,11 +7,28 @@
  * ao menos um campo respondido (sem blocos vazios no PDF).
  */
 
-async function baixarPDF(reg) {
+async function baixarPDF(reg, clienteOverride) {
   mostrarLoading('Gerando PDF…');
   try {
-    const { data, error } = await sb.from('correicoes').select('*').eq('id', reg.id).single();
+    let data, error;
+
+    // Prioridade: cliente passado explicitamente → sbAdmin (painel) → sb (usuário normal)
+    if (clienteOverride) {
+      const res = await clienteOverride.rpc('buscar_registro_por_id', { registro_id: reg.id });
+      error = res.error;
+      data  = res.data && res.data[0];
+    } else if (typeof sbAdmin !== 'undefined') {
+      const res = await sbAdmin.rpc('buscar_registro_por_id', { registro_id: reg.id });
+      error = res.error;
+      data  = res.data && res.data[0];
+    } else {
+      const res = await sb.from('correicoes').select('*').eq('id', reg.id).single();
+      error = res.error;
+      data  = res.data;
+    }
+
     if (error) throw error;
+    if (!data)  throw new Error('Registro não encontrado.');
 
     const dados = data.dados || {};
 

@@ -1,9 +1,9 @@
 /* RESET */
 * { margin:0; padding:0; box-sizing:border-box; }
-
+Z
 body {
   font-family: "Segoe UI", sans-serif;
-  background: #f4f6f7;
+  background: #EfEfEF;
 }
 
 /* ══════════════════════════════════════════
@@ -90,8 +90,8 @@ body {
 
 .sidebar-item.ativo {
   background: rgba(79,184,238,0.15);
-  color: #4FB8EE;
-  border-left-color: #4FB8EE;
+  color: #81cbf0;
+  border-left-color: #81cbf0;
 }
 
 .sidebar-item .item-numero {
@@ -163,7 +163,7 @@ body {
 
 .progress-bar {
   height: 4px;
-  background: #1C799B;
+  background: #2c3e50;
   width: 0%;
   transition: width 0.3s;
 }
@@ -172,7 +172,7 @@ body {
 .banner {
   width: 100%;
   min-height: 140px;
-  background-image: url("../assets/logo.png");
+  background-image: url("../assets/header\ termo_fundo\ transparente.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
@@ -206,13 +206,13 @@ body {
 
 .section.active { display: block; }
 
-h2 { color: #1C799B; margin-bottom: 4px; }
+h2 { color: #124b5f; margin-bottom: 4px; }
 
 label {
   margin-top: 15px;
   display: block;
   font-weight: 600;
-  color: #263238;
+  color: #2c3e50;
 }
 
 label.required::after {
@@ -226,7 +226,7 @@ input, textarea {
   margin-top: 5px;
   border-radius: 8px;
   border: 1px solid #B0BEC5;
-  color: #263238;
+  color: #2c3e50;
 }
 
 input.invalid,

@@ -31,7 +31,7 @@ function renderHistorico(registros, container) {
 
   const titulo = document.createElement('h2');
   titulo.innerText    = '📋 Histórico de Correições';
-  titulo.style.cssText = 'color:#1C799B;margin-bottom:20px;';
+  titulo.style.cssText = 'color:#2c3e50;margin-bottom:20px;';
   container.appendChild(titulo);
 
   if (!registros || registros.length === 0) {
