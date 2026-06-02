@@ -323,7 +323,7 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  min-width: 100px;
+  min-width: 10px;
   font-size: 14px;
 }
 

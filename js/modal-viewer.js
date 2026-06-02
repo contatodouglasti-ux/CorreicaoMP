@@ -445,3 +445,4 @@ const ModalViewer = (() => {
 
   return { abrir, fechar, imprimir };
 })();
+window.ModalViewer = ModalViewer;
