@@ -242,7 +242,7 @@ const ModalViewer = (() => {
       <div id="${IDS.modal}">
         <div class="mv-header">
           <div>
-            <h2 id="${IDS.titulo}">Detalhes do Registro</h2>
+            <h2 id="${IDS.titulo}"style="color: #ffffff;">Detalhes do Registro</h2>
             <div class="mv-sub" id="${IDS.sub}"></div>
           </div>
           <button class="mv-close" id="${IDS.btnFechar2}">✕</button>
