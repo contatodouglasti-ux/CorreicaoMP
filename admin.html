@@ -262,6 +262,13 @@
       color: var(--muted);
     }
 
+    .td-unidade {
+      font-size: 13px;
+      color: var(--text);
+      max-width: 420px;
+      word-break: break-word;
+    }
+
     .status-badge {
       display: inline-block;
       padding: 3px 10px;
@@ -324,7 +331,213 @@
     .toast-ok   { background: var(--accent); color: #fff; }
     .toast-erro { background: var(--red); color: #fff; }
 
-    /* Modal gerenciado pelo modal-viewer.js */
+    /* ── Modal de detalhes ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 780px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+    }
+
+    .modal-header {
+      background: var(--dark);
+      color: #fff;
+      padding: 18px 24px;
+      border-radius: 14px 14px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .modal-header h2 { font-size: 16px; margin-bottom: 2px; }
+    .modal-header .sub { font-size: 12px; opacity: 0.7; }
+
+    .modal-close {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.25); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 24px;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Seções dentro do modal */
+    .detalhe-secao {
+      margin-bottom: 24px;
+    }
+
+    .detalhe-secao h3 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .detalhe-subtitulo {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 14px 0 8px;
+    }
+
+    .detalhe-campo {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: #f7f9fa;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .detalhe-pergunta {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .detalhe-valor {
+      font-size: 14px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .sem-dados {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    /* ── Impressão ── */
+    @media print {
+      /* Oculta tudo exceto o conteúdo do modal */
+      body > *                    { display: none !important; }
+      #printArea                    { display: block !important; }
+
+      #printArea                    { margin: 0; padding: 0; }
+
+      .print-header {
+        display: block !important;
+        width: 100%;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #1C799B;
+      }
+      .print-header img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto;
+        display: block;
+      }
+
+      .print-meta {
+        font-size: 11px;
+        color: #546E7A;
+        margin-bottom: 20px;
+        line-height: 1.7;
+      }
+
+      .print-secao        { margin-bottom: 20px; page-break-inside: avoid; }
+      .print-secao h3 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #1C799B;
+        border-bottom: 1.5px solid #1C799B;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        page-break-after: avoid;
+      }
+      .print-subtitulo {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #546E7A;
+        margin: 10px 0 6px;
+        page-break-after: avoid;
+      }
+      .print-campo {
+        margin-bottom: 8px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .print-pergunta {
+        font-size: 10px;
+        font-weight: 700;
+        color: #546E7A;
+        margin-bottom: 2px;
+      }
+      .print-valor {
+        font-size: 11px;
+        color: #263238;
+        background: #f5f7f9;
+        padding: 5px 8px;
+        border-left: 2px solid #1C799B;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+      .print-assinatura {
+        page-break-before: always;
+        border-top: 2px solid #1C799B;
+        padding-top: 14px;
+        font-size: 11px;
+        color: #263238;
+      }
+      .print-assinatura .label {
+        font-weight: 700;
+        color: #1C799B;
+        margin-bottom: 8px;
+      }
+      .print-assinatura table { width: 100%; border-collapse: collapse; }
+      .print-assinatura td    { padding: 3px 12px 3px 0; vertical-align: top; }
+    }
+
+    /* printArea oculto na tela */
+    #printArea { display: none; }
 
     /* ── Responsivo ── */
     @media (max-width: 700px) {
@@ -379,6 +592,12 @@
       placeholder="🔍  Filtrar por nome do membro..."
       oninput="filtrarDebounce()"
     />
+    <input
+      type="text"
+      id="filtroUnidade"
+      placeholder="🏢  Filtrar por Unidade correicionada..."
+      oninput="filtrarDebounce()"
+    />
     <select id="filtroStatus" onchange="buscar()">
       <option value="">Todos os status</option>
       <option value="true">Finalizados</option>
@@ -400,10 +619,28 @@
 
 </main>
 
-<!-- Modal criado dinamicamente pelo modal-viewer.js -->
+<!-- Modal de detalhes -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharModalClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitulo">Detalhes do Registro</h2>
+        <div class="sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-green" id="modalBtnPDF" onclick="imprimirModal()">🖨️ Imprimir / PDF</button>
+      <button class="btn btn-gray"  onclick="fecharModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Área de impressão (oculta na tela, visível só no print) -->
+<div id="printArea"></div>
 
 <!-- Scripts -->
-<script src="js/modal-viewer.js"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/Secoes.js"></script>
@@ -436,6 +673,19 @@
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  function normalizarTextoFiltro(valor) {
+    return String(valor || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+function obterUnidadeCorreicionadaRegistro(registro) {
+  return String(registro?.unidade_correicionada || registro?.dados?.['1.1'] || '').trim();
+}
+
   /* ── Badge de usuário ── */
   function initBadge() {
     const nome = getNomeUsuario();
@@ -446,12 +696,18 @@
 
   /* ── Busca e renderização ── */
   async function buscar() {
-    const nome   = document.getElementById('filtroNome').value;
-    const status = document.getElementById('filtroStatus').value;
+    const nome    = document.getElementById('filtroNome').value;
+    const unidade = document.getElementById('filtroUnidade').value;
+    const status  = document.getElementById('filtroStatus').value;
 
     mostrarLoading('Buscando registros…');
     try {
       let dados = await buscarTodosRegistros(nome);
+
+      if (unidade && unidade.trim()) {
+        const termoUnidade = normalizarTextoFiltro(unidade);
+        dados = dados.filter(r => normalizarTextoFiltro(obterUnidadeCorreicionadaRegistro(r)).includes(termoUnidade));
+      }
 
       // Filtro de status no client (evita query extra)
       if (status === 'true')  dados = dados.filter(r => r.finalizado === true);
@@ -501,6 +757,7 @@
       const statusHtml = r.finalizado
         ? '<span class="status-badge status-finalizado">✅ Finalizado</span>'
         : `<span class="status-badge status-andamento">⏳ Em andamento (${secoesOk}/${totalSecoes})</span>`;
+      const resposta11 = escapeHtml(obterUnidadeCorreicionadaRegistro(r) || '—');
 
       return `
         <tr>
@@ -508,6 +765,7 @@
             <div class="td-nome">${escapeHtml(r.nome || '—')}</div>
             <div class="td-email">${escapeHtml(r.user_id)}</div>
           </td>
+          <td class="td-unidade">${resposta11}</td>
           <td>${statusHtml}</td>
           <td style="white-space:nowrap;color:var(--muted);font-size:13px;">
             ${data}<br><span style="font-size:11px">${hora}</span>
@@ -525,6 +783,7 @@
         <thead>
           <tr>
             <th>Membro</th>
+            <th>Resposta 1.1</th>
             <th>Status</th>
             <th>Data</th>
             <th>Ações</th>
@@ -539,19 +798,167 @@
     registroAtualId = id;
     mostrarLoading('Carregando detalhes…');
     try {
-      const reg = await carregarRegistroAdmin(id);
-      ModalViewer.abrir({
-        titulo: reg.nome || reg.user_id,
-        sub: `${reg.user_id} · ${new Date(reg.criado_em).toLocaleString('pt-BR')}`,
-        dados: reg.dados || {},
-        secoes: form.secoes,
+      const reg   = await carregarRegistroAdmin(id);
+      const dados = reg.dados || {};
+
+      document.getElementById('modalTitulo').textContent =
+        `${reg.nome || reg.user_id}`;
+      document.getElementById('modalSub').textContent =
+        `${reg.user_id} · ${new Date(reg.criado_em).toLocaleString('pt-BR')}`;
+
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+
+      let temConteudo = false;
+
+      form.secoes.forEach(sec => {
+        const secDiv = document.createElement('div');
+        secDiv.className = 'detalhe-secao';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = sec.nome;
+        secDiv.appendChild(h3);
+
+        let secTemConteudo = false;
+
+        if (sec.subtopicos) {
+          sec.subtopicos.forEach(sub => {
+            const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+            const fragSub = [];
+
+            camposDaSub.forEach(campo => {
+              const valor = dados[campo.id];
+              if (!valor) return;
+              fragSub.push({ pergunta: campo.pergunta, valor });
+            });
+
+            if (fragSub.length === 0) return;
+
+            const subDiv = document.createElement('div');
+            subDiv.className = 'detalhe-subtitulo';
+            subDiv.textContent = sub.nome;
+            secDiv.appendChild(subDiv);
+
+            fragSub.forEach(({ pergunta, valor }) => {
+              secDiv.appendChild(criarCampoDetalhe(pergunta, valor));
+            });
+
+            secTemConteudo = true;
+          });
+        } else {
+          sec.campos.forEach(campo => {
+            const valor = dados[campo.id];
+            if (!valor) return;
+            secDiv.appendChild(criarCampoDetalhe(campo.pergunta, valor));
+            secTemConteudo = true;
+          });
+        }
+
+        if (secTemConteudo) {
+          body.appendChild(secDiv);
+          temConteudo = true;
+        }
       });
+
+      if (!temConteudo) {
+        body.innerHTML = '<p class="sem-dados">Este registro não possui campos preenchidos.</p>';
+      }
+
+      document.getElementById('modalOverlay').classList.add('open');
     } catch (err) {
       console.error(err);
       showToast('Erro ao carregar detalhes.', 'erro');
     } finally {
       esconderLoading();
     }
+  }
+
+  function criarCampoDetalhe(pergunta, valor) {
+    const div = document.createElement('div');
+    div.className = 'detalhe-campo';
+    div.innerHTML = `
+      <div class="detalhe-pergunta">${escapeHtml(pergunta)}</div>
+      <div class="detalhe-valor">${escapeHtml(valor)}</div>`;
+    return div;
+  }
+
+  function fecharModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    registroAtualId = null;
+  }
+
+  function fecharModalClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) fecharModal();
+  }
+
+  async function gerarPDFModal() {
+    if (!registroAtualId) return;
+    await baixarPDFAdmin(registroAtualId);
+  }
+
+  function imprimirModal() {
+    if (!registroAtualId) return;
+
+    // Lê os dados já renderizados no modal
+    const titulo  = document.getElementById('modalTitulo').textContent;
+    const sub     = document.getElementById('modalSub').textContent;
+    const bodyEl  = document.getElementById('modalBody');
+    const print   = document.getElementById('printArea');
+
+    // Monta o HTML de impressão a partir do conteúdo do modal
+    let html = `
+      <div class="print-header">
+        <img src="assets/logo.png" alt="MPAM CGMP" />
+      </div>
+      <div class="print-meta">
+        <strong>${escapeHtml(titulo)}</strong><br>
+        ${escapeHtml(sub)}
+      </div>`;
+
+    // Percorre as seções renderizadas no modal e converte para classes de print
+    bodyEl.querySelectorAll('.detalhe-secao').forEach(secEl => {
+      const secTitulo = secEl.querySelector('h3')?.textContent || '';
+      html += `<div class="print-secao"><h3>${escapeHtml(secTitulo)}</h3>`;
+
+      secEl.childNodes.forEach(node => {
+        if (node.nodeType !== 1) return;
+        if (node.tagName === 'H3') return; // já adicionado
+
+        // Subtítulo
+        if (node.classList.contains('detalhe-subtitulo')) {
+          html += `<div class="print-subtitulo">${escapeHtml(node.textContent)}</div>`;
+          return;
+        }
+
+        // Campo
+        if (node.classList.contains('detalhe-campo')) {
+          const perg = node.querySelector('.detalhe-pergunta')?.textContent || '';
+          const val  = node.querySelector('.detalhe-valor')?.textContent   || '';
+          html += `
+            <div class="print-campo">
+              <div class="print-pergunta">${escapeHtml(perg)}</div>
+              <div class="print-valor">${escapeHtml(val)}</div>
+            </div>`;
+        }
+      });
+
+      html += '</div>';
+    });
+
+    // Assinatura
+    html += `
+      <div class="print-assinatura">
+        <div class="label">✅ Assinatura de Envio</div>
+        <table>
+          <tr>
+            <td><b>Usuário:</b> ${escapeHtml(titulo)}</td>
+            <td><b>Gerado em:</b> ${new Date().toLocaleString('pt-BR')}</td>
+          </tr>
+        </table>
+      </div>`;
+
+    print.innerHTML = html;
+    window.print();
   }
 
   /* ── Init ── */

@@ -31,7 +31,7 @@
  */
 
 // Inicializa o cliente com o email do usuário no header customizado
-const sb = supabase.createClient(
+window.sbClient = supabase.createClient(
   CONFIG.supabase.url,
   CONFIG.supabase.anonKey,
   {
@@ -42,7 +42,7 @@ const sb = supabase.createClient(
     },
   }
 );
-window.sbClient = sb; // ← adicione esta linha
+const sb = window.sbClient;
 
 /* ── CRUD ───────────────────────────────────────────────── */
 
@@ -90,17 +90,16 @@ async function garantirRegistroAberto() {
 async function persistirDados(id, dados) {
   return sb.from('correicoes').update({
     dados,
+    unidade_correicionada: dados['1.1'] || null,  // ← linha nova
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }
 
-/**
- * Salva uma seção marcando-a como concluída.
- */
 async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
   return sb.from('correicoes').update({
     dados:        dadosMerged,
     secoes_ok:    secoesOk,
+    unidade_correicionada: dadosMerged['1.1'] || null,  // ← linha nova
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }
@@ -111,6 +110,7 @@ async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
 async function finalizarRegistro(id, dados) {
   return sb.from('correicoes').update({
     dados,
+    unidade_correicionada: dados['1.1'] || null,  // ← linha nova
     finalizado:    true,
     finalizado_em: new Date().toISOString(),
     atualizado_em: new Date().toISOString(),
