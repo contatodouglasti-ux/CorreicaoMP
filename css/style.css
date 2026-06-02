@@ -609,3 +609,30 @@ button {
   color: #166b5f;
   font-weight: 700;
 }
+@media print {
+  body.modal-printing > * {
+    display: none !important;
+  }
+
+  body.modal-printing #printArea {
+    display: block !important;
+  }
+
+  body.modal-printing #printArea * {
+    visibility: visible !important;
+  }
+
+  /* esconda também a navegação/menu fixo da aplicação */
+  body.modal-printing header,
+  body.modal-printing nav,
+  body.modal-printing .topbar,
+  body.modal-printing .sidebar,
+  body.modal-printing .menu,
+  body.modal-printing .hamburger,
+  body.modal-printing .btn-menu,
+  body.modal-printing .floating-menu,
+  body.modal-printing #loadingOverlay,
+  body.modal-printing .toast {
+    display: none !important;
+  }
+}

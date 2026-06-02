@@ -1,11 +1,14 @@
 /**
  * historico.js
  * Histórico de correições: listagem, abertura, exclusão.
- * Depende de: db.js, ui.js, form.js, app.js, pdf.js
+ * Depende de: db.js, ui.js, form.js, app.js, modal-viewer.js
+ *
+ * O modal de "Ver / Imprimir" agora usa o ModalViewer compartilhado,
+ * o mesmo utilizado pelo admin.html.
  */
 
 function abrirFormulario() {
-  document.getElementById('formContainer').style.display    = '';
+  document.getElementById('formContainer').style.display      = '';
   document.getElementById('historicoContainer').style.display = 'none';
   if (!modoLeitura) document.getElementById('enviarTudoWrap').style.display = '';
 }
@@ -13,6 +16,7 @@ function abrirFormulario() {
 async function abrirHistorico() {
   document.getElementById('formContainer').style.display    = 'none';
   document.getElementById('enviarTudoWrap').style.display   = 'none';
+
   const hc = document.getElementById('historicoContainer');
   hc.style.display = '';
   hc.innerHTML     = '<p style="color:#546E7A;padding:20px">Carregando histórico…</p>';
@@ -30,7 +34,7 @@ function renderHistorico(registros, container) {
   container.innerHTML = '';
 
   const titulo = document.createElement('h2');
-  titulo.innerText    = '📋 Histórico de Correições';
+  titulo.innerText     = '📋 Histórico de Correições';
   titulo.style.cssText = 'color:#2c3e50;margin-bottom:20px;';
   container.appendChild(titulo);
 
@@ -48,10 +52,10 @@ function renderHistorico(registros, container) {
       display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
     `;
 
-    const data    = new Date(reg.criado_em);
-    const dataStr = isNaN(data) ? reg.criado_em : data.toLocaleString('pt-BR');
+    const data     = new Date(reg.criado_em);
+    const dataStr  = isNaN(data) ? reg.criado_em : data.toLocaleString('pt-BR');
     const secoesOk = Object.keys(reg.secoes_ok || {}).length;
-    const status = reg.finalizado
+    const status   = reg.finalizado
       ? '<span style="color:#27ae60;font-weight:700">✅ Finalizado</span>'
       : `<span style="color:#f39c12;font-weight:700">⏳ Em andamento (${secoesOk}/${form.secoes.length} seções)</span>`;
 
@@ -62,30 +66,32 @@ function renderHistorico(registros, container) {
       </div>
       <div class="historico-card-actions">
         <button class="btn-primary">Abrir</button>
-        <button class="btn-gray">📄 PDF</button>
+        <button class="btn-gray">👁 Ver / Imprimir</button>
         <button class="btn-danger">🗑️ Excluir</button>
       </div>
     `;
 
     const btnAbrir   = card.querySelector('.btn-primary');
-    const btnPDF     = card.querySelector('.btn-gray');
+    const btnVer     = card.querySelector('.btn-gray');
     const btnExcluir = card.querySelector('.btn-danger');
 
     btnAbrir.onclick = () => carregarRegistro(reg.id, reg.finalizado);
-    btnPDF.onclick   = () => baixarPDF(reg);
+
+    /* ── Usa o ModalViewer compartilhado ── */
+    btnVer.onclick = () => _abrirViewer(reg.id);
 
     const temSecao = reg.secoes_ok && Object.keys(reg.secoes_ok).length > 0;
 
     if (reg.finalizado) {
-      btnExcluir.disabled          = true;
-      btnExcluir.style.opacity     = '0.5';
-      btnExcluir.style.cursor      = 'not-allowed';
-      btnExcluir.title             = 'Registros finalizados não podem ser excluídos';
+      btnExcluir.disabled      = true;
+      btnExcluir.style.opacity = '0.5';
+      btnExcluir.style.cursor  = 'not-allowed';
+      btnExcluir.title         = 'Registros finalizados não podem ser excluídos';
     } else if (!temSecao) {
-      btnExcluir.disabled          = true;
-      btnExcluir.style.opacity     = '0.5';
-      btnExcluir.style.cursor      = 'not-allowed';
-      btnExcluir.title             = 'Envie ao menos uma seção antes de excluir';
+      btnExcluir.disabled      = true;
+      btnExcluir.style.opacity = '0.5';
+      btnExcluir.style.cursor  = 'not-allowed';
+      btnExcluir.title         = 'Envie ao menos uma seção antes de excluir';
     } else {
       btnExcluir.onclick = () => _confirmarExclusao(reg.id);
     }
@@ -94,6 +100,28 @@ function renderHistorico(registros, container) {
   });
 }
 
+/* ── Abre o ModalViewer compartilhado para um registro do histórico ── */
+async function _abrirViewer(id) {
+  mostrarLoading('Carregando detalhes…');
+  try {
+    const reg  = await carregarRegistroPorId(id);
+    const data = new Date(reg.criado_em).toLocaleString('pt-BR');
+
+    ModalViewer.abrir({
+      titulo : reg.nome || reg.user_id || 'Registro',
+      sub    : `${reg.user_id || '—'} · ${data}`,
+      dados  : reg.dados || {},
+      secoes : form.secoes,
+    });
+  } catch (err) {
+    console.error(err);
+    showToast('Erro ao carregar detalhes.', 'erro');
+  } finally {
+    esconderLoading();
+  }
+}
+
+/* ── Exclusão ── */
 async function _confirmarExclusao(id) {
   if (!confirm('Deseja realmente excluir esta correição?\n\nEsta ação não poderá ser desfeita.')) return;
 
@@ -110,6 +138,7 @@ async function _confirmarExclusao(id) {
   }
 }
 
+/* ── Carrega e reabre o formulário no registro selecionado ── */
 async function carregarRegistro(id) {
   mostrarLoading('Carregando registro…');
   try {
