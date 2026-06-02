@@ -56,7 +56,10 @@ function atualizarSugestoesUnidade(input) {
   if (!wrapper) return;
 
   wrapper.style.position = 'relative';
-
+if (!input) return;
+  if (input.disabled || input.readOnly) { // ← adicione
+    esconderSugestoesUnidade(input);
+    return;}
   if (!Array.isArray(_unidadesCorreicionadasCache)) {
     void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(input));
     return;
@@ -346,11 +349,11 @@ function renderCampo(parent, campo) {
     inp.onkeydown = function (e) {
       if (e.key === '-' || e.key === '+') e.preventDefault();
     };
-    inp.oninput = function () {
-      const v = parseInt(this.value, 10);
-      if (isNaN(v) || v < 0) this.value = '';
-      autoSalvar();
-    };
+inp.oninput = function () {
+  if (this.disabled || this.readOnly) return; // ← adicione
+  void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
+  autoSalvar();
+};
     wrapper.appendChild(inp);
     return;
   }
@@ -377,8 +380,9 @@ function renderCampo(parent, campo) {
       autoSalvar();
     };
     inp.onfocus = function () {
-      void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
-    };
+  if (this.disabled || this.readOnly) return; // ← adicione
+  void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
+};
     inp.onblur = function () {
   setTimeout(() => {
     validarCampoUnidadeCorreicionada(this);
