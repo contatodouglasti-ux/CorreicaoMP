@@ -603,3 +603,9 @@ button {
   border-color: #ff4d4f;
   background: #fff0f0;
 }
+.chip-enviado {
+  background: #e8fff7;
+  border-color: #2E9E8F;
+  color: #166b5f;
+  font-weight: 700;
+}

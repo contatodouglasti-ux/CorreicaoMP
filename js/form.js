@@ -5,6 +5,51 @@
  * Depende de: ui.js, app.js (estado global)
  */
 
+/* ── Helpers de subtópicos ──── */
+
+function normalizarPrefixo(prefixo) {
+  return Array.isArray(prefixo) ? prefixo : [prefixo];
+}
+
+function temValorPreenchido(valor) {
+  return valor !== undefined && valor !== null && String(valor).trim() !== '';
+}
+
+function subtopicoTemDados(sec, sub, dados = window._dadosCarregados || {}) {
+  const prefixos = normalizarPrefixo(sub.prefixo);
+
+  return sec.campos.some(campo =>
+    prefixos.some(p =>
+      (campo.id === p || campo.id.startsWith(p + '.')) &&
+      temValorPreenchido(dados[campo.id])
+    )
+  );
+}
+
+function atualizarEstadoSubtopicos() {
+  const dados = window._dadosCarregados || {};
+
+  document.querySelectorAll('.section').forEach((sectionEl, idx) => {
+    const sec = form.secoes[idx];
+    if (!sec || !sec.subtopicos) return;
+
+    sec.subtopicos.forEach(sub => {
+      const chave = Array.isArray(sub.prefixo) ? sub.prefixo.join(',') : sub.prefixo;
+
+      const chip = Array.from(sectionEl.querySelectorAll('.chip'))
+        .find(btn => btn.dataset.prefixo === chave);
+
+      if (!chip) return;
+
+      const enviado = subtopicoTemDados(sec, sub, dados);
+      chip.classList.toggle('chip-enviado', enviado);
+      chip.title = enviado
+        ? 'Subtópico já possui dados salvos'
+        : 'Subtópico sem dados salvos';
+    });
+  });
+}
+
 /* ── Renderização ──── */
 
 function criarForm() {
@@ -28,26 +73,33 @@ function criarForm() {
 
       function atualizarCampos() {
         camposWrap.innerHTML = '';
+
         if (ativos.size === 0) {
           const aviso = document.createElement('p');
           aviso.className = 'chip-aviso';
           aviso.innerText = 'Selecione um ou mais tópicos acima para exibir os campos.';
           camposWrap.appendChild(aviso);
+          atualizarEstadoSubtopicos();
           return;
         }
+
         sec.subtopicos.forEach(sub => {
           const chave = Array.isArray(sub.prefixo) ? sub.prefixo.join(',') : sub.prefixo;
           if (!ativos.has(chave)) return;
+
           const gt = document.createElement('h3');
           gt.className = 'subtopico-title';
           gt.innerText = sub.titulo || sub.nome;
           camposWrap.appendChild(gt);
+
           const prefixos = Array.isArray(sub.prefixo) ? sub.prefixo : [sub.prefixo];
           sec.campos
             .filter(c => prefixos.some(p => c.id === p || c.id.startsWith(p + '.')))
             .forEach(campo => renderCampo(camposWrap, campo));
         });
+
         carregar();
+        atualizarEstadoSubtopicos();
       }
 
       sec.subtopicos.forEach(sub => {
@@ -55,8 +107,10 @@ function criarForm() {
         chip.type      = 'button';
         chip.className = 'chip';
         chip.innerText = sub.nome;
+
         const chaveAtivo = Array.isArray(sub.prefixo) ? sub.prefixo.join(',') : sub.prefixo;
         chip.dataset.prefixo = chaveAtivo;
+
         chip.onclick   = () => {
           if (ativos.has(chaveAtivo)) {
             ativos.delete(chaveAtivo);
@@ -66,9 +120,12 @@ function criarForm() {
             chip.classList.add('chip-ativo');
           }
           atualizarCampos();
+          atualizarEstadoSubtopicos();
         };
+
         chipBar.appendChild(chip);
       });
+
       d.appendChild(chipBar);
       atualizarCampos();
       d.appendChild(camposWrap);
@@ -113,12 +170,14 @@ function renderCampo(parent, campo) {
     inp.required  = campo.obrigatorio !== false;
     inp.className = 'campo-numero-input';
     inp.min       = '0';
-   inp.onkeydown  = function (e) { if (e.key === '-' || e.key === '+') e.preventDefault(); };
-inp.oninput    = function () {
-  const v = parseInt(this.value, 10);
-  if (isNaN(v) || v < 0) this.value = '';
-  autoSalvar();
-};
+    inp.onkeydown = function (e) {
+      if (e.key === '-' || e.key === '+') e.preventDefault();
+    };
+    inp.oninput = function () {
+      const v = parseInt(this.value, 10);
+      if (isNaN(v) || v < 0) this.value = '';
+      autoSalvar();
+    };
     wrapper.appendChild(inp);
     return;
   }
@@ -132,9 +191,10 @@ inp.oninput    = function () {
 
   if (campo.tipo === 'textarea') {
     const t = document.createElement('textarea');
-    t.id = campo.id; t.required = obrigatorio;
+    t.id = campo.id;
+    t.required = obrigatorio;
     t.style.overflow = 'hidden';
-    t.style.resize   = 'none';
+    t.style.resize = 'none';
     t.oninput = function () {
       this.style.height = 'auto';
       this.style.height = this.scrollHeight + 'px';
@@ -142,9 +202,9 @@ inp.oninput    = function () {
     };
     wrapper.appendChild(t);
   } else if (['text', 'date', 'time'].includes(campo.tipo)) {
-    const inp    = document.createElement('input');
-    inp.type     = campo.tipo;
-    inp.id       = campo.id;
+    const inp = document.createElement('input');
+    inp.type = campo.tipo;
+    inp.id = campo.id;
     inp.required = obrigatorio;
     inp[campo.tipo === 'text' ? 'oninput' : 'onchange'] = autoSalvar;
     wrapper.appendChild(inp);
@@ -153,9 +213,15 @@ inp.oninput    = function () {
     dv.className = 'radio-group';
     campo.opcoes.forEach(op => {
       const lbl = document.createElement('label');
-      const r   = document.createElement('input');
-      r.type    = 'radio'; r.name = campo.id; r.value = op; r.required = obrigatorio;
-      r.onchange = () => { avaliarCondicionais(); autoSalvar(); };
+      const r = document.createElement('input');
+      r.type = 'radio';
+      r.name = campo.id;
+      r.value = op;
+      r.required = obrigatorio;
+      r.onchange = () => {
+        avaliarCondicionais();
+        autoSalvar();
+      };
       lbl.appendChild(r);
       lbl.append(' ' + op);
       dv.appendChild(lbl);
@@ -168,11 +234,11 @@ inp.oninput    = function () {
 
 function avaliarCondicionais() {
   document.querySelectorAll('[data-depende-de-id]').forEach(wrapper => {
-    const controlId     = wrapper.dataset.dependeDeId;
+    const controlId = wrapper.dataset.dependeDeId;
     const valorEsperado = wrapper.dataset.dependeDeValor;
-    const controlEl     = document.querySelector(`input[name="${controlId}"]:checked`);
-    const valorAtual    = controlEl ? controlEl.value : null;
-    const obrigatorio   = valorAtual === valorEsperado;
+    const controlEl = document.querySelector(`input[name="${controlId}"]:checked`);
+    const valorAtual = controlEl ? controlEl.value : null;
+    const obrigatorio = valorAtual === valorEsperado;
     wrapper.querySelectorAll('input, textarea, select').forEach(el => el.required = obrigatorio);
     const lbl = wrapper.querySelector('label');
     if (lbl) lbl.className = obrigatorio ? 'required' : '';
@@ -199,14 +265,16 @@ function atualizarBarra() {
 
 /* ── Coleta e carga de dados ──── */
 
-
 function coletar(sec = null) {
-  const base   = sec !== null ? document.querySelectorAll('.section')[sec] : document;
+  const base = sec !== null ? document.querySelectorAll('.section')[sec] : document;
   const inputs = base.querySelectorAll('input, textarea');
-  const d      = {};
+  const d = {};
   inputs.forEach(i => {
-    if (i.type === 'radio') { if (i.checked) d[i.name] = String(i.value); }
-    else { if (i.id) d[i.id] = String(i.value); }
+    if (i.type === 'radio') {
+      if (i.checked) d[i.name] = String(i.value);
+    } else {
+      if (i.id) d[i.id] = String(i.value);
+    }
   });
   return d;
 }
@@ -216,6 +284,7 @@ function carregar() {
   Object.keys(dadosSalvos).forEach(k => {
     const el = document.getElementById(k) || document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
     if (!el) return;
+
     if (el.type === 'radio') {
       const r = document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
       if (r) r.checked = true;
@@ -228,7 +297,9 @@ function carregar() {
       }
     }
   });
+
   avaliarCondicionais();
+  atualizarEstadoSubtopicos();
 }
 
 /* ── Validação ──── */
@@ -239,7 +310,7 @@ function limparInvalidos(base) {
 
 function encontrarInvalidos(base) {
   limparInvalidos(base);
-  const invalids   = [];
+  const invalids = [];
   const radiosProc = new Set();
 
   base.querySelectorAll('input, textarea').forEach(el => {
@@ -249,16 +320,23 @@ function encontrarInvalidos(base) {
       const radios = Array.from(base.querySelectorAll(`input[name="${el.name}"]`));
       if (el.required && !radios.some(r => r.checked)) {
         const grupo = radios[0] && radios[0].closest('.radio-group');
-        if (grupo) { grupo.classList.add('invalid'); invalids.push(grupo); }
-        else        { radios[0].classList.add('invalid'); invalids.push(radios[0]); }
+        if (grupo) {
+          grupo.classList.add('invalid');
+          invalids.push(grupo);
+        } else {
+          radios[0].classList.add('invalid');
+          invalids.push(radios[0]);
+        }
       }
       return;
     }
+
     if (el.required && (!el.value || !el.value.toString().trim())) {
       el.classList.add('invalid');
       invalids.push(el);
     }
   });
+
   return invalids;
 }
 
