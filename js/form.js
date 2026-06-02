@@ -15,6 +15,179 @@ function temValorPreenchido(valor) {
   return valor !== undefined && valor !== null && String(valor).trim() !== '';
 }
 
+const UNIDADE_CORREICIONADA_CAMPO_ID = '1.1';
+const UNIDADES_CORREICIONADAS_DATALIST_ID = 'unidades-correicionadas-lista';
+let _unidadesCorreicionadasCache = null;
+let _unidadesCorreicionadasPromise = null;
+
+function normalizarTextoBusca(valor) {
+  return String(valor ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function obterClienteSupabase() {
+  return  window.sbClient || null;
+}
+
+
+
+function listarUnidadesCorreicionadas(termo = '') {
+  const lista = _unidadesCorreicionadasCache || [];
+  const normalizado = normalizarTextoBusca(termo);
+  if (!normalizado) return lista.slice(0, 20);
+  return lista
+    .filter(nome => normalizarTextoBusca(nome).includes(normalizado))
+    .slice(0, 20);
+}
+
+function esconderSugestoesUnidade(input) {
+  const wrapper = input?.closest('[data-campo-id="1.1"]');
+  const box = wrapper?.querySelector('.unidade-sugestoes');
+  if (box) box.style.display = 'none';
+}
+
+function atualizarSugestoesUnidade(input) {
+  if (!input) return;
+  const wrapper = input.closest('[data-campo-id="1.1"]');
+  if (!wrapper) return;
+
+  wrapper.style.position = 'relative';
+
+  if (!Array.isArray(_unidadesCorreicionadasCache)) {
+    void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(input));
+    return;
+  }
+
+  let box = wrapper.querySelector('.unidade-sugestoes');
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'unidade-sugestoes';
+    box.style.position = 'absolute';
+    box.style.left = '0';
+    box.style.right = '0';
+    box.style.top = '100%';
+    box.style.zIndex = '9999';
+    box.style.background = '#fff';
+    box.style.border = '1px solid #cfd8dc';
+    box.style.borderRadius = '6px';
+    box.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
+    box.style.maxHeight = '260px';
+    box.style.overflowY = 'auto';
+    box.style.display = 'none';
+    wrapper.appendChild(box);
+  }
+
+  const matches = listarUnidadesCorreicionadas(input.value);
+  box.innerHTML = '';
+
+  if (!matches.length) {
+    box.style.display = 'none';
+    return;
+  }
+
+  matches.forEach(nome => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'unidade-sugestao-item';
+    item.textContent = nome;
+    item.style.display = 'block';
+    item.style.width = '100%';
+    item.style.textAlign = 'left';
+    item.style.padding = '8px 10px';
+    item.style.border = '0';
+    item.style.background = 'transparent';
+    item.style.cursor = 'pointer';
+    item.onmouseenter = () => item.style.background = '#eef6fb';
+    item.onmouseleave = () => item.style.background = 'transparent';
+    item.onmousedown = e => {
+      e.preventDefault();
+      input.value = nome;
+      input.setCustomValidity('');
+      box.style.display = 'none';
+      autoSalvar();
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    box.appendChild(item);
+  });
+
+  box.style.display = 'block';
+}
+
+function validarCampoUnidadeCorreicionada(input) {
+  if (!input) return true;
+
+  const valor = String(input.value || '').trim();
+  if (!valor) {
+    input.setCustomValidity(input.required ? 'Informe a unidade correicionada.' : '');
+    input.classList.toggle('invalid', !!input.required);
+    return !input.required;
+  }
+
+  const lista = _unidadesCorreicionadasCache || [];
+  if (!lista.length) {
+    input.setCustomValidity('');
+    input.classList.remove('invalid');
+    return true;
+  }
+
+  const valorNormalizado = normalizarTextoBusca(valor);
+  const encontrado = lista.find(nome => normalizarTextoBusca(nome) === valorNormalizado);
+
+  if (!encontrado) {
+    input.setCustomValidity('Selecione uma unidade cadastrada na lista.');
+    input.classList.add('invalid');
+    input.reportValidity(); // ← mostra o balão de erro nativo
+    return false;
+  }
+
+  if (input.value !== encontrado) input.value = encontrado;
+  input.setCustomValidity('');
+  input.classList.remove('invalid');
+  return true;
+}
+
+async function carregarUnidadesCorreicionadas() {
+  if (Array.isArray(_unidadesCorreicionadasCache)) return _unidadesCorreicionadasCache;
+  if (_unidadesCorreicionadasPromise) return _unidadesCorreicionadasPromise;
+
+  const client = obterClienteSupabase();
+  if (!client || typeof client.from !== 'function') {
+    _unidadesCorreicionadasCache = [];
+   
+    return _unidadesCorreicionadasCache;
+  }
+
+  _unidadesCorreicionadasPromise = (async () => {
+    try {
+      const { data, error } = await client
+        .from('unidades_correicionadas')
+        .select('nome')
+        .eq('ativo', true)
+        .order('nome', { ascending: true });
+
+      if (error) throw error;
+      return [...new Set((data || [])
+        .map(item => String(item.nome || '').trim())
+        .filter(Boolean))];
+    } catch (err) {
+      console.error('Erro ao carregar unidades correicionadas:', err);
+      return [];
+    }
+  })();
+
+  const lista = await _unidadesCorreicionadasPromise;
+  _unidadesCorreicionadasCache = lista;
+  _unidadesCorreicionadasPromise = null;
+
+  validarCampoUnidadeCorreicionada(document.getElementById(UNIDADE_CORREICIONADA_CAMPO_ID));
+  return lista;
+}
+
+
 function subtopicoTemDados(sec, sub, dados = window._dadosCarregados || {}) {
   const prefixos = normalizarPrefixo(sub.prefixo);
 
@@ -183,6 +356,55 @@ function renderCampo(parent, campo) {
   }
 
   const obrigatorio = campo.obrigatorio !== false;
+
+  if (campo.id === UNIDADE_CORREICIONADA_CAMPO_ID) {
+    const l = document.createElement('label');
+    l.className = obrigatorio ? 'required' : '';
+    l.innerText = campo.pergunta;
+    l.htmlFor = campo.id;
+    wrapper.appendChild(l);
+
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.id = campo.id;
+    inp.required = obrigatorio;
+    inp.autocomplete = 'off';
+   
+    inp.setAttribute('aria-autocomplete', 'list');
+    inp.placeholder = 'Digite para filtrar e selecione uma unidade';
+    inp.oninput = function () {
+      void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
+      autoSalvar();
+    };
+    inp.onfocus = function () {
+      void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
+    };
+    inp.onblur = function () {
+  setTimeout(() => {
+    validarCampoUnidadeCorreicionada(this);
+    esconderSugestoesUnidade(this);
+    // Feedback visual imediato
+    if (this.validationMessage) {
+      this.classList.add('invalid');
+    } else {
+      this.classList.remove('invalid');
+    }
+  }, 150);
+};
+    wrapper.appendChild(inp);
+
+    const ajuda = document.createElement('small');
+    ajuda.style.display = 'block';
+    ajuda.style.marginTop = '4px';
+    ajuda.style.fontSize = '12px';
+    ajuda.style.color = '#546E7A';
+    ajuda.textContent = 'Digite parte do nome e escolha uma opção da lista.';
+    wrapper.appendChild(ajuda);
+
+    void carregarUnidadesCorreicionadas();
+    atualizarSugestoesUnidade(inp);
+    return;
+  }
 
   const l = document.createElement('label');
   l.className = obrigatorio ? 'required' : '';

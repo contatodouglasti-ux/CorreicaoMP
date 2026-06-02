@@ -3,7 +3,7 @@ const form = {
  {
     "nome": "Dados gerais",
     "campos": [
-      {"id": "1.1", "pergunta": "Unidade correicionada:.", "tipo": "textarea"},
+      {"id": "1.1", "pergunta": "Unidade correicionada:.", "tipo": "text"},
       {"id": "1.2", "pergunta": "Data da Correição", "tipo": "textarea"},
       {"id": "1.3", "pergunta": "Mambro responsável pelo preenchimento", "tipo": "textarea"},
       {"id": "1.4", "pergunta": "Designação", "tipo": "textarea"},

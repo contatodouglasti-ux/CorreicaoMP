@@ -42,6 +42,7 @@ const sb = supabase.createClient(
     },
   }
 );
+window.sbClient = sb; // ← adicione esta linha
 
 /* ── CRUD ───────────────────────────────────────────────── */
 
