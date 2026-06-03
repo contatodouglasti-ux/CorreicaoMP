@@ -752,7 +752,7 @@
     <h2>Cadastrar usuário pendente</h2>
     <p>Informe o e-mail ou o identificador do usuário para liberá-lo para preenchimento.</p>
     <div class="inline-form">
-      <input type="text" id="novoUsuarioPendente" placeholder="Digite o e-mail ou user_id do usuário..." />
+      <input type="text" id="novoUsuarioPendente" placeholder="Digite o e-mail do usuário..." />
       <button class="btn btn-primary" onclick="adicionarUsuarioPendente()">Adicionar pendência</button>
       <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Atualizar lista</button>
     </div>
@@ -762,7 +762,7 @@
     <h2>Pendências ativas cadastradas</h2>
     <p>Aqui aparecem apenas os usuários com pendência ativa. Se necessário, você pode remover a pendência.</p>
     <div class="filtros" style="margin-top:14px; margin-bottom:14px;">
-      <input type="text" id="filtroUsuarioPendencia" placeholder="🔍 Filtrar pendências por nome, e-mail ou user_id..." oninput="carregarPendenciasAtivas()" />
+      <input type="text" id="filtroUsuarioPendencia" placeholder="🔍 Filtrar pendências por e-mail" oninput="carregarPendenciasAtivas()" />
       <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Buscar</button>
     </div>
     <div class="tabela-wrap" id="pendenciasWrap">
