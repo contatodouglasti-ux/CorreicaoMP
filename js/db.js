@@ -13,8 +13,15 @@
  *   criado_em     timestamptz default now()
  *   atualizado_em timestamptz default now()
  *
+ * Estrutura sugerida para permissões de preenchimento:
+ *   tabela "pendencias"
+ *     user_id      text primary key
+ *     ativo        boolean default false
+ *     criado_em    timestamptz default now()
+ *     atualizado_em timestamptz default now()
+ *
  * SQL de criação (rode no Supabase SQL Editor):
- * ───────────────────────────────────────────────
+ * ────
  * create table correicoes (
  *   id            uuid primary key default gen_random_uuid(),
  *   user_id       text not null,
@@ -25,10 +32,39 @@
  *   criado_em     timestamptz default now(),
  *   atualizado_em timestamptz default now()
  * );
+ *
+ * create table pendencias (
+ *   user_id       text primary key,
+ *   ativo         boolean default false,
+ *   criado_em     timestamptz default now(),
+ *   atualizado_em timestamptz default now()
+ * );
+ *
  * alter table correicoes enable row level security;
  * create policy "usuario_proprio" on correicoes
  *   using (user_id = current_setting('request.jwt.claims', true)::json->>'email');
  */
+
+
+/* ── Permissões ──── */
+
+async function usuarioEstaPendente(userId = getEmailUsuario()) {
+  const { data, error } = await sb
+    .from('pendencias')
+    .select('ativo')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return !!(data && data.ativo);
+}
+
+async function exigirUsuarioPendente() {
+  const permitido = await usuarioEstaPendente();
+  if (!permitido) {
+    throw new Error('Você só pode preencher respostas quando o administrador marcar você como pendente.');
+  }
+}
 
 // Inicializa o cliente com o email do usuário no header customizado
 window.sbClient = supabase.createClient(
@@ -44,7 +80,7 @@ window.sbClient = supabase.createClient(
 );
 const sb = window.sbClient;
 
-/* ── CRUD ───────────────────────────────────────────────── */
+/* ── CRUD ──── */
 
 /**
  * Garante que existe um registro em aberto para o usuário.
@@ -52,6 +88,9 @@ const sb = window.sbClient;
  */
 async function garantirRegistroAberto() {
   const userId = getEmailUsuario();
+  const pendente = await usuarioEstaPendente(userId);
+
+  if (!pendente) return null;
 
   const { data, error } = await sb
     .from('correicoes')
@@ -88,6 +127,7 @@ async function garantirRegistroAberto() {
  * @param {object} dados - campos coletados do formulário
  */
 async function persistirDados(id, dados) {
+  await exigirUsuarioPendente();
   return sb.from('correicoes').update({
     dados,
     unidade_correicionada: dados['1.1'] || null,  // ← linha nova
@@ -96,6 +136,7 @@ async function persistirDados(id, dados) {
 }
 
 async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
+  await exigirUsuarioPendente();
   return sb.from('correicoes').update({
     dados:        dadosMerged,
     secoes_ok:    secoesOk,

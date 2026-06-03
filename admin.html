@@ -33,6 +33,7 @@
       --border:   #d7e3eb;
       --green:    #2E9E8F;
       --red:      #e74c3c;
+      --yellow:   #f39c12;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,7 +45,7 @@
       min-height: 100vh;
     }
 
-    /* ── Topbar ── */
+    /* Topbar */
     .topbar {
       background: var(--dark);
       color: #fff;
@@ -126,9 +127,9 @@
     }
     .btn-sair:hover { background: rgba(255,255,255,0.18); }
 
-    /* ── Conteúdo ── */
+    /* Page */
     .page {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 32px 24px 60px;
     }
@@ -147,9 +148,29 @@
     .page-header p {
       font-size: 14px;
       color: var(--muted);
+      line-height: 1.5;
     }
 
-    /* ── Barra de filtros ── */
+    .section {
+      margin-top: 22px;
+      background: transparent;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Filtros */
     .filtros {
       background: var(--card);
       border-radius: 12px;
@@ -172,6 +193,7 @@
       color: var(--text);
       outline: none;
       transition: border-color 0.2s;
+      background: #fff;
     }
     .filtros input[type="text"]:focus {
       border-color: var(--accent);
@@ -197,21 +219,69 @@
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
     }
     .btn:active { transform: scale(0.97); }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-gray    { background: #e2eaee; color: var(--text); }
     .btn-green   { background: var(--green); color: #fff; }
     .btn-danger  { background: var(--red); color: #fff; }
+    .btn-yellow  { background: var(--yellow); color: #fff; }
 
-    /* ── Contador ── */
+    /* Cards de gestão */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .inline-form {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      align-items: center;
+    }
+
+    .inline-form input[type="text"] {
+      flex: 1;
+      min-width: 260px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      background: #fff;
+    }
+
+    .inline-form input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
+    }
+
+    /* Contador */
     .contador {
       font-size: 13px;
       color: var(--muted);
       margin-bottom: 12px;
     }
 
-    /* ── Tabela ── */
+    /* Tabela */
     .tabela-wrap {
       background: var(--card);
       border-radius: 12px;
@@ -278,6 +348,7 @@
     }
     .status-finalizado  { background: #d4edda; color: #155724; }
     .status-andamento   { background: #fff3cd; color: #856404; }
+    .status-pendente    { background: #d9edf7; color: #0b5c7a; }
 
     .acoes {
       display: flex;
@@ -290,7 +361,7 @@
       font-size: 12px;
     }
 
-    /* ── Estado vazio / loading ── */
+    /* Estado vazio */
     .estado-vazio {
       text-align: center;
       padding: 60px 20px;
@@ -299,41 +370,56 @@
     .estado-vazio .icone { font-size: 40px; margin-bottom: 12px; }
     .estado-vazio p      { font-size: 15px; }
 
-    /* ── Loading overlay ── */
+    /* Loading overlay */
     #loadingOverlay {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background: rgba(255,255,255,0.85);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      z-index: 9000; gap: 14px;
-      font-size: 15px; color: var(--muted); font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9000;
+      gap: 14px;
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 600;
     }
+
     .spinner {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border: 4px solid #d0e8f0;
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin .8s linear infinite;
     }
+
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Toast ── */
+    /* Toast */
     .toast {
-      position: fixed; bottom: 24px; left: 50%;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
       transform: translateX(-50%) translateY(80px);
-      padding: 13px 18px; border-radius: 10px;
-      font-size: 14px; font-weight: 600;
+      padding: 13px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
       box-shadow: 0 4px 18px rgba(0,0,0,0.15);
-      z-index: 9999; opacity: 0;
+      z-index: 9999;
+      opacity: 0;
       transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
     }
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     .toast-ok   { background: var(--accent); color: #fff; }
     .toast-erro { background: var(--red); color: #fff; }
 
-    /* ── Modal de detalhes ── */
+    /* Modal de detalhes */
     .modal-overlay {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background: rgba(0,0,0,0.5);
       z-index: 2000;
       display: none;
@@ -373,11 +459,14 @@
       background: rgba(255,255,255,0.15);
       border: none;
       color: #fff;
-      width: 28px; height: 28px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       font-size: 16px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       transition: background 0.15s;
     }
@@ -398,7 +487,6 @@
       flex-shrink: 0;
     }
 
-    /* Seções dentro do modal */
     .detalhe-secao {
       margin-bottom: 24px;
     }
@@ -442,6 +530,7 @@
       font-size: 14px;
       color: var(--text);
       word-break: break-word;
+      white-space: pre-wrap;
     }
 
     .sem-dados {
@@ -451,13 +540,10 @@
       padding: 8px 0;
     }
 
-    /* ── Impressão ── */
+    /* Impressão */
     @media print {
-      /* Oculta tudo exceto o conteúdo do modal */
-      body > *                    { display: none !important; }
-      #printArea                    { display: block !important; }
-
-      #printArea                    { margin: 0; padding: 0; }
+      body > * { display: none !important; }
+      #printArea { display: block !important; margin: 0; padding: 0; }
 
       .print-header {
         display: block !important;
@@ -480,7 +566,10 @@
         line-height: 1.7;
       }
 
-      .print-secao        { margin-bottom: 20px; page-break-inside: avoid; }
+      .print-secao {
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+      }
       .print-secao h3 {
         font-size: 11px;
         font-weight: 700;
@@ -492,6 +581,7 @@
         margin-bottom: 10px;
         page-break-after: avoid;
       }
+
       .print-subtitulo {
         font-size: 10px;
         font-weight: 700;
@@ -500,17 +590,20 @@
         margin: 10px 0 6px;
         page-break-after: avoid;
       }
+
       .print-campo {
         margin-bottom: 8px;
         page-break-inside: avoid;
         break-inside: avoid;
       }
+
       .print-pergunta {
         font-size: 10px;
         font-weight: 700;
         color: #546E7A;
         margin-bottom: 2px;
       }
+
       .print-valor {
         font-size: 11px;
         color: #263238;
@@ -520,6 +613,7 @@
         word-break: break-word;
         white-space: pre-wrap;
       }
+
       .print-assinatura {
         page-break-before: always;
         border-top: 2px solid #1C799B;
@@ -527,25 +621,33 @@
         font-size: 11px;
         color: #263238;
       }
+
       .print-assinatura .label {
         font-weight: 700;
         color: #1C799B;
         margin-bottom: 8px;
       }
-      .print-assinatura table { width: 100%; border-collapse: collapse; }
-      .print-assinatura td    { padding: 3px 12px 3px 0; vertical-align: top; }
+
+      .print-assinatura table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .print-assinatura td {
+        padding: 3px 12px 3px 0;
+        vertical-align: top;
+      }
     }
 
-    /* printArea oculto na tela */
     #printArea { display: none; }
 
-    /* ── Responsivo ── */
+    /* Responsivo */
     @media (max-width: 700px) {
       .topbar { padding: 0 16px; }
       .page   { padding: 20px 14px 40px; }
       table   { font-size: 13px; }
       thead th, tbody td { padding: 10px 12px; }
       .topbar-title { font-size: 13px; }
+      .inline-form input[type="text"] { min-width: 100%; }
     }
   </style>
 </head>
@@ -565,7 +667,7 @@
 <header class="topbar">
   <div class="topbar-brand">
     <img src="assets/logo2.png" alt="MPAM" />
-     <button class="btn-sair" onclick="window.location.href = 'index.html'">Correição</button>
+    <button class="btn-sair" onclick="window.location.href='index.html'">Correição</button>
     <span class="topbar-badge">Painel Admin</span>
   </div>
   <div class="topbar-right">
@@ -577,46 +679,100 @@
   </div>
 </header>
 
-<!-- Conteúdo -->
 <main class="page">
 
   <div class="page-header">
     <h1>Registros de Correição</h1>
-    <p>Visualize e filtre todos os registros cadastrados no sistema.</p>
+    <p>Visualize, filtre e gerencie os registros cadastrados no sistema.</p>
   </div>
 
-  <!-- Filtros -->
-  <div class="filtros">
-    <input
-      type="text"
-      id="filtroNome"
-      placeholder="🔍  Filtrar por nome do membro..."
-      oninput="filtrarDebounce()"
-    />
-    <input
-      type="text"
-      id="filtroUnidade"
-      placeholder="🏢  Filtrar por Unidade correicionada..."
-      oninput="filtrarDebounce()"
-    />
-    <select id="filtroStatus" onchange="buscar()">
-      <option value="">Todos os status</option>
-      <option value="true">Finalizados</option>
-      <option value="false">Em andamento</option>
-    </select>
-    <button class="btn btn-primary" onclick="buscar()">Buscar</button>
-    <button class="btn btn-gray"    onclick="limparFiltros()">Limpar</button>
-  </div>
+  <!-- Busca de registros -->
+  <section class="section">
+    
+    
 
-  <div class="contador" id="contador"></div>
+    <div class="filtros">
+      <h2 class="section-title">Buscar registros</h2>
+      
+      <input
+        type="text"
+        id="filtroNome"
+        placeholder="🔍 Filtrar por nome do membro..."
+        oninput="filtrarDebounce()"
+      />
+      <input
+        type="text"
+        id="filtroUnidade"
+        placeholder="🏢 Filtrar por unidade correicionada..."
+        oninput="filtrarDebounce()"
+      />
+      <select id="filtroStatus" onchange="buscar()">
+        <option value="">Todos os status</option>
+        <option value="true">Finalizados</option>
+        <option value="false">Em andamento</option>
+      </select>
+      <button class="btn btn-primary" onclick="buscar()">Buscar</button>
+      <button class="btn btn-gray" onclick="limparFiltros()">Limpar</button>
+    </div>
 
-  <!-- Tabela -->
-  <div class="tabela-wrap" id="tabelaWrap">
-    <div class="estado-vazio">
-      <div class="icone">📋</div>
-      <p>Carregando registros…</p>
+    <div class="contador" id="contador"></div>
+
+    <div class="tabela-wrap" id="tabelaWrap">
+      <div class="estado-vazio">
+        <div class="icone">📋</div>
+        <p>Carregando registros…</p>
+      </div>
+    </div>
+  </section>
+
+
+<!-- Gestão de pendências -->
+<div style="margin-top: 28px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;">
+  <button class="btn btn-primary" id="btnTogglePendencias" onclick="togglePendencias()" style="display:flex;align-items:center;gap:8px;">
+    <span id="btnPendenciasIcone">👥</span>
+    Gerenciar pendências
+    <span id="btnPendenciasChevron" style="font-size:11px;transition:transform 0.25s">▼</span>
+  </button>
+  <span id="contadorPendenciasAtivas" style="font-size:12px;color:var(--muted);display:none;"></span>
+</div>
+
+<section class="section" id="secaoPendencias" style="
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+  pointer-events: none;
+">
+  <h2 class="section-title" style="margin-top:8px;">Pendências de usuários</h2>
+  <p class="section-subtitle">
+    Cadastre quem pode preencher o formulário e acompanhe quem está liberado para editar.
+  </p>
+
+  <div class="card">
+    <h2>Cadastrar usuário pendente</h2>
+    <p>Informe o e-mail ou o identificador do usuário para liberá-lo para preenchimento.</p>
+    <div class="inline-form">
+      <input type="text" id="novoUsuarioPendente" placeholder="Digite o e-mail ou user_id do usuário..." />
+      <button class="btn btn-primary" onclick="adicionarUsuarioPendente()">Adicionar pendência</button>
+      <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Atualizar lista</button>
     </div>
   </div>
+
+  <div class="card">
+    <h2>Pendências ativas cadastradas</h2>
+    <p>Aqui aparecem apenas os usuários com pendência ativa. Se necessário, você pode remover a pendência.</p>
+    <div class="filtros" style="margin-top:14px; margin-bottom:14px;">
+      <input type="text" id="filtroUsuarioPendencia" placeholder="🔍 Filtrar pendências por nome, e-mail ou user_id..." oninput="carregarPendenciasAtivas()" />
+      <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Buscar</button>
+    </div>
+    <div class="tabela-wrap" id="pendenciasWrap">
+      <div class="estado-vazio">
+        <div class="icone">⏳</div>
+        <p>Carregando pendências…</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 </main>
 
@@ -633,12 +789,12 @@
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-footer">
       <button class="btn btn-green" id="modalBtnPDF" onclick="imprimirModal()">🖨️ Imprimir / PDF</button>
-      <button class="btn btn-gray"  onclick="fecharModal()">Fechar</button>
+      <button class="btn btn-gray" onclick="fecharModal()">Fechar</button>
     </div>
   </div>
 </div>
 
-<!-- Área de impressão (oculta na tela, visível só no print) -->
+<!-- Área de impressão -->
 <div id="printArea"></div>
 
 <!-- Scripts -->
@@ -649,29 +805,34 @@
 <script src="js/pdf.js"></script>
 
 <script>
-  /* ── Estado ── */
   let registroAtualId = null;
-  let _filtroTimer    = null;
+  let _filtroTimer = null;
 
-  /* ── Helpers de UI ── */
   function mostrarLoading(msg = 'Carregando…') {
     document.getElementById('loadingMsg').textContent = msg;
     document.getElementById('loadingOverlay').style.display = 'flex';
   }
+
   function esconderLoading() {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
+
   function showToast(msg, tipo) {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className   = 'toast ' + (tipo === 'erro' ? 'toast-erro' : 'toast-ok');
+    t.className = 'toast ' + (tipo === 'erro' ? 'toast-erro' : 'toast-ok');
     t.classList.add('show');
     clearTimeout(t._t);
     t._t = setTimeout(() => t.classList.remove('show'), 4000);
   }
+
   function escapeHtml(s) {
     return String(s || '')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   function normalizarTextoFiltro(valor) {
@@ -683,23 +844,27 @@
       .toLowerCase();
   }
 
-function obterUnidadeCorreicionadaRegistro(registro) {
-  return String(registro?.unidade_correicionada || registro?.dados?.['1.1'] || '').trim();
-}
-
-  /* ── Badge de usuário ── */
-  function initBadge() {
-    const nome = getNomeUsuario();
-    const iniciais = nome.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase() || '?';
-    document.getElementById('adminAvatar').textContent = iniciais;
-    document.getElementById('adminNome').textContent   = nome;
+  function obterUnidadeCorreicionadaRegistro(registro) {
+    return String(registro?.unidade_correicionada || registro?.dados?.['1.1'] || '').trim();
   }
 
-  /* ── Busca e renderização ── */
+  function initBadge() {
+    const nome = getNomeUsuario();
+    const iniciais = nome
+      .split(' ')
+      .slice(0, 2)
+      .map(p => p[0])
+      .join('')
+      .toUpperCase() || '?';
+
+    document.getElementById('adminAvatar').textContent = iniciais;
+    document.getElementById('adminNome').textContent = nome;
+  }
+
   async function buscar() {
-    const nome    = document.getElementById('filtroNome').value;
+    const nome = document.getElementById('filtroNome').value;
     const unidade = document.getElementById('filtroUnidade').value;
-    const status  = document.getElementById('filtroStatus').value;
+    const status = document.getElementById('filtroStatus').value;
 
     mostrarLoading('Buscando registros…');
     try {
@@ -710,8 +875,7 @@ function obterUnidadeCorreicionadaRegistro(registro) {
         dados = dados.filter(r => normalizarTextoFiltro(obterUnidadeCorreicionadaRegistro(r)).includes(termoUnidade));
       }
 
-      // Filtro de status no client (evita query extra)
-      if (status === 'true')  dados = dados.filter(r => r.finalizado === true);
+      if (status === 'true') dados = dados.filter(r => r.finalizado === true);
       if (status === 'false') dados = dados.filter(r => r.finalizado === false);
 
       renderTabela(dados);
@@ -729,7 +893,7 @@ function obterUnidadeCorreicionadaRegistro(registro) {
   }
 
   function limparFiltros() {
-    document.getElementById('filtroNome').value   = '';
+    document.getElementById('filtroNome').value = '';
     document.getElementById('filtroStatus').value = '';
     document.getElementById('filtroUnidade').value = '';
     buscar();
@@ -737,6 +901,7 @@ function obterUnidadeCorreicionadaRegistro(registro) {
 
   function renderTabela(registros) {
     const wrap = document.getElementById('tabelaWrap');
+
     document.getElementById('contador').textContent =
       registros.length === 0
         ? 'Nenhum registro encontrado.'
@@ -751,34 +916,25 @@ function obterUnidadeCorreicionadaRegistro(registro) {
       return;
     }
 
-   const linhas = registros.map(r => {
-  const dataBase = r.finalizado_em || r.atualizado_em;
+    const linhas = registros.map(r => {
+      const dataBase = r.finalizado_em || r.atualizado_em || r.criado_em;
+      const data = dataBase ? new Date(dataBase).toLocaleDateString('pt-BR') : '—';
+      const hora = dataBase ? new Date(dataBase).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
 
-  const data = dataBase
-    ? new Date(dataBase).toLocaleDateString('pt-BR')
-    : '—';
+      const secoesOk = Object.keys(r.secoes_ok || {}).length;
+      const totalSecoes = form?.secoes?.length || 0;
 
-  const hora = dataBase
-    ? new Date(dataBase).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    : '';
+      const statusHtml = r.finalizado
+        ? '<span class="status-badge status-finalizado">✅ Finalizado</span>'
+        : `<span class="status-badge status-andamento">⏳ Em andamento (${secoesOk}/${totalSecoes})</span>`;
 
-  const secoesOk = Object.keys(r.secoes_ok || {}).length;
-  const totalSecoes = form.secoes.length;
-
-  const statusHtml = r.finalizado
-    ? '<span class="status-badge status-finalizado">✅ Finalizado</span>'
-    : `<span class="status-badge status-andamento">⏳ Em andamento (${secoesOk}/${totalSecoes})</span>`;
-
-  const resposta11 = escapeHtml(obterUnidadeCorreicionadaRegistro(r) || '—');
+      const resposta11 = escapeHtml(obterUnidadeCorreicionadaRegistro(r) || '—');
 
       return `
         <tr>
           <td>
             <div class="td-nome">${escapeHtml(r.nome || '—')}</div>
-            <div class="td-email">${escapeHtml(r.user_id)}</div>
+            <div class="td-email">${escapeHtml(r.user_id || '—')}</div>
           </td>
           <td class="td-unidade">${resposta11}</td>
           <td>${statusHtml}</td>
@@ -788,7 +944,7 @@ function obterUnidadeCorreicionadaRegistro(registro) {
           <td>
             <div class="acoes">
               <button class="btn btn-primary" onclick="abrirModal('${r.id}')">👁 Ver / Imprimir</button>
-${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.id}')">🔓 Reabrir</button>` : ''}
+              ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.id}')">🔓 Reabrir</button>` : ''}
             </div>
           </td>
         </tr>`;
@@ -809,25 +965,22 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
       </table>`;
   }
 
-  /* ── Modal de detalhes ── */
   async function abrirModal(id) {
     registroAtualId = id;
     mostrarLoading('Carregando detalhes…');
     try {
-      const reg   = await carregarRegistroAdmin(id);
+      const reg = await carregarRegistroAdmin(id);
       const dados = reg.dados || {};
 
-      document.getElementById('modalTitulo').textContent =
-        `${reg.nome || reg.user_id}`;
-      document.getElementById('modalSub').textContent =
-        `${reg.user_id} · ${new Date(reg.criado_em).toLocaleString('pt-BR')}`;
+      document.getElementById('modalTitulo').textContent = `${reg.nome || reg.user_id || 'Registro'}`;
+      document.getElementById('modalSub').textContent = `${reg.user_id || '—'} · ${reg.criado_em ? new Date(reg.criado_em).toLocaleString('pt-BR') : ''}`;
 
       const body = document.getElementById('modalBody');
       body.innerHTML = '';
 
       let temConteudo = false;
 
-      form.secoes.forEach(sec => {
+      (form?.secoes || []).forEach(sec => {
         const secDiv = document.createElement('div');
         secDiv.className = 'detalhe-secao';
 
@@ -839,7 +992,7 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
 
         if (sec.subtopicos) {
           sec.subtopicos.forEach(sub => {
-            const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+            const camposDaSub = (sec.campos || []).filter(c => c.id.startsWith(sub.prefixo + '.'));
             const fragSub = [];
 
             camposDaSub.forEach(campo => {
@@ -862,7 +1015,7 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
             secTemConteudo = true;
           });
         } else {
-          sec.campos.forEach(campo => {
+          (sec.campos || []).forEach(campo => {
             const valor = dados[campo.id];
             if (!valor) return;
             secDiv.appendChild(criarCampoDetalhe(campo.pergunta, valor));
@@ -915,13 +1068,11 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
   function imprimirModal() {
     if (!registroAtualId) return;
 
-    // Lê os dados já renderizados no modal
-    const titulo  = document.getElementById('modalTitulo').textContent;
-    const sub     = document.getElementById('modalSub').textContent;
-    const bodyEl  = document.getElementById('modalBody');
-    const print   = document.getElementById('printArea');
+    const titulo = document.getElementById('modalTitulo').textContent;
+    const sub = document.getElementById('modalSub').textContent;
+    const bodyEl = document.getElementById('modalBody');
+    const print = document.getElementById('printArea');
 
-    // Monta o HTML de impressão a partir do conteúdo do modal
     let html = `
       <div class="print-header">
         <img src="assets/logo.png" alt="MPAM CGMP" />
@@ -931,25 +1082,22 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
         ${escapeHtml(sub)}
       </div>`;
 
-    // Percorre as seções renderizadas no modal e converte para classes de print
     bodyEl.querySelectorAll('.detalhe-secao').forEach(secEl => {
       const secTitulo = secEl.querySelector('h3')?.textContent || '';
       html += `<div class="print-secao"><h3>${escapeHtml(secTitulo)}</h3>`;
 
       secEl.childNodes.forEach(node => {
         if (node.nodeType !== 1) return;
-        if (node.tagName === 'H3') return; // já adicionado
+        if (node.tagName === 'H3') return;
 
-        // Subtítulo
         if (node.classList.contains('detalhe-subtitulo')) {
           html += `<div class="print-subtitulo">${escapeHtml(node.textContent)}</div>`;
           return;
         }
 
-        // Campo
         if (node.classList.contains('detalhe-campo')) {
           const perg = node.querySelector('.detalhe-pergunta')?.textContent || '';
-          const val  = node.querySelector('.detalhe-valor')?.textContent   || '';
+          const val = node.querySelector('.detalhe-valor')?.textContent || '';
           html += `
             <div class="print-campo">
               <div class="print-pergunta">${escapeHtml(perg)}</div>
@@ -961,7 +1109,6 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
       html += '</div>';
     });
 
-    // Assinatura
     html += `
       <div class="print-assinatura">
         <div class="label">✅ Assinatura de Envio</div>
@@ -976,14 +1123,19 @@ ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.i
     print.innerHTML = html;
     window.print();
   }
-async function reabrirRegistro(id) {
+
+  async function reabrirRegistro(id) {
   if (!confirm('Deseja reabrir este registro?\n\nO status voltará para "Em andamento" e o usuário poderá editá-lo novamente.')) return;
 
   mostrarLoading('Reabrindo registro…');
   try {
+    const reg = await carregarRegistroAdmin(id);
+
     await reabrirRegistroAdmin(id);
-    showToast('Registro reaberto com sucesso ✅', 'ok');
-    await buscar(); // atualiza a tabela
+    await marcarUsuarioComoPendente(reg.user_id);
+
+    showToast('Registro reaberto e usuário marcado como pendente ✅', 'ok');
+    await buscar();
   } catch (err) {
     console.error(err);
     showToast('Erro ao reabrir registro.', 'erro');
@@ -991,18 +1143,171 @@ async function reabrirRegistro(id) {
     esconderLoading();
   }
 }
-  /* ── Init ── */
-  (async function init() {
+
+  function normalizarIdOuEmail(valor) {
+    return String(valor || '').trim();
+  }
+
+  async function carregarPendenciasAtivas() {
+    mostrarLoading('Carregando pendências…');
+    try {
+      const filtroPendenciaEl = document.getElementById('filtroUsuarioPendencia');
+      const termo = normalizarTextoFiltro(filtroPendenciaEl?.value || '');
+
+      const pendencias = await listarUsuariosPendentes();
+      const lista = Array.isArray(pendencias) ? pendencias : [];
+
+      let filtradas = lista;
+
+      if (termo) {
+        filtradas = lista.filter(p => {
+          const nome = normalizarTextoFiltro(p.nome || p.full_name || '');
+          const email = normalizarTextoFiltro(p.email || '');
+          const userId = normalizarTextoFiltro(p.user_id || p.id || '');
+          return nome.includes(termo) || email.includes(termo) || userId.includes(termo);
+        });
+      }
+
+      renderPendencias(filtradas);
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao carregar pendências.', 'erro');
+      document.getElementById('pendenciasWrap').innerHTML = `
+        <div class="estado-vazio">
+          <div class="icone">⚠️</div>
+          <p>Não foi possível carregar as pendências.</p>
+        </div>`;
+    } finally {
+      esconderLoading();
+    }
+  }
+
+  function renderPendencias(lista) {
+  const wrap = document.getElementById('pendenciasWrap');
+
+  if (!lista || lista.length === 0) {
+    wrap.innerHTML = `
+      <div class="estado-vazio">
+        <div class="icone">📭</div>
+        <p>Nenhuma pendência ativa encontrada.</p>
+      </div>`;
+    return;
+  }
+
+  const linhas = lista.map(p => {
+    const userId  = escapeHtml(p.user_id || p.id || '—');
+    const criadoEm = p.criado_em || p.created_at || p.updated_at || null;
+    const data    = criadoEm ? new Date(criadoEm).toLocaleString('pt-BR') : '—';
+
+    return `
+      <tr>
+        <td class="td-email">${userId}</td>
+        <td>
+          <span class="status-badge status-pendente">Pendente</span>
+        </td>
+        <td style="white-space:nowrap;color:var(--muted);font-size:13px;">${data}</td>
+        <td>
+          <div class="acoes">
+            <button class="btn btn-danger" onclick="desmarcarPendente('${String(p.user_id || p.id || '').replace(/'/g, "\\'")}')">
+              Remover pendência
+            </button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Identificador</th>
+          <th>Status</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>${linhas}</tbody>
+    </table>`;
+}
+
+  async function adicionarUsuarioPendente() {
+    const input = document.getElementById('novoUsuarioPendente');
+    const valor = normalizarIdOuEmail(input.value);
+
+    if (!valor) {
+      showToast('Informe o e-mail ou user_id do usuário.', 'erro');
+      input.focus();
+      return;
+    }
+
+    mostrarLoading('Adicionando pendência…');
+    try {
+      await marcarUsuarioComoPendente(valor);
+      showToast('Usuário marcado como pendente ✅', 'ok');
+      input.value = '';
+      await carregarPendenciasAtivas();
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao adicionar pendência.', 'erro');
+    } finally {
+      esconderLoading();
+    }
+  }
+
+  async function desmarcarPendente(userId) {
+    if (!userId) {
+      showToast('Identificador inválido.', 'erro');
+      return;
+    }
+
+    if (!confirm('Deseja remover a pendência deste usuário?')) return;
+
+    mostrarLoading('Removendo pendência…');
+    try {
+      await removerUsuarioPendente(userId);
+      showToast('Pendência removida ✅', 'ok');
+      await carregarPendenciasAtivas();
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao remover pendência.', 'erro');
+    } finally {
+      esconderLoading();
+    }
+  }
+
+  async function init() {
     try {
       await verificarAdmin();
       initBadge();
       await buscar();
-    } catch (err) {
+      } catch (err) {
       // verificarAdmin já redireciona
     } finally {
       esconderLoading();
     }
-  })();
+  }let _pendenciasAbertas = false;
+
+function togglePendencias() {
+  const secao   = document.getElementById('secaoPendencias');
+  const chevron = document.getElementById('btnPendenciasChevron');
+
+  _pendenciasAbertas = !_pendenciasAbertas;
+
+  if (_pendenciasAbertas) {
+    secao.style.maxHeight     = '2000px';
+    secao.style.opacity       = '1';
+    secao.style.pointerEvents = 'auto';
+    chevron.style.transform   = 'rotate(180deg)';
+    carregarPendenciasAtivas(); // carrega só quando abre
+  } else {
+    secao.style.maxHeight     = '0';
+    secao.style.opacity       = '0';
+    secao.style.pointerEvents = 'none';
+    chevron.style.transform   = 'rotate(0deg)';
+  }
+}
+
+  init();
 </script>
 
 </body>

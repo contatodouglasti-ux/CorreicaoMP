@@ -10,6 +10,44 @@
 let atual      = 0;
 let registroId = null;   // UUID do registro ativo no Supabase
 let modoLeitura = false; // true = formulário bloqueado (já finalizado)
+let usuarioPodePreencher = false;
+
+
+async function atualizarPermissaoUsuario() {
+  try {
+    usuarioPodePreencher = await usuarioEstaPendente();
+  } catch (err) {
+    console.error('Erro ao verificar pendência do usuário:', err);
+    usuarioPodePreencher = false;
+  }
+  return usuarioPodePreencher;
+}
+
+function aplicarModoSomenteLeituraForcado(mensagem = 'Você não tem permissão para preencher respostas. Aguarde o administrador marcá-lo como pendente.') {
+  registroId = null;
+  modoLeitura = true;
+  window._dadosCarregados = {};
+
+  const enviarWrap = document.getElementById('enviarTudoWrap');
+  if (enviarWrap) enviarWrap.style.display = 'none';
+
+  const aviso = document.querySelector('.modo-leitura-aviso');
+  if (aviso) aviso.remove();
+
+  document.querySelectorAll('#formContainer input, #formContainer textarea, #formContainer select, #formContainer button').forEach(el => {
+    if (el.tagName === 'BUTTON') return;
+    el.disabled = true;
+  });
+
+  const sidebarNova = document.querySelector('.sidebar-footer .sidebar-item[onclick*="novaCorreicao"]');
+  if (sidebarNova) {
+    sidebarNova.style.opacity = '0.5';
+    sidebarNova.style.pointerEvents = 'none';
+    sidebarNova.title = mensagem;
+  }
+
+  showToast(mensagem, 'erro');
+}
 
 /* ── Auto-save (debounce 1,5s) ──── */
 
@@ -29,6 +67,10 @@ function autoSalvar() {
 /* ── Salvar seção ──── */
 
 async function salvarSecao(i) {
+  if (!usuarioPodePreencher) {
+    showToast('Você só pode preencher respostas quando estiver como pendente.', 'erro');
+    return;
+  }
   if (modoLeitura) {
     showToast('Este envio já foi finalizado e não pode ser alterado.', 'erro');
     return;
@@ -84,6 +126,10 @@ async function salvarSecao(i) {
 /* ── Enviar tudo ──── */
 
 async function enviarTudo() {
+  if (!usuarioPodePreencher) {
+    showToast('Você só pode enviar respostas quando estiver como pendente.', 'erro');
+    return;
+  }
   if (modoLeitura) {
     showToast('Este envio já foi finalizado.', 'erro');
     return;
@@ -140,6 +186,24 @@ async function enviarTudo() {
 /* ── Nova correição ──── */
 
 async function novaCorreicao() {
+  // Revalida permissão no momento do clique
+  await atualizarPermissaoUsuario();
+
+  if (!usuarioPodePreencher) {
+    showToast('Você só pode iniciar uma nova correição quando o administrador marcar você como pendente.', 'erro');
+    await abrirHistorico();
+    return;
+  }
+
+  // Bloqueia se já existe correição finalizada — aguarda nova liberação do admin
+  const registros = await listarRegistrosDoUsuario();
+  const temFinalizada = registros.some(r => r.finalizado === true);
+  if (temFinalizada) {
+    showToast('Você já possui uma correição finalizada. Aguarde o administrador liberar um novo preenchimento.', 'erro');
+    await abrirHistorico();
+    return;
+  }
+
   if (registroId && !modoLeitura) {
     const secoesOk  = await buscarSecoesOk(registroId);
     const pendentes = form.secoes.length - Object.keys(secoesOk).length;
@@ -186,7 +250,27 @@ async function init() {
     criarMenu();
     criarForm();
 
+    // ← NOVO: carrega a permissão antes de qualquer decisão
+    await atualizarPermissaoUsuario();
+
+    if (!usuarioPodePreencher) {
+      // Usuário não pendente: carrega só em modo leitura, sem criar registro
+      aplicarModoSomenteLeituraForcado();
+      avaliarCondicionais();
+      mostrar(0);
+      return;
+    }
+
     const reg = await garantirRegistroAberto();
+
+    // ← NOVO: garantirRegistroAberto pode retornar null se não for pendente
+    if (!reg) {
+      aplicarModoSomenteLeituraForcado();
+      avaliarCondicionais();
+      mostrar(0);
+      return;
+    }
+
     registroId  = reg.id;
     modoLeitura = reg.finalizado;
     window._dadosCarregados = reg.dados || {};
@@ -209,7 +293,7 @@ async function init() {
     mostrar(0);
   } catch (err) {
     console.error('Erro na inicialização:', err);
-    showToast('Erro ao conectar ao banco de dados. Verifique as credenciais do Supabase.', 'erro');
+    showToast('Erro ao conectar ao banco de dados.', 'erro');
   } finally {
     esconderLoading();
   }

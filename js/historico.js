@@ -22,21 +22,34 @@ async function abrirHistorico() {
   hc.innerHTML     = '<p style="color:#546E7A;padding:20px">Carregando histórico…</p>';
 
   try {
-    const registros = await listarRegistrosDoUsuario();
-    renderHistorico(registros, hc);
+    const podePreencher = await usuarioEstaPendente();
+    let registros = await listarRegistrosDoUsuario();
+
+    if (!podePreencher) {
+      registros = registros.filter(reg => reg.finalizado === true);
+    }
+
+    renderHistorico(registros, hc, podePreencher);
   } catch (err) {
     hc.innerHTML = '<p style="color:#c0392b;padding:20px">Erro ao carregar histórico.</p>';
     console.error(err);
   }
 }
 
-function renderHistorico(registros, container) {
+function renderHistorico(registros, container, podePreencher = true) {
   container.innerHTML = '';
 
   const titulo = document.createElement('h2');
   titulo.innerText     = '📋 Histórico de Correições';
   titulo.style.cssText = 'color:#2c3e50;margin-bottom:20px;';
   container.appendChild(titulo);
+
+  if (!podePreencher) {
+    const aviso = document.createElement('div');
+    aviso.style.cssText = 'background:#eef7fb;border-left:4px solid #1C799B;padding:12px 14px;border-radius:8px;margin-bottom:16px;color:#36515f;font-size:13px;';
+    aviso.innerText = 'Seu acesso está em modo somente leitura. Aqui aparecem apenas registros finalizados.';
+    container.appendChild(aviso);
+  }
 
   if (!registros || registros.length === 0) {
     container.innerHTML += '<p style="color:#546E7A">Nenhum registro encontrado.</p>';
@@ -144,8 +157,16 @@ async function carregarRegistro(id) {
   try {
     const reg = await carregarRegistroPorId(id);
 
+    const podePreencher = await usuarioEstaPendente();
+
+    if (!reg.finalizado && !podePreencher) {
+      showToast('Você só pode abrir para edição registros finalizados ou quando estiver como pendente.', 'erro');
+      await abrirHistorico();
+      return;
+    }
+
     registroId  = reg.id;
-    modoLeitura = reg.finalizado;
+    modoLeitura = reg.finalizado || !podePreencher;
     window._dadosCarregados = reg.dados || {};
 
     // Limpa campos e remove bloqueios antigos
