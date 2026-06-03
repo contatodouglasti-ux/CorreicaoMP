@@ -66,7 +66,7 @@
     }
 
     .topbar-brand img {
-      height: 32px;
+      height: 72px;
       filter: brightness(0) invert(1);
       opacity: 0.9;
     }
@@ -79,8 +79,8 @@
 
     .topbar-badge {
       background: rgba(255,255,255,0.12);
-      border-radius: 20px;
-      padding: 4px 12px;
+      border-radius: 10px;
+      padding: 6px 14px;
       font-size: 12px;
       font-weight: 600;
       color: #4FB8EE;
@@ -751,15 +751,28 @@ function obterUnidadeCorreicionadaRegistro(registro) {
       return;
     }
 
-    const linhas = registros.map(r => {
-      const data       = new Date(r.criado_em).toLocaleDateString('pt-BR');
-      const hora       = new Date(r.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-      const secoesOk   = Object.keys(r.secoes_ok || {}).length;
-      const totalSecoes = form.secoes.length;
-      const statusHtml = r.finalizado
-        ? '<span class="status-badge status-finalizado">✅ Finalizado</span>'
-        : `<span class="status-badge status-andamento">⏳ Em andamento (${secoesOk}/${totalSecoes})</span>`;
-      const resposta11 = escapeHtml(obterUnidadeCorreicionadaRegistro(r) || '—');
+   const linhas = registros.map(r => {
+  const dataBase = r.finalizado_em || r.atualizado_em;
+
+  const data = dataBase
+    ? new Date(dataBase).toLocaleDateString('pt-BR')
+    : '—';
+
+  const hora = dataBase
+    ? new Date(dataBase).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : '';
+
+  const secoesOk = Object.keys(r.secoes_ok || {}).length;
+  const totalSecoes = form.secoes.length;
+
+  const statusHtml = r.finalizado
+    ? '<span class="status-badge status-finalizado">✅ Finalizado</span>'
+    : `<span class="status-badge status-andamento">⏳ Em andamento (${secoesOk}/${totalSecoes})</span>`;
+
+  const resposta11 = escapeHtml(obterUnidadeCorreicionadaRegistro(r) || '—');
 
       return `
         <tr>
@@ -775,6 +788,7 @@ function obterUnidadeCorreicionadaRegistro(registro) {
           <td>
             <div class="acoes">
               <button class="btn btn-primary" onclick="abrirModal('${r.id}')">👁 Ver / Imprimir</button>
+${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.id}')">🔓 Reabrir</button>` : ''}
             </div>
           </td>
         </tr>`;
@@ -962,7 +976,21 @@ function obterUnidadeCorreicionadaRegistro(registro) {
     print.innerHTML = html;
     window.print();
   }
+async function reabrirRegistro(id) {
+  if (!confirm('Deseja reabrir este registro?\n\nO status voltará para "Em andamento" e o usuário poderá editá-lo novamente.')) return;
 
+  mostrarLoading('Reabrindo registro…');
+  try {
+    await reabrirRegistroAdmin(id);
+    showToast('Registro reaberto com sucesso ✅', 'ok');
+    await buscar(); // atualiza a tabela
+  } catch (err) {
+    console.error(err);
+    showToast('Erro ao reabrir registro.', 'erro');
+  } finally {
+    esconderLoading();
+  }
+}
   /* ── Init ── */
   (async function init() {
     try {

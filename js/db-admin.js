@@ -73,3 +73,12 @@ async function carregarRegistroAdmin(id) {
 async function baixarPDFAdmin(id) {
   await baixarPDF({ id });
 }
+/**
+ * Reabre um registro finalizado, voltando para em andamento.
+ */
+async function reabrirRegistroAdmin(id) {
+  const { error } = await sbAdmin
+    .rpc('reabrir_registro', { registro_id: id });
+
+  if (error) throw error;
+}
