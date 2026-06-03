@@ -285,6 +285,7 @@
     }
 
     btnLogin.addEventListener('click', () => {
+      
       const email = (emailInput.value || '').trim();
       localStorage.setItem('msal_email', email);
 
@@ -300,6 +301,9 @@
         prompt:    'login',
       });
     });
+    emailInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') btnLogin.click();
+});
 
     // Trata retorno do redirect
     (function autoInit() {
