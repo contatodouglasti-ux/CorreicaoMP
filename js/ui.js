@@ -135,8 +135,12 @@ function atualizarMenuBadge(i, enviada = true) {
 function bloquearSecao(i) {
   const section = document.querySelectorAll('.section')[i];
   if (!section) return;
+
+  
   section.querySelectorAll('input, textarea, select').forEach(el => el.disabled = true);
 
+  section.querySelectorAll('.unidade-sugestoes')
+    .forEach(el => el.style.display = 'none');
   if (!section.querySelector('.btn-editar') && !modoLeitura) {
     const btnE       = document.createElement('button');
     btnE.innerText   = '✏️ Editar esta seção';

@@ -140,6 +140,7 @@ async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
   return sb.from('correicoes').update({
     dados:        dadosMerged,
     secoes_ok:    secoesOk,
+   // tipo_formulario: TIPO_FORMULARIO,
     unidade_correicionada: dadosMerged['1.1'] || null,  // ← linha nova
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
@@ -228,5 +229,4 @@ async function buscarSecoesOk(id) {
     .select('secoes_ok')
     .eq('id', id)
     .single();
-  return data ? (data.secoes_ok || {}) : {};
-}
+  return data ? (data.secoes_ok || {}) : {};}

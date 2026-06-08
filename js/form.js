@@ -54,7 +54,11 @@ function atualizarSugestoesUnidade(input) {
   if (!input) return;
   const wrapper = input.closest('[data-campo-id="1.1"]');
   if (!wrapper) return;
-
+// NOVO
+  if (input.disabled || input.readOnly) {
+    esconderSugestoesUnidade(input);
+    return;
+  }
   wrapper.style.position = 'relative';
 if (!input) return;
   if (input.disabled || input.readOnly) { // ← adicione
