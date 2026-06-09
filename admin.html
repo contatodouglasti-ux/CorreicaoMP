@@ -899,6 +899,14 @@
     buscar();
   }
 
+  function abrirRelatorio(id) {
+    if (!id) {
+    alert('ID do registro não encontrado');
+    return;
+  }
+    window.location.href = `relatorio.html?id=${encodeURIComponent(id)}`;
+  }
+
   function renderTabela(registros) {
     const wrap = document.getElementById('tabelaWrap');
 
@@ -943,6 +951,7 @@
           </td>
           <td>
             <div class="acoes">
+              <button class="btn btn-yellow" onclick="abrirRelatorio('${r.id}')">📄 Abrir relatório</button>
               <button class="btn btn-primary" onclick="abrirModal('${r.id}')">👁 Ver / Imprimir</button>
               ${r.finalizado ? `<button class="btn btn-danger" onclick="reabrirRegistro('${r.id}')">🔓 Reabrir</button>` : ''}
             </div>

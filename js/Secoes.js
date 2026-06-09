@@ -5,7 +5,7 @@ const form = {
     "campos": [
       {"id": "1.1", "pergunta": "Unidade correicionada:.", "tipo": "text"},
       {"id": "1.2", "pergunta": "Data da Correição", "tipo": "textarea"},
-      {"id": "1.3", "pergunta": "Mambro responsável pelo preenchimento", "tipo": "textarea"},
+      {"id": "1.3", "pergunta": "Membro responsável pelo preenchimento", "tipo": "textarea"},
       {"id": "1.4", "pergunta": "Designação", "tipo": "textarea"},
       {"id": "1", "pergunta": "Ato(s) normativo(s) que fixa(m) as atribuições do órgão correicionado (com indicação dos artigos).", "tipo": "textarea"},
       {"id": "2", "pergunta": "Descrição detalhada das atribuições.", "tipo": "textarea"},
