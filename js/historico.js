@@ -80,12 +80,16 @@ function renderHistorico(registros, container, podePreencher = true) {
       <div class="historico-card-actions">
         <button class="btn-primary">Abrir</button>
         <button class="btn-gray">👁 Ver / Imprimir</button>
-        <button class="btn-danger">🗑️ Excluir</button>
+        ${reg.finalizado
+          ? '<button class="btn-reaproveitar">♻️ Reaproveitar</button>'
+          : '<button class="btn-danger">🗑️ Excluir</button>'
+        }
       </div>
     `;
 
     const btnAbrir   = card.querySelector('.btn-primary');
     const btnVer     = card.querySelector('.btn-gray');
+    const btnRea     = card.querySelector('.btn-reaproveitar');
     const btnExcluir = card.querySelector('.btn-danger');
 
     btnAbrir.onclick = () => carregarRegistro(reg.id, reg.finalizado);
@@ -93,20 +97,20 @@ function renderHistorico(registros, container, podePreencher = true) {
     /* ── Usa o ModalViewer compartilhado ── */
     btnVer.onclick = () => _abrirViewer(reg.id);
 
-    const temSecao = reg.secoes_ok && Object.keys(reg.secoes_ok).length > 0;
+    /* ── Reaproveitar respostas de um registro finalizado ── */
+    if (btnRea) btnRea.onclick = () => _confirmarReaproveitamento(reg.id);
 
-    if (reg.finalizado) {
-      btnExcluir.disabled      = true;
-      btnExcluir.style.opacity = '0.5';
-      btnExcluir.style.cursor  = 'not-allowed';
-      btnExcluir.title         = 'Registros finalizados não podem ser excluídos';
-    } else if (!temSecao) {
-      btnExcluir.disabled      = true;
-      btnExcluir.style.opacity = '0.5';
-      btnExcluir.style.cursor  = 'not-allowed';
-      btnExcluir.title         = 'Envie ao menos uma seção antes de excluir';
-    } else {
-      btnExcluir.onclick = () => _confirmarExclusao(reg.id);
+    if (btnExcluir) {
+      const temSecao = reg.secoes_ok && Object.keys(reg.secoes_ok).length > 0;
+
+      if (!temSecao) {
+        btnExcluir.disabled      = true;
+        btnExcluir.style.opacity = '0.5';
+        btnExcluir.style.cursor  = 'not-allowed';
+        btnExcluir.title         = 'Envie ao menos uma seção antes de excluir';
+      } else {
+        btnExcluir.onclick = () => _confirmarExclusao(reg.id);
+      }
     }
 
     container.appendChild(card);
@@ -146,6 +150,59 @@ async function _confirmarExclusao(id) {
   } catch (err) {
     console.error(err);
     showToast(err.message || 'Erro ao excluir registro.', 'erro');
+  } finally {
+    esconderLoading();
+  }
+}
+
+/* ── Confirmação e execução do reaproveitamento ── */
+async function _confirmarReaproveitamento(id) {
+  if (!confirm(
+    'Deseja criar uma nova correição usando as respostas deste registro como ponto de partida?\n\n' +
+    'Um novo registro será aberto com os campos pré-preenchidos. Você poderá editar antes de finalizar.'
+  )) return;
+
+  mostrarLoading('Carregando respostas para reaproveitamento…');
+  try {
+    const reg = await carregarRegistroPorId(id);
+
+    const podePreencher = await usuarioEstaPendente();
+    if (!podePreencher) {
+      showToast('Você precisa estar como pendente para criar um novo registro.', 'erro');
+      return;
+    }
+
+    // Reutiliza o registro em aberto (criado pelo garantirRegistroAberto ao entrar
+    // no formulário) em vez de criar um duplicado. Só cria novo se não houver nenhum.
+    const regAberto = await garantirRegistroAberto();
+
+    registroId  = regAberto.id;
+    modoLeitura = false;
+    window._dadosCarregados = reg.dados || {};
+
+    // Limpa campos e remove bloqueios antigos
+    document.querySelectorAll('#formContainer input, #formContainer textarea').forEach(el => {
+      if (el.type === 'radio' || el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+    });
+    form.secoes.forEach((_, i) => { desbloquearSecao(i); atualizarMenuBadge(i, false); });
+
+    // Pré-preenche os campos com os dados reaproveitados
+    carregar();
+
+    // Nenhuma seção é marcada como enviada — tudo fica editável
+    document.getElementById('enviarTudoWrap').style.display = '';
+    const aviso = document.querySelector('.modo-leitura-aviso');
+    if (aviso) aviso.remove();
+
+    abrirFormulario();
+    mostrar(0);
+    avaliarCondicionais();
+
+    showToast('✅ Respostas carregadas! Revise e finalize o novo registro.', 'ok');
+  } catch (err) {
+    console.error(err);
+    showToast('Erro ao reaproveitar registro.', 'erro');
   } finally {
     esconderLoading();
   }

@@ -58,8 +58,10 @@ function autoSalvar() {
   _autoSalvarTimer = setTimeout(() => {
     if (registroId) {
       const dados = coletar();
-      window._dadosCarregados = dados;
-      persistirDados(registroId, dados);
+      window._dadosCarregados = { ...window._dadosCarregados, ...dados };
+      try {
+        localStorage.setItem('rascunho_' + registroId, JSON.stringify(window._dadosCarregados));
+      } catch (_) {}
     }
   }, 1500);
 }
@@ -111,6 +113,7 @@ async function salvarSecao(i) {
     secoesOk[i] = 'true';
 
     await salvarSecaoNoBanco(registroId, dadosMerged, secoesOk);
+    try { localStorage.removeItem('rascunho_' + registroId); } catch (_) {}
 
     bloquearSecao(i);
     atualizarMenuBadge(i);
@@ -274,6 +277,15 @@ async function init() {
     registroId  = reg.id;
     modoLeitura = reg.finalizado;
     window._dadosCarregados = reg.dados || {};
+
+    // Recupera rascunho local se houver (dados mais recentes que o banco)
+    try {
+      const rascunho = localStorage.getItem('rascunho_' + registroId);
+      if (rascunho) {
+        window._dadosCarregados = { ...window._dadosCarregados, ...JSON.parse(rascunho) };
+        showToast('Rascunho local recuperado 💾', 'ok');
+      }
+    } catch (_) {}
 
     carregar();
 

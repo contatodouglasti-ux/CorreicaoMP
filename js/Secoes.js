@@ -65,22 +65,22 @@ const form = {
 
     "campos": [
         {"id": "26.a", "pergunta": "Inquéritos Policiais recebidos", "tipo": "number","obrigatorio": false},
-        {"id": "26.b", "pergunta": "Termos Circunstanciados de Ocorrência recebidos", "tipo": "number","obrigatorio": false},
-        {"id": "26.c", "pergunta": "Procedimentos Investigatórios Criminais instaurados", "tipo": "number","obrigatorio": false},
-        {"id": "26.d", "pergunta": "Processos criminais recebidos", "tipo": "number","obrigatorio": false},
-        {"id": "26.e", "pergunta": "Processos cíveis recebidos", "tipo": "number","obrigatorio": false},
-        {"id": "26.f", "pergunta": "Notícias de Fato (NF) autuadas", "tipo": "number","obrigatorio": false},
-        {"id": "26.g", "pergunta": "Inquéritos Civis (IC) instaurados", "tipo": "number","obrigatorio": false},
-        {"id": "26.h", "pergunta": "Procedimentos Preparatórios (PP) instaurados", "tipo": "number","obrigatorio": false},
-        {"id": "26.i", "pergunta": "Procedimentos Administrativos (PA) instaurados", "tipo": "number","obrigatorio": false},
-        {"id": "26.j", "pergunta": "Recomendações", "tipo": "number","obrigatorio": false},
-        {"id": "26.k", "pergunta": "Termos de Ajustamento de Conduta (TAC)", "tipo": "number","obrigatorio": false},
-        {"id": "26.l", "pergunta": "Acordos de Não Persecução Cível (ANPC)", "tipo": "number","obrigatorio": false},
-        {"id": "26.m", "pergunta": "Acordos de Não Persecução Penal (ANPP)", "tipo": "number","obrigatorio": false},
-        {"id": "26.n", "pergunta": "Reuniões", "tipo": "number","obrigatorio": false},
-        {"id": "26.o", "pergunta": "Audiências públicas", "tipo": "number","obrigatorio": false},
-        {"id": "26.p", "pergunta": "Audiências judiciais", "tipo": "number","obrigatorio": false},
-        {"id": "26.q", "pergunta": "Inspeções/Visitas", "tipo": "number","obrigatorio": false}
+        {"id": "26.b", "pergunta": "Termos Circunstanciados de Ocorrência recebidos", "tipo": "number"},
+        {"id": "26.c", "pergunta": "Procedimentos Investigatórios Criminais instaurados", "tipo": "number"},
+        {"id": "26.d", "pergunta": "Processos criminais recebidos", "tipo": "number"},
+        {"id": "26.e", "pergunta": "Processos cíveis recebidos", "tipo": "number"},
+        {"id": "26.f", "pergunta": "Notícias de Fato (NF) autuadas", "tipo": "number"},
+        {"id": "26.g", "pergunta": "Inquéritos Civis (IC) instaurados", "tipo": "number"},
+        {"id": "26.h", "pergunta": "Procedimentos Preparatórios (PP) instaurados", "tipo": "number"},
+        {"id": "26.i", "pergunta": "Procedimentos Administrativos (PA) instaurados", "tipo": "number"},
+        {"id": "26.j", "pergunta": "Recomendações", "tipo": "number"},
+        {"id": "26.k", "pergunta": "Termos de Ajustamento de Conduta (TAC)", "tipo": "number"},
+        {"id": "26.l", "pergunta": "Acordos de Não Persecução Cível (ANPC)", "tipo": "number"},
+        {"id": "26.m", "pergunta": "Acordos de Não Persecução Penal (ANPP)", "tipo": "number"},
+        {"id": "26.n", "pergunta": "Reuniões", "tipo": "number"},
+        {"id": "26.o", "pergunta": "Audiências públicas", "tipo": "number"},
+        {"id": "26.p", "pergunta": "Audiências judiciais", "tipo": "number"},
+        {"id": "26.q", "pergunta": "Inspeções/Visitas", "tipo": "number"}
       ]
   },
   {

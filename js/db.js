@@ -48,6 +48,16 @@
 
 /* ── Permissões ──── */
 
+// No topo do db.js ou app.js
+let _pendenciaCache = null;
+async function usuarioEstaPendente(userId = getEmailUsuario()) {
+  if (_pendenciaCache !== null) return _pendenciaCache;
+  const { data, error } = await sb.from('pendencias').select('ativo').eq('user_id', userId).maybeSingle();
+  if (error) throw error;
+  _pendenciaCache = !!(data && data.ativo);
+  return _pendenciaCache;
+}
+
 async function usuarioEstaPendente(userId = getEmailUsuario()) {
   const { data, error } = await sb
     .from('pendencias')

@@ -512,14 +512,26 @@ function coletar(sec = null) {
 function carregar() {
   const dadosSalvos = window._dadosCarregados || {};
   Object.keys(dadosSalvos).forEach(k => {
-    const el = document.getElementById(k) || document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
+    const valor = dadosSalvos[k];
+
+    // Tenta pelo id primeiro (inputs de texto, textarea, etc.)
+    let el = document.getElementById(k);
+
+    // Se não achou pelo id, pode ser um radio — busca sem usar o valor no seletor
+    // para evitar SyntaxError com valores que contenham \n, aspas ou caracteres especiais
+    if (!el) {
+      el = document.querySelector(`input[name="${k}"]`);
+    }
+
     if (!el) return;
 
     if (el.type === 'radio') {
-      const r = document.querySelector(`input[name="${k}"][value="${dadosSalvos[k]}"]`);
-      if (r) r.checked = true;
+      // Itera pelos radios do grupo e marca pelo valor, sem seletor CSS com o valor
+      document.querySelectorAll(`input[name="${k}"]`).forEach(r => {
+        if (r.value === valor) r.checked = true;
+      });
     } else {
-      el.value = dadosSalvos[k];
+      el.value = valor;
       // Re-expande textareas ao carregar dados salvos
       if (el.tagName === 'TEXTAREA') {
         el.style.height = 'auto';
