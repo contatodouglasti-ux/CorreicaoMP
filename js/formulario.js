@@ -124,9 +124,33 @@
             setText('auto_motivacao', extrairTexto(dados.motivacao) || 'Dar cumprimento ao calendário anual de inspeções e correições, elaborado pela Corregedoria-Geral do Ministério Público para o ano de 20232, atendendo ao que determina a Resolução CNMP nº 149/2016.');
             setText('auto_excesso_prazo', extrairTexto(dados.excesso_prazo) || '(Neste campo devem ser relacionados os procedimentos e processos em atraso. Caso seja extraído algum relatório do sistema, deve ser ele indicado com precisão e juntado como anexo a este relatório)');
 
-            setText('auto_resposta_2', extrairTexto(dados['1']));
+            setText('DM_2', extrairTexto(dados['6']));
+            setText('DM_3', extrairTexto(dados['6.a']));
+            setText('DM_4', extrairTexto(dados['4']));
+            setText('DM_5', extrairTexto(dados['5']));
+            setText('DM_6', extrairTexto(dados['6']));
+            setText('DM_10', extrairTexto(dados['10']));
+            setText('DM_12', extrairTexto(dados['12']));
+            setText('DM_14', extrairTexto(dados['14']));
+            setText('DM_18', extrairTexto(dados['18']));
+            setText('DU_1', extrairTexto(dados['18']));
+            setText('DU_2', extrairTexto(dados['18.a']));
+            setText('DU_3', extrairTexto(dados['']));
+            setText('DU_4', extrairTexto(dados['4']));
+            setText('DU_5', extrairTexto(dados['2']));
+            setText('DU_6', extrairTexto(dados['4']));
+            setText('DU_7', extrairTexto(dados['4']));
+            setText('DU_8', extrairTexto(dados['1']));
+            setText('DU_9', extrairTexto(dados['2']));
+            setText('DU_10', extrairTexto(dados['4']));
+            setText('DU_11', extrairTexto(dados['4']));
+            setText('DU_12', extrairTexto(dados['1']));
             setText('auto_resposta_3', extrairTexto(dados['2']));
             setText('auto_resposta_4', extrairTexto(dados['4']));
+            setText('auto_resposta_4', extrairTexto(dados['4']));
+            
+
+
 
             // NOME busca registro?.user_id; LOTAÇÃO busca dados['1.1']
             const nome = registro?.user_id || '';

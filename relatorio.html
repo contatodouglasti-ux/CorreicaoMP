@@ -3,8 +3,104 @@
 
 <head>
     <meta charset="UTF-8" />
-     <link rel="stylesheet" href="css/stylerelatorio.css">
+    <link rel="stylesheet" href="css/stylerelatorio.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        /* ── IMPRESSÃO: preservar layout idêntico à tela ── */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm 12mm 12mm 12mm;
+            }
+
+            /* Ocultar topbar, botões e overlay */
+            .topbar,
+            .no-print,
+            #loadingOverlay,
+            button,
+            .btn,
+            .actions,
+            .actions-row {
+                display: none !important;
+            }
+
+            /* Fundo branco, cores exatas */
+            html, body {
+                background: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            /* Remover margens externas da página */
+            .page {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Remover sombra do paper */
+            .paper {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            /* Preservar cores de fundo exatas */
+            .field,
+            .section-box,
+            .proposal,
+            .doc-block,
+            .proposal-text,
+            .proposal-notice,
+            th,
+            .meta-grid,
+            .proposal-fields {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            /* Inputs e textareas: manter borda fina, sem sombra */
+            input[type="text"],
+            input[type="date"],
+            textarea {
+                border: 1px solid #d9e1ea !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Manter grids de 2 colunas */
+            .meta-grid,
+            .proposal-fields,
+            .two-col {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* Evitar quebra de página dentro de propostas */
+            .proposal {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Radios visíveis */
+            input[type="radio"],
+            input[type="checkbox"] {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
     <title>Relatório de Correição Ordinária</title>
 
     <script>
@@ -143,10 +239,10 @@
             <!-- 4.1 -->
             <div class="proposal">
                 <div class="proposal-title">4.1 Residência na comarca de lotação</div>
-                <div class="subtle">Caso não resida na comarca de lotação, especificar o local de residência, o motivo, a distância da sede e se está autorizado pelo Procurador-Geral (informar o ato autorizativo) <em>(No Termo - Dados do Membro – Perguntas 02 e 03)</em></div>
+                <div class="subtle">Caso não resida na comarca de lotação, especificar o local de residência, o motivo, a distância da sede e se está autorizado pelo Procurador-Geral (informar o ato autorizativo)</div>
                 <div class="subtle" style="margin-top:4px;">
-                    <div class="value" id="auto_resposta_2"></div>
-                    <div class="value" id="auto_resposta_3"></div>
+                    <div class="value" id="DM_2"></div>
+                    <div class="value" id="DM_3"></div>
                 </div>
                 <div class="proposal-fields">
                     <div class="field">
@@ -171,8 +267,8 @@
             <!-- 4.2 -->
             <div class="proposal">
                 <div class="proposal-title">4.2 Regularidade do comparecimento físico à Promotoria de Justiça</div>
-                <div class="subtle"><em>(No Termo - Dados do Membro – Pergunta 04)</em></div>
-                <div class="value" id="auto_resposta_4"></div>
+              
+                <div class="value" id="DM_4"></div>
                 <div class="proposal-fields">
                     <div class="field">
                         <label>Observações da equipe</label>
@@ -196,7 +292,7 @@
             <!-- 4.3 -->
             <div class="proposal">
                 <div class="proposal-title">4.3 Participação em audiências judiciais de forma presencial</div>
-                <div class="subtle"><em>(No Termo - Dados do Membro – Pergunta 05)</em></div>
+                <div class="value" id="DM_5"></div>
                 <div class="proposal-fields">
                     <div class="field">
                         <label>Observações da equipe</label>
@@ -220,7 +316,7 @@
             <!-- 4.4 -->
             <div class="proposal">
                 <div class="proposal-title">4.4 Participação em cursos de aperfeiçoamento, de capacitação em negociação e mediação e/ou sobre atuação resolutiva</div>
-                <div class="subtle"><em>(No Termo - Dados do Membro – Pergunta 06)</em></div>
+                <div class="value" id="DM_6"></div>
                 <div class="proposal-fields">
                     <div class="field">
                         <label>Observações da equipe</label>
@@ -244,7 +340,8 @@
             <!-- 4.5 -->
             <div class="proposal">
                 <div class="proposal-title">4.5 Exercício do magistério, atividade de coaching, exercício da advocacia, participação de sociedade comercial ou organização não governamental</div>
-                <div class="subtle"><em>(No Termo - Dados do Membro – Perguntas 10, 12, 14)</em></div>
+                
+                <div class="value" id="DM_10"></div><div class="value" id="DM_12"></div><div class="value" id="DM_14"></div>
                 <div class="proposal-fields">
                     <div class="field">
                         <label>Observações da equipe</label>
@@ -272,9 +369,10 @@ SUGERIR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar d
             <!-- 4.6 -->
             <div class="proposal">
                 <div class="proposal-title">4.6 Atuação Eficiente com a Cumulação voluntária de órgãos</div>
-                <div class="subtle"><em>(No Termo - Dados do Membro – Pergunta 18)</em></div>
+                 <div class="value" id="DM_18"></div>
                 <div class="proposal-fields">
                     <div class="field">
+                        
                         <label>Observações da equipe</label>
                         <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>

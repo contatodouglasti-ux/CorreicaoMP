@@ -1,5 +1,4 @@
-
-        :root {
+:root {
             --bg: #f4f6f9;
             --paper: #fff;
             --border: #d9e1ea;
@@ -23,7 +22,7 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.5; 
-    padding-top: 70px; /* ajuste conforme a altura da topbar */
+           padding-top: 70px; /* ajuste conforme a altura da topbar */
 
         }
 
@@ -378,14 +377,74 @@
         }
 
         @media print {
-            body { background: #fff; }
-            .topbar, #loadingOverlay, .actions-row, .no-print { display: none !important; }
-            .page { margin: 0; padding: 0; max-width: none; }
-            .paper { border: none; box-shadow: none; border-radius: 0; padding: 0 18px 18px; }
-            input, textarea { border: none !important; box-shadow: none !important; background: transparent !important; padding-left: 0 !important; padding-right: 0 !important; }
-            .field, .section-box, .proposal, .doc-block { background: transparent !important; }
-            .btn, button { display: none !important; }
-            .error-box { display: none !important; }
+            @page {
+                size: A4 portrait;
+                margin: 12mm;
+            }
+
+            html,
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body {
+                padding-top: 0 !important;
+                font-size: 11px !important;
+            }
+
+            .topbar,
+            #loadingOverlay,
+            .actions-row,
+            .no-print,
+            .btn,
+            button {
+                display: none !important;
+            }
+
+            .page {
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: none !important;
+            }
+
+            .paper {
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            input,
+            textarea {
+                border: 1px solid #d9e1ea !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                color: #1f2a37 !important;
+            }
+
+            .field,
+            .section-box,
+            .proposal,
+            .doc-block,
+            .proposal-notice,
+            .proposal-text,
+            th,
+            td {
+                background: transparent !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .error-box {
+                display: none !important;
+            }
         }
 textarea.auto-expand {
   overflow: hidden;
