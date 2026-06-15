@@ -274,6 +274,58 @@
       box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
     }
 
+    .inline-form input[type="date"] {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      min-width: 160px;
+    }
+    .inline-form input[type="date"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
+    }
+
+    .date-range-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .date-range-group {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .date-range-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .badge-expirado {
+      background: #fde8e8;
+      color: #a93226;
+    }
+
+    .badge-vigente {
+      background: #d9edf7;
+      color: #0b5c7a;
+    }
+
+    .badge-futuro {
+      background: #fef9e7;
+      color: #7d6608;
+    }
+
     /* Contador */
     .contador {
       font-size: 13px;
@@ -750,9 +802,22 @@
 
   <div class="card">
     <h2>Cadastrar usuário pendente</h2>
-    <p>Informe o e-mail ou o identificador do usuário para liberá-lo para preenchimento.</p>
-    <div class="inline-form">
-      <input type="text" id="novoUsuarioPendente" placeholder="Digite o e-mail do usuário..." />
+    <p>Informe o e-mail, a data de início e a data fim do período de acesso. O usuário só poderá preencher o formulário dentro desse intervalo.</p>
+    <div class="inline-form" style="align-items:flex-end;">
+      <div style="display:flex;flex-direction:column;flex:1;min-width:260px;">
+        <span class="date-range-label">E-mail / Identificador</span>
+        <input type="text" id="novoUsuarioPendente" placeholder="Digite o e-mail do usuário..." />
+      </div>
+      <div class="date-range-group">
+        <div class="date-range-item">
+          <span class="date-range-label">Data início</span>
+          <input type="date" id="pendenciaDataInicio" />
+        </div>
+        <div class="date-range-item">
+          <span class="date-range-label">Data fim</span>
+          <input type="date" id="pendenciaDataFim" />
+        </div>
+      </div>
       <button class="btn btn-primary" onclick="adicionarUsuarioPendente()">Adicionar pendência</button>
       <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Atualizar lista</button>
     </div>
@@ -1203,23 +1268,36 @@
     return;
   }
 
-  const linhas = lista.map(p => {
-    const userId  = escapeHtml(p.user_id || p.id || '—');
-    const criadoEm = p.criado_em || p.created_at || p.updated_at || null;
-    const data    = criadoEm ? new Date(criadoEm).toLocaleString('pt-BR') : '—';
+  const hoje = new Date().toISOString().slice(0, 10);
 
+  const linhas = lista.map(p => {
+    const userId   = escapeHtml(p.user_id || p.id || '—');
+    const criadoEm = p.criado_em || p.created_at || null;
+    const cadastro = criadoEm ? new Date(criadoEm).toLocaleDateString('pt-BR') : '—';
+    const inicio   = p.data_inicio || null;
+    const fim      = p.data_fim    || null;
+    const fmtData  = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('pt-BR') : '—';
+
+    let badgeClass, badgeText;
+    if (inicio && fim) {
+      if (hoje < inicio)   { badgeClass = 'status-badge badge-futuro';   badgeText = 'Futuro';   }
+      else if (hoje > fim) { badgeClass = 'status-badge badge-expirado'; badgeText = 'Expirado'; }
+      else                 { badgeClass = 'status-badge badge-vigente';  badgeText = 'Vigente';  }
+    } else {
+      badgeClass = 'status-badge status-pendente'; badgeText = 'Pendente';
+    }
+
+    const uid = String(p.user_id || p.id || '').replace(/'/g, "\'");
     return `
       <tr>
         <td class="td-email">${userId}</td>
-        <td>
-          <span class="status-badge status-pendente">Pendente</span>
-        </td>
-        <td style="white-space:nowrap;color:var(--muted);font-size:13px;">${data}</td>
+        <td><span class="${badgeClass}">${badgeText}</span></td>
+        <td style="white-space:nowrap;font-size:13px;">${fmtData(inicio)}</td>
+        <td style="white-space:nowrap;font-size:13px;">${fmtData(fim)}</td>
+        <td style="white-space:nowrap;color:var(--muted);font-size:13px;">${cadastro}</td>
         <td>
           <div class="acoes">
-            <button class="btn btn-danger" onclick="desmarcarPendente('${String(p.user_id || p.id || '').replace(/'/g, "\\'")}')">
-              Remover pendência
-            </button>
+            <button class="btn btn-danger" onclick="desmarcarPendente('${uid}')">Remover</button>
           </div>
         </td>
       </tr>`;
@@ -1231,7 +1309,9 @@
         <tr>
           <th>Identificador</th>
           <th>Status</th>
-          <th>Data</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Cadastrado em</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -1240,8 +1320,10 @@
 }
 
   async function adicionarUsuarioPendente() {
-    const input = document.getElementById('novoUsuarioPendente');
-    const valor = normalizarIdOuEmail(input.value);
+    const input      = document.getElementById('novoUsuarioPendente');
+    const dataInicio = document.getElementById('pendenciaDataInicio').value;
+    const dataFim    = document.getElementById('pendenciaDataFim').value;
+    const valor      = normalizarIdOuEmail(input.value);
 
     if (!valor) {
       showToast('Informe o e-mail ou user_id do usuário.', 'erro');
@@ -1249,11 +1331,23 @@
       return;
     }
 
+    if (!dataInicio || !dataFim) {
+      showToast('Informe a data de início e a data fim do período de acesso.', 'erro');
+      return;
+    }
+
+    if (dataFim < dataInicio) {
+      showToast('A data fim não pode ser anterior à data de início.', 'erro');
+      return;
+    }
+
     mostrarLoading('Adicionando pendência…');
     try {
-      await marcarUsuarioComoPendente(valor);
+      await marcarUsuarioComoPendente(valor, dataInicio, dataFim);
       showToast('Usuário marcado como pendente ✅', 'ok');
       input.value = '';
+      document.getElementById('pendenciaDataInicio').value = '';
+      document.getElementById('pendenciaDataFim').value = '';
       await carregarPendenciasAtivas();
     } catch (err) {
       console.error(err);

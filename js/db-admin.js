@@ -111,19 +111,33 @@ async function verificarUsuarioPendente(identificador) {
     .limit(1);
 
   if (error) throw error;
-  return Array.isArray(data) && data.length > 0;
+  if (!Array.isArray(data) || data.length === 0) return false;
+
+  const p = data[0];
+
+  // Se não há período definido, acesso é livre enquanto ativo
+  if (!p.data_inicio && !p.data_fim) return true;
+
+  // Verifica se a data atual está dentro do intervalo permitido
+  const hoje = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const dentroDoInicio = !p.data_inicio || hoje >= p.data_inicio;
+  const dentroDoFim    = !p.data_fim    || hoje <= p.data_fim;
+
+  return dentroDoInicio && dentroDoFim;
 }
 
-async function marcarUsuarioComoPendente(identificador) {
+async function marcarUsuarioComoPendente(identificador, dataInicio = null, dataFim = null) {
   const id = String(identificador || '').trim();
   if (!id) throw new Error('Identificador inválido');
 
   const agora = new Date().toISOString();
 
   const payload = {
-    user_id: id,
-    ativo: true,
+    user_id:      id,
+    ativo:        true,
     atualizado_em: agora,
+    data_inicio:  dataInicio || null,   // YYYY-MM-DD ou null
+    data_fim:     dataFim    || null,   // YYYY-MM-DD ou null
   };
 
   const { error } = await sbAdmin

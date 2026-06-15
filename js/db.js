@@ -48,25 +48,36 @@
 
 /* ── Permissões ──── */
 
-// No topo do db.js ou app.js
+// Verifica se o usuário está pendente E dentro do período de acesso permitido
 let _pendenciaCache = null;
 async function usuarioEstaPendente(userId = getEmailUsuario()) {
   if (_pendenciaCache !== null) return _pendenciaCache;
-  const { data, error } = await sb.from('pendencias').select('ativo').eq('user_id', userId).maybeSingle();
-  if (error) throw error;
-  _pendenciaCache = !!(data && data.ativo);
-  return _pendenciaCache;
-}
 
-async function usuarioEstaPendente(userId = getEmailUsuario()) {
   const { data, error } = await sb
     .from('pendencias')
-    .select('ativo')
+    .select('ativo, data_inicio, data_fim')
     .eq('user_id', userId)
     .maybeSingle();
 
   if (error) throw error;
-  return !!(data && data.ativo);
+  if (!data || !data.ativo) {
+    _pendenciaCache = false;
+    return false;
+  }
+
+  // Sem período definido = acesso livre enquanto ativo
+  if (!data.data_inicio && !data.data_fim) {
+    _pendenciaCache = true;
+    return true;
+  }
+
+  // Verifica se hoje está dentro do intervalo permitido
+  const hoje = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const dentroDoInicio = !data.data_inicio || hoje >= data.data_inicio;
+  const dentroDoFim    = !data.data_fim    || hoje <= data.data_fim;
+
+  _pendenciaCache = dentroDoInicio && dentroDoFim;
+  return _pendenciaCache;
 }
 
 async function exigirUsuarioPendente() {
