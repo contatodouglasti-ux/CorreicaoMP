@@ -77,7 +77,33 @@ const form = {
         {"id": "25.c", "pergunta": "Em caso negativo, justificar.", "tipo": "textarea", dependeDe: { id: "25.b", valor: "Não" }}
       ]
   },
+{
+    "nome": "Atuação geral",
+    "campos": [
+      {"id": "38", "pergunta": "O(a) membro(a) executa projetos pautados por objetivos estratégicos?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "38.a", "pergunta": "O(a) membro(a) possui projetos de iniciativa própria institucionalizados?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "38", valor: "Sim" }},
+      {"id": "38.b", "pergunta": "Em caso positivo, indicar o(s) projeto(s) executado(s) e o(s) respectivo(s) número(s) do(s) procedimento(s).", "tipo": "textarea", dependeDe: { id: "38", valor: "Sim" }},
+      {"id": "38.c", "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?", "tipo": "textarea", dependeDe: { id: "38", valor: "Sim" }},
+      {"id": "38.d", "pergunta": "O(a) membro(a) aderiu a algum projeto institucional?","tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "38.e", "pergunta": "Em caso positivo, indicar o(s) projeto(s) executado(s) e o(s) respectivo(s) número(s) do(s) procedimento(s).", "tipo": "textarea", dependeDe: { id: "38.d", valor: "Sim" }},
+      {"id": "38.f", "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?", "tipo": "textarea", dependeDe: { id: "38.d", valor: "Sim" }},
 
+      {"id": "39", "pergunta": "Utiliza indicadores sociais da sua área de atuação para tomada de decisão?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "39.a", "pergunta": "Especificar os indicadores utilizados.", "tipo": "textarea", dependeDe: { id: "39", valor: "Sim" }},
+      {"id": "40", "pergunta": "Utiliza, em suas atividades, mecanismos de resolução consensual (negociação, mediação, conciliação, práticas restaurativas, convenções processuais, acordos de resultado), bem como outros métodos e mecanismos eficazes na resolução de conflitos, controvérsias e problemas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "40.a", "pergunta": "Em caso positivo, indicar quais mecanismos utiliza e o número dos processos em que foram utilizados.", "tipo": "textarea", dependeDe: { id: "40", valor: "Sim" }},
+      {"id": "41", "pergunta": "Possui Plano de Atuação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "41.a", "pergunta": "Quais medidas adota para garantir a celeridade dos feitos (judiciais e extrajudiciais) sob sua responsabilidade?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "41", valor: "Sim" }},
+      {"id": "42", "pergunta": "Que medidas adota para garantir a celeridade dos feitos (judiciais e extrajudiciais) sob sua responsabilidade?", "tipo": "textarea"},
+      {"id": "43", "pergunta": "Prioriza a tutela coletiva, propondo ações individuais apenas quando absolutamente necessário?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "43.a", "pergunta": "Em caso afirmativo, exemplificar indicando número do(s) processo(s) em que houve prioridade da tutela coletiva.", "tipo": "textarea", dependeDe: { id: "43", valor: "Sim" }},
+      {"id": "44", "pergunta": "Consegue identificar resultados objetivos decorrentes de sua atuação institucional?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "44.a", "pergunta": "Em caso afirmativo, explicar quais são esses resultados.", "tipo": "textarea", dependeDe: { id: "44", valor: "Sim" }},
+      {"id": "45", "pergunta": "No exercício de sua atividade, há atuação com perspectiva de gênero?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "45.a", "pergunta": "Em caso afirmativo, especificar.", "tipo": "textarea", dependeDe: { id: "45", valor: "Sim" }}
+      
+    ]
+  },
    
   {
     "nome": "Dados específicos",
@@ -325,7 +351,7 @@ const form = {
     ]
   },
  {
-    "nome": "Estatísticas gerais",
+    "nome": "Dados estatísticos gerais do órgão",
 
     "campos": [
         {"id": "26.a", "pergunta": "Inquéritos Policiais recebidos", "tipo": "number","obrigatorio": false},
@@ -359,33 +385,7 @@ const form = {
       ]
   },
 
-  {
-    "nome": "Atuação geral",
-    "campos": [
-      {"id": "38", "pergunta": "O(a) membro(a) executa projetos pautados por objetivos estratégicos?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "38.a", "pergunta": "O(a) membro(a) possui projetos de iniciativa própria institucionalizados?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "38", valor: "Sim" }},
-      {"id": "38.b", "pergunta": "Em caso positivo, indicar o(s) projeto(s) executado(s) e o(s) respectivo(s) número(s) do(s) procedimento(s).", "tipo": "textarea", dependeDe: { id: "38", valor: "Sim" }},
-      {"id": "38.c", "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?", "tipo": "textarea", dependeDe: { id: "38", valor: "Sim" }},
-      {"id": "38.d", "pergunta": "O(a) membro(a) aderiu a algum projeto institucional?","tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "38.e", "pergunta": "Em caso positivo, indicar o(s) projeto(s) executado(s) e o(s) respectivo(s) número(s) do(s) procedimento(s).", "tipo": "textarea", dependeDe: { id: "38.d", valor: "Sim" }},
-      {"id": "38.f", "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?", "tipo": "textarea", dependeDe: { id: "38.d", valor: "Sim" }},
-
-      {"id": "39", "pergunta": "Utiliza indicadores sociais da sua área de atuação para tomada de decisão?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "39.a", "pergunta": "Especificar os indicadores utilizados.", "tipo": "textarea", dependeDe: { id: "39", valor: "Sim" }},
-      {"id": "40", "pergunta": "Utiliza, em suas atividades, mecanismos de resolução consensual (negociação, mediação, conciliação, práticas restaurativas, convenções processuais, acordos de resultado), bem como outros métodos e mecanismos eficazes na resolução de conflitos, controvérsias e problemas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "40.a", "pergunta": "Em caso positivo, indicar quais mecanismos utiliza e o número dos processos em que foram utilizados.", "tipo": "textarea", dependeDe: { id: "40", valor: "Sim" }},
-      {"id": "41", "pergunta": "Possui Plano de Atuação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "41.a", "pergunta": "Quais medidas adota para garantir a celeridade dos feitos (judiciais e extrajudiciais) sob sua responsabilidade?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "41", valor: "Sim" }},
-      {"id": "42", "pergunta": "Que medidas adota para garantir a celeridade dos feitos (judiciais e extrajudiciais) sob sua responsabilidade?", "tipo": "textarea"},
-      {"id": "43", "pergunta": "Prioriza a tutela coletiva, propondo ações individuais apenas quando absolutamente necessário?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "43.a", "pergunta": "Em caso afirmativo, exemplificar indicando número do(s) processo(s) em que houve prioridade da tutela coletiva.", "tipo": "textarea", dependeDe: { id: "43", valor: "Sim" }},
-      {"id": "44", "pergunta": "Consegue identificar resultados objetivos decorrentes de sua atuação institucional?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "44.a", "pergunta": "Em caso afirmativo, explicar quais são esses resultados.", "tipo": "textarea", dependeDe: { id: "44", valor: "Sim" }},
-      {"id": "45", "pergunta": "No exercício de sua atividade, há atuação com perspectiva de gênero?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "45.a", "pergunta": "Em caso afirmativo, especificar.", "tipo": "textarea", dependeDe: { id: "45", valor: "Sim" }},
-       {"id": "46", "pergunta": "Observações complementares.", "tipo": "textarea", "obrigatorio": false}
-    ]
-  },
+  
   {
     "nome": "Resolutiva e de relevância social",
     "campos": [
