@@ -45,7 +45,7 @@ function criarMenu() {
   titulo.className = 'sidebar-title';
   titulo.textContent = 'Seções';
   scroll.appendChild(titulo);
-//
+
   // Índices do grupo colapsável "ATUAÇÃO GERAL" (seções 5 a 17)
   const GRUPO_INICIO = 10;
   const GRUPO_FIM    =11;
