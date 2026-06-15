@@ -155,14 +155,27 @@
                     <label>Equipe de Apoio</label>
                     <input class="manual-input" type="text" id="equipe_apoio" placeholder="Digite o nome da equipe de apoio" />
                 </div>
-                <div class="field">
-                    <label>Data da Realização</label>
-                    <input class="manual-input" type="date" id="data_realizacao" />
-                </div>
+               <div class="datas-row">
+ <div class="field">
+  <label>Data da Correição</label>
+
+  <div class="datas-row">
+    <div class="campo">
+      <label>INICIO</label>
+      <input class="manual-input" type="date" id="data_realizacao">
+    </div>
+
+    <div class="campo">
+      <label>FIM</label>
+      <input class="manual-input" type="date" id="data_final">
+    </div>
+  </div>
+</div>
+ 
+</div>
                 <div class="field">
                     <label>Tipo de Correição</label>
                     <div class="check-row">
-                        <label class="check"><input type="radio" name="tipo_correcao" value="Presencial" /> Presencial</label>
                         <label class="check"><input type="radio" name="tipo_correcao" value="Virtual" /> Virtual</label>
                         <label class="check"><input type="radio" name="tipo_correcao" value="Híbrida" /> Híbrida</label>
                     </div>

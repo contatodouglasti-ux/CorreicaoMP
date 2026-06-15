@@ -516,3 +516,25 @@ input[type="text"].auto-expand {
     resize: vertical;
     white-space: pre-wrap;
 }
+.field {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.datas-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.datas-row .campo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.datas-row .manual-input {
+  width: 100%;
+}

@@ -328,39 +328,66 @@ function criarForm() {
 function renderCampo(parent, campo) {
   const wrapper = document.createElement('div');
   wrapper.dataset.campoId = campo.id;
+
   if (campo.dependeDe) {
-    wrapper.dataset.dependeDeId    = campo.dependeDe.id;
+    wrapper.dataset.dependeDeId = campo.dependeDe.id;
     wrapper.dataset.dependeDeValor = campo.dependeDe.valor;
   }
-  parent.appendChild(wrapper);
 
-  if (campo.tipo === 'number') {
-    // Layout horizontal: label à esquerda, input pequeno à direita
+  const ehDataCorrecao = campo.id === '1.2.inicio' || campo.id === '1.2.fim';
+
+  if (ehDataCorrecao) {
+    let grupo = parent.querySelector('.grupo-data-correcao');
+    if (!grupo) {
+      grupo = document.createElement('div');
+      grupo.className = 'grupo-data-correcao';
+      parent.appendChild(grupo);
+    }
+    wrapper.classList.add('data-correcao');
+    grupo.appendChild(wrapper);
+  } else {
+    parent.appendChild(wrapper);
+  }
+
+  if (campo.tipo === 'number' || campo.tipo === 'date') {
     wrapper.className = 'campo-numero-row';
 
     const l = document.createElement('label');
-    l.className = 'required campo-numero-label';
+    l.className = campo.obrigatorio !== false ? 'required campo-numero-label' : 'campo-numero-label';
     l.innerText = campo.pergunta;
-    l.htmlFor   = campo.id;
+    l.htmlFor = campo.id;
     wrapper.appendChild(l);
 
-    const inp     = document.createElement('input');
-    inp.type      = 'number';
-    inp.id        = campo.id;
-    inp.required  = campo.obrigatorio !== false;
+    const inp = document.createElement('input');
+    inp.type = campo.tipo;
+    inp.id = campo.id;
+    inp.required = campo.obrigatorio !== false;
     inp.className = 'campo-numero-input';
-    inp.min       = '0';
-    inp.onkeydown = function (e) {
-      if (e.key === '-' || e.key === '+') e.preventDefault();
+
+    if (campo.id === '8.a') {
+      inp.placeholder = 'Digite o valor';
+    }
+
+    if (campo.tipo === 'number') {
+      inp.min = '0';
+      inp.onkeydown = function (e) {
+        if (e.key === '-' || e.key === '+') e.preventDefault();
+      };
+    }
+
+    inp.oninput = function () {
+      if (this.disabled || this.readOnly) return;
+      autoSalvar();
     };
-inp.oninput = function () {
-  if (this.disabled || this.readOnly) return; // ← adicione
-  void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
-  autoSalvar();
-};
+
+    if (campo.tipo === 'date') {
+      inp.onchange = autoSalvar;
+    }
+
     wrapper.appendChild(inp);
     return;
   }
+
 
   const obrigatorio = campo.obrigatorio !== false;
 
@@ -432,6 +459,20 @@ inp.oninput = function () {
     };
     wrapper.appendChild(t);
   } else if (['text', 'date', 'time'].includes(campo.tipo)) {
+    //aqui coloca os campos lado a lado ( datas )
+    if (campo.id === '1.2.inicio' || campo.id === '1.2.fim') {
+  let grupo = parent.querySelector('.grupo-data-correcao');
+  if (!grupo) {
+    grupo = document.createElement('div');
+    grupo.className = 'grupo-data-correcao';
+    parent.appendChild(grupo);
+  }
+  wrapper.classList.add('data-correcao');
+  grupo.appendChild(wrapper);
+} else {
+  parent.appendChild(wrapper);
+}
+
     const inp = document.createElement('input');
     inp.type = campo.tipo;
     inp.id = campo.id;
@@ -457,6 +498,65 @@ inp.oninput = function () {
       dv.appendChild(lbl);
     });
     wrapper.appendChild(dv);
+  } else if (campo.tipo === 'date_ranger') {
+    // Renderiza dois inputs de data lado a lado com labels personalizadas
+    const rangeWrap = document.createElement('div');
+    rangeWrap.className = 'date-range-group';
+
+    // Campo INÍCIO
+    const wrapInicio = document.createElement('div');
+    wrapInicio.className = 'date-range-item';
+
+    const lblInicio = document.createElement('label');
+    lblInicio.textContent = campo.inicioLabel || 'INÍCIO';
+    lblInicio.htmlFor = campo.id + '.inicio';
+    lblInicio.className = obrigatorio ? 'required' : '';
+
+    const inpInicio = document.createElement('input');
+    inpInicio.type = 'date';
+    inpInicio.id = campo.id + '.inicio';
+    inpInicio.required = obrigatorio;
+
+    // Campo FIM
+    const wrapFim = document.createElement('div');
+    wrapFim.className = 'date-range-item';
+
+    const lblFim = document.createElement('label');
+    lblFim.textContent = campo.fimLabel || 'FIM';
+    lblFim.htmlFor = campo.id + '.fim';
+    lblFim.className = obrigatorio ? 'required' : '';
+
+    const inpFim = document.createElement('input');
+    inpFim.type = 'date';
+    inpFim.id = campo.id + '.fim';
+    inpFim.required = obrigatorio;
+
+    // Validação cruzada: fim não pode ser antes do início
+    inpInicio.onchange = function () {
+      autoSalvar();
+      if (inpFim.value && inpFim.value < this.value) {
+        inpFim.setCustomValidity('A data fim não pode ser anterior à data início.');
+      } else {
+        inpFim.setCustomValidity('');
+      }
+    };
+
+    inpFim.onchange = function () {
+      if (inpInicio.value && this.value < inpInicio.value) {
+        this.setCustomValidity('A data fim não pode ser anterior à data início.');
+      } else {
+        this.setCustomValidity('');
+      }
+      autoSalvar();
+    };
+
+    wrapInicio.appendChild(lblInicio);
+    wrapInicio.appendChild(inpInicio);
+    wrapFim.appendChild(lblFim);
+    wrapFim.appendChild(inpFim);
+    rangeWrap.appendChild(wrapInicio);
+    rangeWrap.appendChild(wrapFim);
+    wrapper.appendChild(rangeWrap);
   }
 }
 
