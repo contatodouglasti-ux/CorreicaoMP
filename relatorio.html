@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="css/stylerelatorio.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatório de Correição Ordinária</title>
+
     <style>
-        /* ── IMPRESSÃO: preservar layout idêntico à tela ── */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 12mm 12mm 12mm 12mm;
+                margin: 12mm;
             }
 
-            /* Ocultar topbar, botões e overlay */
             .topbar,
             .no-print,
             #loadingOverlay,
+            .proposal-sidebar,
             button,
             .btn,
             .actions,
@@ -24,7 +24,6 @@
                 display: none !important;
             }
 
-            /* Fundo branco, cores exatas */
             html, body {
                 background: #fff !important;
                 -webkit-print-color-adjust: exact !important;
@@ -32,14 +31,12 @@
                 color-adjust: exact !important;
             }
 
-            /* Remover margens externas da página */
             .page {
                 max-width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
 
-            /* Remover sombra do paper */
             .paper {
                 box-shadow: none !important;
                 border: none !important;
@@ -48,12 +45,10 @@
                 width: 100% !important;
             }
 
-            /* Preservar cores de fundo exatas */
             .field,
             .section-box,
             .proposal,
             .doc-block,
-            .proposal-text,
             .proposal-notice,
             th,
             .meta-grid,
@@ -63,17 +58,13 @@
                 color-adjust: exact !important;
             }
 
-            /* Inputs e textareas: manter borda fina, sem sombra */
             input[type="text"],
             input[type="date"],
             textarea {
                 border: 1px solid #d9e1ea !important;
                 box-shadow: none !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
             }
 
-            /* Manter grids de 2 colunas */
             .meta-grid,
             .proposal-fields,
             .two-col {
@@ -82,7 +73,6 @@
                 gap: 10px !important;
             }
 
-            /* Evitar quebra de página dentro de propostas */
             .proposal {
                 break-inside: avoid;
                 page-break-inside: avoid;
@@ -92,16 +82,8 @@
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
-
-            /* Radios visíveis */
-            input[type="radio"],
-            input[type="checkbox"] {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
         }
     </style>
-    <title>Relatório de Correição Ordinária</title>
 
     <script>
         (function () {
@@ -117,10 +99,20 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 
 <body>
+    <aside id="proposalSidebar" class="proposal-sidebar no-print">
+        <h2>Textos predefinidos</h2>
+        <div class="sidebar-hint">
+            Clique em um campo de <strong>Proposição</strong> no relatório e, em seguida, escolha um texto nesta lateral.
+        </div>
+        <div id="proposalSidebarStatus" class="sidebar-status">
+            Nenhum campo selecionado ainda.
+        </div>
+        <div id="proposalSidebarList" class="sidebar-list"></div>
+    </aside>
+
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <div id="loadingMsg">Carregando relatório…</div>
@@ -176,8 +168,8 @@
                 <div class="field">
                     <label>Tipo de Correição</label>
                     <div class="check-row">
-                        <label class="check"><input type="radio" name="tipo_correcao" value="Virtual" /> Virtual</label>
-                        <label class="check"><input type="radio" name="tipo_correcao" value="Híbrida" /> Híbrida</label>
+                    <label class="check"><input type="radio" name="tipo_correcao" value="Virtual" /> Virtual</label>
+                    <label class="check"><input type="radio" name="tipo_correcao" value="Híbrida" /> Híbrida</label>
                     </div>
                 </div>
             </div>
@@ -188,27 +180,27 @@
                 <div class="value" id="auto_motivacao"></div>
             </div>
 
-            <!-- ===== PROMOTORIA DE JUSTIÇA ===== -->
+            <!-- ==== PROMOTORIA DE JUSTIÇA ==== -->
             <h2>PROMOTORIA DE JUSTIÇA</h2>
 
             <h3>1. DADOS GERAIS</h3>
             <div class="meta-grid">
                 <div class="field">
                     <label>Órgão correicionado</label>
-                    <input class="manual-input" type="text" id="orgao_correicionado" placeholder="Digite o nome do órgão correicionado" />
+                    <span class="inline-value" id="DM_1.1"></span>
                 </div>
                 <div class="field">
                     <label>Nome do(a) titular</label>
-                    <input class="manual-input" type="text" id="nome_titular" placeholder="Digite o nome do(a) titular" />
+                    <input class="manual-input inline-value" type="text" id="DM_nome" placeholder="Digite o nome do(a) titular" />
                 </div>
                 <div class="field">
                     <label>Nome do(a) substituto(a)</label>
                     <div class="subtle">(caso o membro responsável pelo preenchimento do termo ou entrevistado não seja o titular do órgão correicionado)</div>
-                    <input class="manual-input" type="text" id="nome_substituto" placeholder="Digite o nome do(a) substituto(a)" style="margin-top:6px;" />
+                    <input class="manual-input inline-value" type="text" id="DM_nome_substituto" placeholder="Digite o nome do(a) substituto(a)" />
                 </div>
                 <div class="field">
                     <label>Órgão(s) jurisdicional(is) perante o(s) qual(is) atua</label>
-                    <input class="manual-input" type="text" id="orgaos_jurisdicionais" placeholder="Digite o nome dos órgãos jurisdicionais" />
+                    <span class="inline-value" id="DM_3"></span>
                 </div>
             </div>
 
@@ -224,20 +216,20 @@
             <table id="tabela-processos">
                 <thead>
                     <tr>
-                        <th style="width:18%">Espécie</th>
-                        <th style="width:24%">Número do processo/procedimento</th>
-                        <th style="width:20%">Data da instauração</th>
-                        <th style="width:32%">Situação detectada</th>
-                        <th style="width:6%">Ação</th>
+                    <th style="width:18%">Espécie</th>
+                    <th style="width:24%">Número do processo/procedimento</th>
+                    <th style="width:20%">Data da instauração</th>
+                    <th style="width:32%">Situação detectada</th>
+                    <th style="width:6%">Ação</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-                        <td><input class="table-input" placeholder="Número" /></td>
-                        <td><input class="table-input" type="date" /></td>
-                        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-                        <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
+                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
+                    <td><input class="table-input" placeholder="Número" /></td>
+                    <td><input class="table-input" type="date" /></td>
+                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+                    <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -245,187 +237,241 @@
                 <button class="btn btn-ok" type="button" onclick="adicionarLinha()">+ Adicionar linha</button>
             </div>
 
-            <!-- ===== 4. PROPOSIÇÕES GERAIS ===== -->
+            <!-- ==== 4. PROPOSIÇÕES GERAIS ==== -->
             <h2>4. PROPOSIÇÕES GERAIS</h2>
             <div class="subtle">Preenchimento obrigatório</div>
 
             <!-- 4.1 -->
             <div class="proposal">
-                <div class="proposal-title">4.1 Residência na comarca de lotação</div>
-                <div class="subtle">Caso não resida na comarca de lotação, especificar o local de residência, o motivo, a distância da sede e se está autorizado pelo Procurador-Geral (informar o ato autorizativo)</div>
-                <div class="subtle" style="margin-top:4px;">
-                    <div class="value" id="DM_2"></div>
-                    <div class="value" id="DM_3"></div>
-                </div>
-                <div class="proposal-fields">
-                    <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
-                    </div>
-                    <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_41" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_41" value="nao" /> Não</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="field" style="margin-top:12px;">
+    <div class="proposal-title">4.1 Residência na comarca de lotação</div>
+    <div class="subtle">
+        Caso não resida na comarca de lotação, especificar o local de residência, o motivo,
+        a distância da sede e se está autorizado pelo Procurador-Geral (informar o ato autorizativo)
+    </div>
+
+    <div class="field">
+        <div class="value" id="DM_6"></div>
+        <div class="value" id="DM_6.a"></div>
+    </div>
+
+    <div class="proposal-fields">
+        <div class="field">
+            <label>Observações da equipe</label>
+            <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+        </div>
+
+        <div class="field">
+            <label>Necessidade de proposição</label>
+            <div class="check-row">
+                <label class="check"><input type="radio" name="prop_41" value="sim" /> Sim</label>
+                <label class="check"><input type="radio" name="prop_41" value="nao" /> Não</label>
+            </div>
+        </div>
+        
+    </div>
+
+   <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">SUGERIR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar diante da constatação de que o(a) membro(a) correicionado(a) <span class="inline-value" id="auto_resposta_nome"></span> — <span class="inline-value" id="auto_resposta_lotacao"></span> reside fora da comarca em que é titular, sem autorização do Procurador-Geral de Justiça, circunstância identificada durante a visita correicional.</div>
-            </div>
+</div>
 
             <!-- 4.2 -->
             <div class="proposal">
                 <div class="proposal-title">4.2 Regularidade do comparecimento físico à Promotoria de Justiça</div>
-              
-                <div class="value" id="DM_4"></div>
+            <div class="field">
+                        <div class="value" id="DM_7"></div>
+                        <div class="value" id="DM_8"></div>
+                        <div class="value" id="DM_8.a"></div>
+            </div>
+
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_42" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_42" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_42" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_42" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">SUGERIR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar diante da constatação de que o(a) membro(a) correicionado(a) <span class="inline-value" id="auto_resposta_nome_42"></span> — <span class="inline-value" id="auto_resposta_lotacao_42"></span> não comparece regularmente à Promotoria em que é titular, circunstância identificada durante a visita correicional, para adoção das providências cabíveis.</div>
             </div>
 
             <!-- 4.3 -->
             <div class="proposal">
-                <div class="proposal-title">4.3 Participação em audiências judiciais de forma presencial</div>
-                <div class="value" id="DM_5"></div>
+                <div class="proposal-title">4.3.a Participação em audiências judiciais de forma presencial</div>
+                      <div class="field"> 
+                        <div class="value" id="DM_9"></div>
+                        <div class="value" id="DM_9.a"></div>
+            </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_43" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_43" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_43" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_43" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que participe de modo presencial das audiências judiciais, na forma da regulamentação interna da Instituição.</div>
+            </div>
+
+            <!-- 4.3.b -->
+            <div class="proposal">
+                <div class="proposal-title">4.3.b Participação em audiências extrajudiciais de forma presencial</div>
+                      <div class="field"> 
+                        <div class="value" id="DM_9.b"></div>
+                        <div class="value" id="DM_9.c"></div>
+            </div>
+                <div class="proposal-fields">
+                    <div class="field">
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    </div>
+                    <div class="field">
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_43" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_43" value="nao" /> Não</label>
+                    </div>
+                    </div>
+                </div>
+                <div class="field" style="margin-top:12px;">
+                    <label>Proposição</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
+                </div>
             </div>
 
             <!-- 4.4 -->
             <div class="proposal">
                 <div class="proposal-title">4.4 Participação em cursos de aperfeiçoamento, de capacitação em negociação e mediação e/ou sobre atuação resolutiva</div>
-                <div class="value" id="DM_6"></div>
+                <div class="field"> 
+                        <div class="value" id="DM_10"></div>
+                        <div class="value" id="DM_10.a"></div>
+                        <div class="value" id="DM_10.b"></div>
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_44" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_44" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_44" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_44" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que participe dos cursos de aperfeiçoamento disponibilizados pela Instituição, em especial sobre temas afins à atividade disciplinar, correicional e sobre resolutividade.</div>
             </div>
 
             <!-- 4.5 -->
             <div class="proposal">
                 <div class="proposal-title">4.5 Exercício do magistério, atividade de coaching, exercício da advocacia, participação de sociedade comercial ou organização não governamental</div>
                 
-                <div class="value" id="DM_10"></div><div class="value" id="DM_12"></div><div class="value" id="DM_14"></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_12"></div>
+                        <div class="value" id="DM_12.a"></div>
+                        <div class="value" id="DM_13"></div>
+                        <div class="value" id="DM_13.a"></div>
+                        <div class="value" id="DM_14"></div>
+                 </div>
+
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_45" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_45" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_45" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_45" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">SUGERIR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar diante da constatação de que o(a) membro(a) correicionado(a) <span class="inline-value" id="auto_nome_45a"></span> — <span class="inline-value" id="auto_lotacao_45a"></span> exerce atividade de coaching, vedada pela Resolução CNMP n. 273/2023, circunstância identificada durante a visita correicional, para adoção das providências cabíveis.
 
-SUGERIR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar diante da constatação de que o(a) membro(a) correicionado(a) <span class="inline-value" id="auto_nome_45b"></span> — <span class="inline-value" id="auto_lotacao_45b"></span> exerce advocacia fora das hipóteses autorizadas pela Resolução CNMP n. 16/2007, circunstância identificada durante a visita correicional, para adoção das providências cabíveis.
-
-SUGERIR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar diante da constatação de que o(a) membro(a) correicionado(a) <span class="inline-value" id="auto_nome_45c"></span> — <span class="inline-value" id="auto_lotacao_45c"></span> exerce comércio ou participa de sociedade comercial não apenas na condição de cotista ou acionista, fora, portanto, das hipóteses autorizadas pelo artigo 44, III, da LOMP, circunstância identificada durante a visita correicional, para adoção das providências cabíveis.</div>
             </div>
 
             <!-- 4.6 -->
             <div class="proposal">
                 <div class="proposal-title">4.6 Atuação Eficiente com a Cumulação voluntária de órgãos</div>
-                 <div class="value" id="DM_18"></div>
+                  <div class="field"> 
+                        <div class="value" id="DM_15"></div>
+                        <div class="value" id="DM_16"></div>
+                        <div class="value" id="DM_16.b"></div>
+                        <div class="value" id="DM_16.a"></div>
+                      
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_46" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_46" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_46" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_46" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que evite acumular voluntariamente outro(s) órgão(s) do Ministério Público, considerando que a cumulação tem prejudicado a atuação eficiente do órgão correicionado, circunstância identificada durante a visita correicional.</div>
             </div>
 
             <!-- 4.7 -->
             <div class="proposal">
                 <div class="proposal-title">4.7 Atendimento ao público: Realização bem como registro do atendimento ao público (atas, memórias, termos etc.). Como o membro procede e encaminha as demandas. Horário de atendimento ao público</div>
-                <div class="subtle"><em>(No termo – Dados da unidade – Perguntas 01, 02, 03 e 04)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_18" ></div>
+                        <div class="value" id="DM_18.e"></div>
+                     
+                      
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_47" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_47" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_47" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_47" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que efetue atendimento ao público, registrando-o e especificando, inclusive, os encaminhamentos adotados em cada caso.
+                <div class=RECOMENDAR ao(à) membro(a) correicionado(a) que efetue atendimento ao público, registrando-o e especificando, inclusive, os encaminhamentos adotados em cada caso.
 
 RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampliar o horário do atendimento ao público.</div>
             </div>
@@ -433,53 +479,59 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampli
             <!-- 4.8 -->
             <div class="proposal">
                 <div class="proposal-title">4.8 Quantidade de membros, servidores, terceirizados e estagiários lotados no órgão correicionado. Adequação de Recursos humanos à demanda da unidade</div>
-                <div class="subtle"><em>(No termo – Dados da Unidade – Perguntas 05 a 10)</em></div>
+               <div class="field"> 
+                        <div class="value" id="DM_19" ></div>
+                        <div class="value" id="DM_20"></div>
+                        <div class="value" id="DM_21"></div>
+                        <div class="value" id="DM_22"></div>
+                        <div class="value" id="DM_23"></div>
+                        <div class="value" id="DM_23.a"></div>
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">SUGERIR ao(à) Procurador(a)-Geral de Justiça que, respeitada a autonomia administrativa, avalie a possibilidade de ampliar o quadro de servidores da [INDICAR A UNIDADE], considerando</div>
             </div>
 
             <!-- 4.9 -->
             <div class="proposal">
                 <div class="proposal-title">4.9 Adequação das instalações físicas, mobiliário, equipamentos de informática e conectividade à internet</div>
-                <div class="subtle"><em>(No termo – Dados da Unidade – Perguntas 11 e 12)</em></div>
+                  <div class="field"> 
+                        <div class="value" id="DM_24" ></div>
+                        <div class="value" id="DM_25"></div>
+                        <div class="value" id="DM_25.b"></div>
+                       
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_49" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_49" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_49" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_49" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">SUGERIR ao(à) Procurador(a)-Geral de Justiça que modernize os computadores e/ou mobiliário da [INDICAR A UNIDADE e QUAIS ITENS DEVEM SER SUBSTITUÍDOS].
-
-SUGERIR ao(à) Procurador(a)-Geral de Justiça que, respeitada a autonomia administrativa, promova melhorias nas instalações físicas ou, não sendo possível, transfira o local de funcionamento da [INDICAR A UNIDADE] para local mais seguro e adequado para a execução de suas atividades.
-
-SUGERIR ao(à) Procurador(a)-Geral de Justiça que solucione o problema de conectividade à internet da [INDICAR A UNIDADE] para a normalização do trabalho.</div>
             </div>
 
             <!-- 4.10 -->
@@ -487,15 +539,15 @@ SUGERIR ao(à) Procurador(a)-Geral de Justiça que solucione o problema de conec
                 <div class="proposal-title">4.10 Estatísticas do Órgão</div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_410" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_410" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_410" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_410" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
@@ -503,26 +555,25 @@ SUGERIR ao(à) Procurador(a)-Geral de Justiça que solucione o problema de conec
                     <label>Proposições</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">SUGERIR ao(à) Procurador(a)-Geral de Justiça, respeitada a autonomia administrativa, que realize os estudos necessários para a extinção/criação/revisão das atribuições da(s) ____ Promotoria(s) de Justiça da Comarca de [INDICAR A UNIDADE], de acordo com os dados estatísticos levantados na visita correicional.
-
-SUGERIR ao(à) Procurador(a)-Geral de Justiça, respeitada a autonomia administrativa, que proceda à reavaliação das atuais atribuições da(s) Promotoria(s) de Justiça da Comarca de [INDICAR A UNIDADE] no que diz respeito à atuação na área de [INDICAR A ATRIBUIÇÃO], de acordo com os dados estatísticos levantados na visita correicional.</div>
             </div>
 
             <!-- 4.11 -->
             <div class="proposal">
                 <div class="proposal-title">4.11 Análise por amostragem de processos judiciais e procedimentos extrajudiciais. Medidas adotadas para garantir a celeridade dos feitos (judiciais e extrajudiciais)</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Pergunta 9)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_42" ></div>                   
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_411" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_411" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_411" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_411" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="proposal-notice">Obs.: Lançar nas observações de equipe todas as situações dignas de registro identificadas durante a análise por amostragem de processos judiciais e procedimentos extrajudiciais. A equipe deve criar outras proposições a partir das situações encontradas.</div>
@@ -530,21 +581,6 @@ SUGERIR ao(à) Procurador(a)-Geral de Justiça, respeitada a autonomia administr
                     <label>Proposições</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que fundamente os despachos de prorrogação das investigações e notícias de fato, com a indicação das diligências imprescindíveis, conforme estabelece a Resolução CNMP n. 174/2017.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) o incremento da atividade extrajudicial na defesa da tutela coletiva na área de atribuição [INDICAR A ATRIBUIÇÃO], tendo por base o plano de atuação e o planejamento estratégico da Instituição.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que priorize a conclusão dos inquéritos civis/procedimentos administrativos/inquéritos policiais/procedimentos investigatórios criminais (PICs) instaurados há mais de cinco anos.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que evite a manutenção dos procedimentos extrajudiciais por longos períodos sem conclusão, recomendando-se a movimentação ao menos a cada 90 (noventa) dias.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que promova o acompanhamento dos prazos das diligências requisitadas à autoridade policial ou por estas solicitadas no bojo de procedimentos investigativos criminais, realizando controle pelo sistema informatizado do Ministério Público ou, em não havendo tal funcionalidade, em planilha separada.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que promova o acompanhamento dos prazos das diligências requisitadas ou solicitadas a outros órgãos em procedimentos extrajudiciais, realizando controle pelo sistema informatizado do Ministério Público ou, em não havendo tal funcionalidade, em planilha separada.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que promova a correta classificação dos procedimentos sob sua responsabilidade, em conformidade com a tabela taxonômica de classes do CNMP.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que adote rotina de trabalho a fim de impulsionar com regularidade procedimentos extrajudiciais e os procedimentos judiciais sob sua responsabilidade, com ou sem carga ao Ministério Público.</div>
             </div>
 
             <!-- 4.12 -->
@@ -553,166 +589,169 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que adote rotina de trabalho a fim 
                 <div class="subtle">A equipe deve observar os processos e procedimentos com excesso de prazo e analisar se é caso das proposições abaixo, podendo criar outras se achar conveniente.</div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_412" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_412" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_412" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_412" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposições</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) Corregedor(a)-Geral a instauração de procedimento disciplinar uma vez que foram constatados, durante a visita correicional, procedimentos/processos com excesso de prazo na unidade correicionada [IDENTIFICAR O MEMBRO E A UNIDADE], para adoção das providências cabíveis.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) a regularização imediata dos feitos extrajudiciais e judiciais com excesso de prazo, devendo informar à Corregedoria-Geral, no prazo de 30 (trinta) dias, as medidas adotadas.
-
-RECOMENDAR ao(à) Corregedor(a)-Geral o acompanhamento funcional da unidade correicionada [IDENTIFICAR A UNIDADE] e/ou do respectivo membro [IDENTIFICAR O MEMBRO], pelo prazo de 180 dias, informando à Corregedoria Nacional, a cada trimestre, se foram cumpridas ou, em caso negativo, quais medidas foram adotadas pela Corregedoria-Geral visando ao seu cumprimento, sem prejuízo da adoção de providências disciplinares cabíveis, principalmente quanto aos seguintes pontos: a) regularização imediata dos IP, procedimentos extrajudiciais e processos judiciais com excesso de prazo; b) evitar a manutenção dos procedimentos extrajudiciais por longos períodos sem conclusão, recomendando-se a movimentação ao menos a cada 90 (noventa) dias.; c) pontualidade das manifestações, controlando os prazos das requisições à autoridade policial ou em procedimentos extrajudiciais, realizando controle pelo sistema informatizado do Ministério Público ou, em não havendo tal funcionalidade, em planilha separada.; d) motivação das prorrogações de notícias de fato e procedimentos extrajudiciais, apontando as diligências necessárias à continuidade do feito; e) observância da taxonomia, prazos de conversão e procedimentos previstos nos atos normativos do CNMP que tenham pertinência com suas atribuições, em especial as Resoluções CNMP nºs xxxx; f) o incremento da atividade extrajudicial na defesa da tutela coletiva na área de atribuição [INDICAR A ATRIBUIÇÃO], tendo por base o plano de atuação e o planejamento estratégico da Instituição.</div>
             </div>
 
             <!-- 4.13 -->
             <div class="proposal">
                 <div class="proposal-title">4.13 Existência de projetos pautados por objetivos estratégicos. Em havendo, se são institucionais e quais os resultados concretos obtidos pelo membro. Utilização de indicadores sociais para tomada de decisão</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Perguntas 04 e 05)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_38" ></div>  
+                        <div class="value" id="DM_38.a" ></div>  
+                        <div class="value" id="DM_38.b" ></div>                   
+                        <div class="value" id="DM_38.c" ></div>  
+                        <div class="value" id="DM_38.d" ></div>  
+                        <div class="value" id="DM_38.e" ></div>  
+                        <div class="value" id="DM_38.f" ></div> 
+                        <div class="value" id="DM_39" ></div> 
+                        
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_413" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_413" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_413" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_413" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva/adira a projetos pautados no planejamento estratégico da instituição, em especial na temática (indicar o tema/projeto).
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva indicador de resultado específico para medir os impactos do Projeto xxxxx/ dos projetos que desenvolve.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que utilize indicadores sociais, a partir de banco de dados oficiais, para tomada de decisões em relação às atividades e projetos que desenvolve.</div>
             </div>
 
             <!-- 4.16 -->
             <div class="proposal">
                 <div class="proposal-title">4.16 Utilização de mecanismos de resolução consensual dos conflitos, controvérsias e problemas. Interação no seio social para conhecer das principais demandas sobre violação de direitos e que digam respeito à atuação do MP. Realização de atividades não procedimentais de relevância social.</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Perguntas 06 e 07)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_40" ></div>  
+                        <div class="value" id="DM_40.a" ></div>                                              
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_416" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_416" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_416" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_416" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que participe dos cursos sobre métodos autocompositivos disponibilizados pela Instituição.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que analise a viabilidade de criar mecanismos de maior interação com a sociedade em geral, a exemplo de audiências públicas, contatos com lideranças comunitárias, reuniões com outros órgãos etc.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva atividades não procedimentais de relevância social, tais como palestras, participações em reuniões e outras atividades que resultem em medidas de inserção social.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que participe de grupos de trabalho ou de reuniões com representantes da sociedade para identificação de demandas de relevância social.</div>
             </div>
 
             <!-- 4.17 -->
             <div class="proposal">
                 <div class="proposal-title">4.17 Plano de Atuação e prévio diagnóstico das carências e necessidades sociais para a construção do Plano</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Pergunta 08)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_41" ></div>  
+                        <div class="value" id="DM_41.a" ></div>                                              
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_417" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_417" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_417" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_417" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que elabore Plano de Atuação quanto às atividades desenvolvidas pautado no planejamento estratégico da Instituição, a partir do diagnóstico prévio das carências e necessidades sociais da sua área de atuação, podendo utilizar como base o modelo disponível no anexo da Recomendação CN-CNMP n. 01/2023.</div>
             </div>
 
             <!-- 4.18 -->
             <div class="proposal">
                 <div class="proposal-title">4.18 Medidas adotadas para garantir a celeridade dos feitos (judiciais e extrajudiciais)</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Pergunta 09)</em></div>
+               <div class="field"> 
+                        <div class="value" id="DM_422" ></div>                                              
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_418" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_418" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_418" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_418" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que adote rotina de trabalho a fim de impulsionar com regularidade procedimentos extrajudiciais e os procedimentos judiciais sob sua responsabilidade, com ou sem carga ao Ministério Público.</div>
             </div>
 
             <!-- 4.19 -->
             <div class="proposal">
                 <div class="proposal-title">4.19 Quanto a coletivização da demanda e sua priorização, sem prejuízo dos atendimentos individuais. Aferição de relevantes resultados quantificáveis relacionados à atuação institucional</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Perguntas 10 e 11)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_43" ></div>
+                        <div class="value" id="DM_43.a" ></div>  
+                        <div class="value" id="DM_44" ></div>  
+                        <div class="value" id="DM_44.a" ></div>  
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_419" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_419" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_419" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_419" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, a partir do conhecimento de demandas individuais, averigue se é o caso de coletivização da demanda a fim de proporcionar uma atuação mais eficiente do órgão ministerial.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que priorize a atuação na tutela coletiva, sem prejuízo aos atendimentos individuais e encaminhamentos necessários.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva mecanismo que quantifique relevantes resultados de sua atuação institucional.</div>
             </div>
 
             <!-- 4.20 -->
             <div class="proposal">
                 <div class="proposal-title">4.20 Atuação com perspectiva de gênero</div>
-                <div class="subtle"><em>(Termo - Atuação Geral – Pergunta 12)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_45" ></div>
+                        <div class="value" id="DM_45.a" ></div>  
+                     
+                 </div>
                 <div class="proposal-notice">
                     <strong>Objetivo:</strong> Verificar se o(a) membro(a) correicionado(a) vem atuando com perspectiva de gênero.<br><br>
                     <strong>Sugestões para atuação de membros(as):</strong><br>
@@ -722,71 +761,59 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva mecanismo que quanti
                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_420" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_420" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_420" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_420" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, no exercício de sua atividade, atue com perspectiva de gênero em todos os momentos de intervenção do Ministério Público, aplicando, no que for cabível, os termos do Protocolo para Julgamento com Perspectiva de Gênero do Conselho Nacional de Justiça (Resolução CNJ n. 492/2023); das Diretrizes nacionais de investigação criminal com perspectiva de gênero: princípios para atuação com perspectiva de gênero para o Ministério Público e a Segurança Pública do Brasil e as Diretrizes Nacionais Feminicídio: investigar, processar e julgar com perspectiva de gênero as mortes violentas de mulheres, da ONU, a fim de evitar exteriorização de preconceitos e estereótipos de gênero e considerações depreciativas sobre o comportamento da vítima.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, no exercício de sua atividade, atue de forma a valorizar a palavra da vítima, garantindo-lhe peso probatório diferenciado.
-
-SOLICITAR ao CEAF que realize cursos de formação e desenvolva projetos institucionais para estimular e induzir a atuação do Ministério Público com perspectiva de gênero, orientando e capacitando os membros. (CASO SE CONSTATE, DE FORMA GERAL, QUE NÃO HÁ ATUAÇÃO COM PERSPECTIVA DE GÊNERO NA INSTITUIÇÃO)</div>
             </div>
 
             <!-- 4.21 -->
             <div class="proposal">
                 <div class="proposal-title">4.21 Da atuação resolutiva e de relevância social</div>
-                <div class="subtle"><em>(Termo – Item 3)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_47" ></div>
+                        <div class="value" id="DM_47.b" ></div>
+                        <div class="value" id="DM_48" ></div>
+                        <div class="value" id="DM_48.b" ></div>
+                        <div class="value" id="DM_49" ></div>
+                        <div class="value" id="DM_50" ></div>
+                        <div class="value" id="DM_51" ></div>
+                        <div class="value" id="DM_52" ></div>  
+                        <div class="value" id="DM_53" ></div>
+                          
+                     
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_421" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_421" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_421" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_421" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que faça a utilização racional e adequada da judicialização, observada a possibilidade de utilização de métodos de resolução consensual de conflitos;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue de forma a garantir o andamento célere e a duração razoável dos feitos sob a responsabilidade Ministerial, inclusive mediante interposição de recursos e realização de manifestações orais;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue de forma a potencializar a dimensão da eficiência na reparação dos danos eventualmente ocorridos;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que observe a condução direta e diligente dos expedientes extrajudiciais, mediante despachos objetivos e tendentes à conclusão da investigação, com vistas à delimitação do objeto e à individualização dos fatos em apuração;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que avalie continuamente a real necessidade de novas diligências nos procedimentos extrajudiciais, com a observância da duração razoável do expediente;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) a adoção de instrumento que permita o acompanhamento contínuo da tramitação, instrução e fiscalização dos procedimentos investigatórios prioritários e dos processos judiciais mais relevantes, nas causas em que o Ministério Público for parte;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) atuação efetiva na tutela coletiva e na propositura de ações individuais em situações absolutamente necessárias, sem prejuízo dos atendimentos individuais e encaminhamentos devidos;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) atuação alinhada ao Planejamento Estratégico Institucional, aos Planos de Atuação da unidade;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) a atuação extrajudicial na resolução de conflitos estruturais, mediante mediação, negociação, construção de consensos e compromissos significativos para a autocomposição estrutural, sem prejuízo da via judicial quando necessária, inclusive com a busca de soluções por autocomposição em juízo;
-
-RECOMENDAR ao(à) membro(a) correicionado(a) a triagem adequada das comunicações da Ouvidoria e análise tempestiva de notícias de fato, de modo a evitar a instauração de procedimentos inviáveis e a implementar a pronta tramitação dos expedientes relevantes.</div>
             </div>
 
-            <!-- ===== 5. INFÂNCIA E JUVENTUDE ===== -->
+            <!-- ==== 5. INFÂNCIA E JUVENTUDE ==== -->
             <h2>5. PROPOSIÇÕES ESPECÍFICAS — INFÂNCIA E JUVENTUDE</h2>
             <div class="nao-aplica-row">
                 <label class="check"><input type="checkbox" id="na_5" /> Não se aplica</label>
@@ -795,308 +822,267 @@ RECOMENDAR ao(à) membro(a) correicionado(a) a triagem adequada das comunicaçõ
             <!-- 5.1 -->
             <div class="proposal">
                 <div class="proposal-title">5.1 Atuação em rede</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 01)</em></div>
+                   <div class="field"> 
+                        <div class="value" id="DM_54" ></div>
+                        <div class="value" id="DM_54.a" ></div>                                                                
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_51" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_51" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_51" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_51" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que realize reuniões periódicas com a rede para discussão de casos ou ainda para a implementação de políticas públicas na área da infância e juventude, com a construção de fluxos, protocolos e planos de atuação, atuando extrajudicialmente para garantia e pleno funcionamento da rede de proteção à criança e ao adolescente, conforme artigo 70-A do ECA e artigo 4º da Recomendação CNMP n. 33/2016. (CASO O COLEGA NÃO REALIZE REUNIÃO DE REDE)
-
-OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que realize reuniões com a rede, com periodicidade definida e sempre que necessário, para discussão de casos ou ainda para a implementação de políticas públicas na área da infância e juventude, com a construção de fluxos, protocolos e planos de atuação, atuando extrajudicialmente para garantia e pleno funcionamento da rede de proteção à criança e ao adolescente, conforme artigo 70-A do ECA e artigo 4º da Recomendação CNMP n. 33/2016. (CASO O COLEGA AFIRME REALIZAR REUNIÕES DE REDE, MAS DE FORMA ESPORÁDICA, APENAS "QUANDO NECESSÁRIO")
-
-E/OU
-
-SOLICITAR ao CAOIJ que, juntamente com o CEAF, realize cursos de formação que visem estimular e induzir a atuação do Ministério Público na articulação da rede de proteção da área da infância e juventude, com a construção de fluxos, protocolos e planos de atuação, fomentando a atuação extrajudicial para garantia e pleno funcionamento do Sistema de Garantia de Direitos, conforme artigo 70-A do ECA e artigo 4º da Recomendação CNMP n. 33/2016. (CASO SE CONSTATE, DE FORMA GERAL, QUE OS COLEGAS NÃO ATUAM PROATIVAMENTE NA ARTICULAÇÃO DA REDE)</div>
             </div>
 
             <!-- 5.2 -->
             <div class="proposal">
                 <div class="proposal-title">5.2 Visitas às Unidades de Acolhimento e existência de Serviço de Acolhimento em Família Acolhedora</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Perguntas 02 e 03)</em></div>
+                   <div class="field"> 
+                        <div class="value" id="DM_55" ></div>
+                        <div class="value" id="DM_56" ></div>    
+                                                                                       
+                 </div>
+
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_52" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_52" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_52" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_52" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que instaure o procedimento administrativo de acompanhamento e fiscalização de instituições a fim de registrar as visitas realizadas com base na Resolução CNMP n. 293/2024. (ALTERAÇÃO NORMATIVA PREVÊ A NECESSIDADE DE PA MESMO SEM DETECTAR IRREGULARIDADES)
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a), por meio de procedimento adequado, a adoção de medidas extrajudiciais e judiciais cabíveis a fim de sanar as irregularidades constatada após as visitas realizadas, nos termos da Resolução CNMP n. 293/2024. (CASO SE VERIFIQUE QUE O COLEGA NÃO ESTÁ ATUANDO PARA SANAR AS IRREGULARIDADES CONSTATADAS)
-
-E/OU
-
-SOLICITAR ao CAOIJ que, juntamente como CEAF, realize cursos de formação sobre a política de assistência social (SUAS) destinadas a membros e servidores do Ministério Público, com foco na Resolução Conjunta CONANDA/CNAS 01/2009, bem como garanta que as visitas realizadas pelos membros aos serviços de acolhimento sejam acompanhadas por equipe técnica multidisciplinar, nos termos da Resolução 71/2011. (CASO SE CONSTATE, DE FORMA GERAL, QUE OS COLEGAS NÃO CONHECEM A POLÍTICA DE ASSISTÊNCIA SOCIAL)
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue para implementar o serviço de acolhimento em família acolhedora nos municípios em que atua, por meio da instauração do competente procedimento extrajudicial, considerando a existência de demanda para acolhimento na comarca e o descumprimento, pelo gestor, da preferência prevista no artigo 34, §1º, do ECA e o artigo 12 da Resolução CNMP n. 293/2024. (CASO SE VERIFIQUE QUE HÁ DEMANDA PARA ACOLHIMENTO NA COMARCA E NÃO TENHA SERVIÇO DE FAMÍLIA ACOLHEDORA IMPLEMENTADO)
-
-OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue para qualificar o serviço de acolhimento em família acolhedora existente, verificando a existência de equipe técnica adequada, nos termos da NOB/RH/SUAS, bem como se a metodologia adotada pelo serviço está adequada, desde a captação/seleção de famílias acolhedoras e sua formação inicial, até o atendimento das crianças acolhidas, observando os parâmetros da Recomendação CNMP n. 82/2021 e da Recomendação Conjunta CNJ/CNMP/MDS/MDHC/MPO/CNAS/CONANDA n. 2/2024, assim como do Caderno de Orientações Técnicas sobre acolhimento familiar. (CASO HAJA ACOLHIMENTO FAMILIAR NA COMARCA PORÉM O SERVIÇO NÃO ESTEJA FUNCIONANDO DE FORMA ADEQUADA)
-
-E/OU
-
-SOLICITAR ao CAOIJ que, juntamente como CEAF, realize cursos de formação com vistas a estimular e induzir a atuação do Ministério Público no fomento à criação, expansão e/ou estruturação de serviços de acolhimento em família acolhedora, bem como para que dialogue com o Poder Executivo Estadual para garantir a implantação da regionalização da política de assistência social, nos termos da LOAS e da Resolução CNAS n. 31/2013. (CASO SE CONSTATE, DE FORMA GERAL, QUE NÃO HÁ ATUAÇÃO ORGÂNICA DO MP NO FOMENTO AO ACOLHIMENTO FAMILIAR)</div>
             </div>
 
             <!-- 5.3 -->
             <div class="proposal">
                 <div class="proposal-title">5.3 Verificação do Sistema Nacional de Adoção – SNA</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 4)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_57" ></div>
+                        
+                                                                                       
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_53" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_53" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_53" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_53" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que acompanhe e fiscalize, periodicamente, a correta alimentação do Sistema Nacional de Adoção e Acolhimento, gerando login e senha próprios, a fim de garantir que o sistema retrate com exatidão a situação das crianças e adolescentes acolhidos e visando à observância criteriosa da ordem de convocação dos habilitados à adoção. (CASO SE VERIFIQUE QUE O COLEGA NÃO TEM FEITO A FISCALIZAÇÃO DO SNA)
-
-E/OU
-
-SOLICITAR ao CAOIJ que providencie aos membros com atribuição na área da infância e juventude login e senha para acesso ao Sistema Nacional de Adoção e Acolhimento (SNA), bem como que estimule periodicamente os membros a acessarem o sistema a fim de garantir que o sistema retrate com exatidão a situação das crianças e adolescentes acolhidos. (CASO SE CONSTATE, DE FORMA GERAL, QUE OS COLEGAS NÃO ACESSAM O SNA)</div>
             </div>
 
             <!-- 5.4 -->
             <div class="proposal">
                 <div class="proposal-title">5.4 Análise de processos e procedimentos de crianças e adolescentes em situação de acolhimento, inclusive daquelas acolhidas a mais de 18 meses. Crianças acolhidas em comarca diversa</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Perguntas 05, 06 e 07)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_59" ></div>
+                        <div class="value" id="DM_60" ></div>
+                        <div class="value" id="DM_60.a" ></div>
+                 </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_54" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_54" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_54" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_54" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que observe o prazo legal, contados da data de recebimento do relatório da equipe técnica, para o ajuizamento de eventual ação de destituição do poder familiar ou outra que garanta o contraditório aos familiares. (SEMPRE QUE POSSÍVEL ANALISAR ALGUM PROCESSO DE ACOLHIMENTO E PERGUNTAR SE TEM ALGUMA CRIANÇA ACOLHIDA SEM PROCEDIMENTO JUDICIAL EM CONTRADITÓRIO. CASO SE VERIFIQUE ALGUMA CRIANÇA ACOLHIDA SEM PROCESSO JUDICIAL, FAZER ESSA DETERMINAÇÃO)
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue para construir um fluxo com a rede de proteção (serviço de acolhimento, Conselho Tutelar etc.) para os casos de acolhimento emergencial de crianças e adolescentes, evitando acolhimentos precipitados, sem informações suficientes e garantindo a judicialização do caso com a maior brevidade possível, em não sendo possível a imediata reintegração familiar. (PERGUNTAR SE A MAIORIA DAS CRIANÇAS ACOLHIDAS FOI ACOLHIDA DIRETAMENTE PELO CONSELHO TUTELAR OU HOUVE PREVIA AÇÃO JUDICIAL PROMOVIDA PELO MP. NA PRIMEIRA HIPÓTESE, FAZER ESSA RECOMENDAÇÃO)
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue para garantir a efetiva participação da criança ou adolescente acolhido no processo de revisão da medida de acolhimento, de forma que ele tenha sua opinião devidamente considerada, na forma do artigo 100, parágrafo único, inciso XII, do ECA, bem como que para a elaboração e revisão do PIA sejam observados os anexos do documento de orientações técnicas para elaboração do PIA, do Ministério do Desenvolvimento Social.
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que atue para qualificar a intervenção da rede nos casos de acolhimento, em especial por meio da revisão dos PIA, a fim de que a equipe técnica do serviço de acolhimento adote as medidas necessárias para o fortalecimento da autonomia do acolhido, a garantia de sua escolarização e profissionalização, nesta última hipótese apenas se tiver idade superior a 14 (quatorze) anos. (CASO SE CONSTATE QUE EXISTEM ADOLESCENTES ACOLHIDOS HÁ MAIS DE 18 MESES NA COMARCA SEM PERSPECTIVA DE RETORNO AO CONVÍVIO FAMILIAR OU ADOÇÃO)
-
-E/OU
-
-SUGERIR ao(à) Procurador(a)-Geral de Justiça que promova, na Comarca de XXXXX, que conta com excessivo número de crianças e adolescentes acolhidos, mutirões/esforços concentrados de Promotores(as) de Justiça, com designação de auxiliares se necessário, assim como de membros(as) das equipes multidisciplinares, para possibilitar a revisão criteriosa de todos os casos, conforme estabelece o artigo 2º, I, da Recomendação CNMP n. 33/2016. (CASO SE CONSTATE NÚMERO EXCESSIVO DE CRIANÇAS ACOLHIDAS NA COMARCA)
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que evite o encaminhamento de crianças e adolescentes para serviços de acolhimento que não sejam os mais próximos da residência destes, atuando para garantir o retorno de eventuais acolhidos em locais cuja distância seja superior a 2 (duas) horas de deslocamento (conforme artigo 16, § 2º, da Resolução CNAS n. 31/2013). (CASO SE CONSTATE QUE EXISTEM ACOLHIDOS PELA COMARCA EM ABRIGOS DISTANTES)</div>
             </div>
 
             <!-- 5.5 -->
             <div class="proposal">
                 <div class="proposal-title">5.5 Oitiva informal e atuação integrada na socioeducação</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 8)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_61" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_55" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_55" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_55" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_55" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que realize oitivas informais antes de deliberar pelo ajuizamento ou não da representação em face do adolescente a quem se atribua ato infracional, preferencialmente por meio da pactuação de fluxo com a Polícia Civil (de modo a agilizar o comparecimento de adolescentes e familiares na Promotoria de Justiça) e com o Poder Judiciário e com o CREAS (para garantir que eventual medida socioeducativa aplicada seja iniciada com a maior brevidade possível). (CASO SE CONSTATE QUE O COLEGA NÃO REALIZA AS OITIVAS INFORMAIS E/OU NÃO HAJA FLUXO PACTUADO COM OS DEMAIS ÓRGÃOS)</div>
             </div>
 
             <!-- 5.6 -->
             <div class="proposal">
                 <div class="proposal-title">5.6 Visitas às unidades de internação e semiliberdade e/ou nas unidades executoras do meio aberto. Política de atendimento socioeducativo</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Perguntas 09 e 10)</em></div>
+                   <div class="field"> 
+                        <div class="value" id="DM_63" ></div>
+                        <div class="value" id="DM_63.b" ></div>
+                        <div class="value" id="DM_64" ></div>
+                   
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_56" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_56" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_56" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_56" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue para sanar as irregularidades constatadas nas visitas realizadas com base nas Resoluções CNMP nº 67/2011 e 204/2019. (CASO SE VERIFIQUE, APÓS A LEITURA DO ÚLTIMO RELATÓRIO DE VISITA, QUE O COLEGA NÃO ESTÁ ATUANDO PARA SANAR AS IRREGULARIDADES CONSTATADAS)
-
-E/OU
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que adote medidas administrativas ou judiciais voltadas à implementação de políticas socioeducativas em âmbito estadual (em havendo atribuição) e/ou municipal, nos moldes do previsto pela Lei n. 12.594/2012 (Lei do SINASE), o que pressupõe a aprovação dos respectivos planos decenais de atendimento socioeducativo e a criação e manutenção dos programas de atendimento socioeducativo que lhes competem, conforme art. 4º da Resolução nº 204/2019, art. 4º da Resolução CNMP nº 67/2011 e art. 5º da Recomendação CNMP n. 26/2015. (CASO SE VERIFIQUE QUE NÃO HÁ PLANO MUNICIPAL DE ATENDIMENTO SOCIOEDUCATIVO OU NÃO HÁ ATUAÇÃO ADEQUADA PARA IMPLEMENTAR AS POLÍTICAS SOCIOEDUCATIVAS)
-
-E/OU
-
-SOLICITAR ao CAOIJ que, juntamente com o CEAF, realize cursos de formação sobre a política socioeducativa (SINASE) destinadas a membros e servidores do Ministério Público, bem como garanta que as visitas realizadas pelos membros(as) às unidades de internação e semiliberdade e/ou nas unidades executoras do meio aberto sejam acompanhadas por equipe técnica multidisciplinar, nos termos das Resoluções CNMP nº 67/2011 e 204/2019. (CASO SE CONSTATE, DE FORMA GERAL, QUE OS COLEGAS NÃO CONHECEM O SINASE E NÃO SÃO ACOMPANHADOS POR EQUIPE TÉCNICA NAS VISITAS)</div>
             </div>
 
             <!-- 5.7 -->
             <div class="proposal">
                 <div class="proposal-title">5.7 Plano Municipal da Primeira Infância</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 11)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_65" ></div>
+                       
+                   
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_57" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_57" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_57" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_57" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue para garantir a implementação do Plano Municipal pela Primeira Infância nos municípios em que atua, proporcionando discussão ampla com a sociedade e com o Conselho Municipal dos Direitos da Criança e do Adolescente, bem como para a criação do comitê intersetorial de políticas públicas para a primeira infância com a finalidade de assegurar a articulação das ações voltadas à proteção e à promoção dos direitos da criança, nos termos do art. 7º, da Lei nº 13.257/16. (CASO SE VERIFIQUE QUE NÃO HÁ PLANO MUNICIPAL OU COMITÊ DA PRIMEIRA INFÂNCIA)</div>
             </div>
 
             <!-- 5.8 -->
             <div class="proposal">
                 <div class="proposal-title">5.8 Fundo da Infância</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 12)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_66" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_58" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_58" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_58" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_58" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue para que haja a implementação e regular funcionamento do Fundo na Infância nos municípios que integram a sua comarca de atuação, realizando-se também tratativas junto ao Conselho Municipal dos Direitos da Criança e do Adolescente para adequada deliberação sobre o plano de ação e aplicação, além da realização de campanhas de estímulo à destinação de parcela do imposto de renda ao FIA municipal. (CASO SE VERIFIQUE IRREGULARIDADE NO FIA)</div>
             </div>
 
             <!-- 5.9 -->
             <div class="proposal">
                 <div class="proposal-title">5.9 Escuta especializada</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 13)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_67" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_59" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_59" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_59" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_59" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, em parceria com a Promotoria de Justiça com atribuição nos crimes contra criança e adolescente, atue para que haja a implementação nos municípios da comarca do sistema de garantia de direitos das crianças e adolescentes vítimas e testemunhas de violência tal qual previsto na Lei n. 13.431/2017, na Lei n. 14.344/2022 (Lei Henry Borel) e no Decreto Federal n. 9.603/2018, empreendendo esforços para exigir do Poder Executivo local a previsão e implementação de uma política pública intersetorial de enfrentamento à violência por meio de normativas municipais, com a criação do comitê de gestão colegiada (Resolução CONANDA n. 235/23), definição de fluxos e protocolos de atendimento, realização da escuta especializada, avaliação de riscos e planejamento intersetorial de aplicação de medidas de proteção, nos termos do artigo 3º da Resolução CNMP n. 287/2024. (CASO SE CONSTATE AUSÊNCIA DE ATUAÇÃO PARA IMPLEMENTAR A ESCUTA ESPECIALIZADA)</div>
             </div>
 
             <!-- 5.10 -->
             <div class="proposal">
                 <div class="proposal-title">5.10 Atuação integrada nos casos de violência contra criança ou adolescente</div>
-                <div class="subtle"><em>(Termo – INFÂNCIA E JUVENTUDE – Pergunta 14)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_68" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_510" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_510" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_510" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_510" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva atuação integrada com os membros das diferentes áreas (infância e juventude, criminal, violência doméstica e família), na efetiva defesa e proteção das crianças e adolescentes vítimas ou testemunhas de violência, por meio da pactuação de fluxos e compartilhamento de informações, como determinado na Resolução CNMP n. 287/2024. (CASO SE CONSTATE FALTA DE ATUAÇÃO ARTICULADA ENTRE AS PJS)
-
-E/OU
-
-SOLICITAR ao CAOIJ, CAOCIVEL e CAOCRIM que adotem providências administrativas para a promoção da atuação integrada do Ministério Público para a efetiva defesa e proteção das crianças e adolescentes vítimas ou testemunhas de violência, por meio do cumprimento das diretrizes do artigo 10 da Resolução CNMP 287/24, bem como para que os(as) membro(as) sejam bem capacitados e orientados a cumprir as atribuições previstas no artigo 3º da mencionada resolução. (CASO SE CONSTATE A NECESSIDADE DE FORMAÇÃO DOS MEMBROS SOBRE A LEI 13.431/17)</div>
             </div>
 
-            <!-- ===== 6. CRIMES CONTRA CRIANÇA E ADOLESCENTES ===== -->
+            <!-- ==== 6. CRIMES CONTRA CRIANÇA E ADOLESCENTES ==== -->
             <h2>6. PROPOSIÇÕES ESPECÍFICAS — CRIMES CONTRA CRIANÇA E ADOLESCENTES</h2>
             <div class="nao-aplica-row">
                 <label class="check"><input type="checkbox" id="na_6" /> Não se aplica</label>
@@ -1105,66 +1091,54 @@ SOLICITAR ao CAOIJ, CAOCIVEL e CAOCRIM que adotem providências administrativas 
             <!-- 6.1 -->
             <div class="proposal">
                 <div class="proposal-title">6.1 Atuação na implementação da política pública de enfrentamento à violência contra crianças e adolescentes vítimas ou testemunhas de violência da Lei nº 13.431/17, bem como da escuta especializada, conforme o Decreto Federal nº 9.603/2018</div>
-                <div class="subtle"><em>(Termo - Crimes contra Crianças e Adolescentes – Pergunta 01)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_70" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_61" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_61" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_61" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_61" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, em parceria com a Promotoria de Justiça com atribuição na área da infância e juventude, atue para que haja a implementação nos municípios da comarca do sistema de garantia de direitos das crianças e adolescentes vítimas e testemunhas de violência tal qual previsto na Lei n. 13.431/2017, na Lei n. 14.344/2022 (Lei Henry Borel) e no Decreto Federal n. 9.603/2018, empreendendo esforços para exigir do Poder Executivo local a previsão e implementação de uma política pública intersetorial de enfrentamento à violência por meio de normativas municipais, com a criação do comitê de gestão colegiada (Resolução CONANDA n. 235/23), definição de fluxos e protocolos de atendimento, realização da escuta especializada, avaliação de riscos e planejamento intersetorial de aplicação de medidas de proteção, nos termos do artigo 3º da Resolução CNMP n. 287/2024.
-
-E/OU
-
-SOLICITAR ao CAOIJ que adote providências administrativas para a promoção da atuação integrada do Ministério Público para a efetiva defesa e proteção das crianças e adolescentes vítimas ou testemunhas de violência, por meio do cumprimento das diretrizes do artigo 10 da Resolução CNMP n. 287/24, bem como para que os membros também sejam capacitados e orientados a cumprir as atribuições previstas no artigo 3º da mencionada resolução.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, havendo necessidade de oitiva da criança ou do adolescente vítima ou testemunha sobre a violência perante a autoridade judiciária, zele para que ela se dê na forma do depoimento especial, em sala devidamente preparada para tanto e por meio de profissional especializado, salvo na hipótese prevista no art. 12, §1º, da Lei nº 13.431/2017, nos termos dos artigos 5º, § 2º, e 6º da Resolução CNMP n. 287/2024. (CASO O DEPOIMENTO ESPECIAL AINDA NÃO ESTEJA SENDO REALIZADO NA COMARCA)
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, sempre que necessário o depoimento especial e com brevidade, promova o ajuizamento de ação cautelar de produção antecipada de provas em ação própria ou incidental na denúncia, notadamente nas hipóteses obrigatórias previstas no art. 11, §1º, I e II, da Lei nº 13.431/2017, como forma de evitar a revitimização, preservar a qualidade da prova e prevenir o prejuízo causado pela ação do tempo ou de contaminações à memória, nos termos do artigo 5º da Resolução CNMP n. 287/2024. (CASO NÃO ESTEJA SENDO PROPOSTA A AÇÃO CAUTELAR DE ANTECIPAÇÃO DE PROVA OU O DEPOIMENTO ESPECIAL ESTEJA DEMORANDO MUITO TEMPO PARA ACONTECER)
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, quando realizado o depoimento especial em sede de produção antecipada de prova em ação própria, zele para que este passe a integrar, com brevidade, o procedimento que serviu de fundamento para o ajuizamento da demanda cautelar, de forma a priorizar a adoção das medidas cabíveis, atentando para o resguardo do sigilo do seu conteúdo, nos termos do artigo 5º, § 1º, da Resolução CNMP n. 287/2024. (CASO, DEPOIS DA REALIZAÇÃO DO DEPOIMENTO ESPECIAL JUDICIAL ANTES DA CONCLUSÃO DO INQUÉRITO, ESTE ESTEJA DEMORANDO MUITO PARA SER FINALIZADO)
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, se a recomendação pela não realização do depoimento especial for pautada na recusa, livre e informada, por parte da criança ou adolescente em depor, zele para que seja respeitado esse direito, nos termos do art. 5º, VI, da Lei nº 13.431/2017, art. 12 da Convenção sobre os Direitos da Criança e artigo 6º, § 5º, da Resolução CNMP n. 287/2024. (CASO SE IDENTIFIQUE QUE O COLEGA TENHA "OBRIGADO" A VÍTIMA A DEPOR, MESMO CONTRA SUA VONTADE)
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, em qualquer hipótese, zele para que a vítima não tenha contato, ainda que visual, com o autor ou acusado ou com qualquer outra pessoa que represente ameaça, coação ou constrangimento, nos termos artigo 6º, § 7º, da Resolução CNMP n. 287/2024. (CASO SE IDENTIFIQUE QUE O COLEGA NÃO ESTEJA TOMANDO AS PROVIDÊNCIAS NECESSÁRIAS PARA PRESERVAR A VÍTIMA DE CONTATO COM O ACUSADO)</div>
             </div>
 
             <!-- 6.2 -->
             <div class="proposal">
                 <div class="proposal-title">6.2 Atuação integrada com as Promotorias de Justiça da área da infância e juventude, de violência doméstica e núcleo de proteção à vítima</div>
-                <div class="subtle"><em>(Termo - Crimes contra Crianças e Adolescentes – Pergunta 02)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_72" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_62" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_62" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_62" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_62" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva atuação integrada com os membros das diferentes áreas (infância e juventude, criminal, violência doméstica e família), na efetiva defesa e proteção das crianças e adolescentes vítimas ou testemunhas de violência, por meio da pactuação de fluxos e compartilhamento de informações, como determinado na Resolução CNMP n. 287/2024.</div>
             </div>
 
-            <!-- ===== 7. EDUCAÇÃO INFANTIL ===== -->
+            <!-- ==== 7. EDUCAÇÃO INFANTIL ==== -->
             <h2>7. PROPOSIÇÕES ESPECÍFICAS — EDUCAÇÃO INFANTIL</h2>
             <div class="nao-aplica-row">
                 <label class="check"><input type="checkbox" id="na_7" /> Não se aplica</label>
@@ -1173,130 +1147,131 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que, em qualquer hipótese, zele pa
             <!-- 7.1 -->
             <div class="proposal">
                 <div class="proposal-title">7.1 Oferta de vagas em creches e pré-escola</div>
-                <div class="subtle"><em>(Termo - EDUCAÇÃO INFANTIL – Perguntas 01 e 02)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_73" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_71" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_71" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_71" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_71" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que adote medidas administrativas ou judiciais voltadas ao aumento da oferta de vagas em creches públicas (ou para averiguar se de fato estão supridas todas as demandas por vagas), com vistas a ampliar o atendimento da demanda manifesta e por meio da realização de busca ativa, a fim de garantir o atendimento em creches, até 2024, de, no mínimo, 50% da população de 0 a 3 anos (Meta 1 do PNE), conforme art. 3º da Recomendação CNMP nº 30/2015.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que adote medidas administrativas para averiguar se de fato estão supridas todas as demandas por vagas por meio da busca ativa de eventuais crianças fora da escola, considerando a garantia da universalização da pré-escola, obrigatória para crianças de 4 a 5 anos (artigo 208, I, da CF e Meta 1 PNE), conforme art. 4º da Recomendação CNMP nº 30/2015.</div>
             </div>
 
             <!-- 7.2 -->
             <div class="proposal">
                 <div class="proposal-title">7.2 Atendimento educacional especializado complementar</div>
-                <div class="subtle"><em>(Termo - EDUCAÇÃO INFANTIL – Pergunta 03)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_75" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_72" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_72" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_72" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_72" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que adote medidas administrativas ou judiciais voltadas ao fomento efetivo da oferta do atendimento educacional especializado complementar, suplementar e integrado às crianças com deficiência, transtornos globais do desenvolvimento e altas habilidades ou superdotação, conforme arts. 5º e 6º da Recomendação CNMP nº 30/2015, assegurando-se, além da participação nas aulas do ensino regular, a elaboração de plano individual de atendimento educacional especializado por professor especialista em educação inclusiva, bem como todos os serviços e atendimentos necessários para superação das barreiras e garantia da aprendizagem dos alunos, observando-se os termos do Manual de Atuação do Ministério Público em Defesa da Educação Especial na Perspectiva da Educação Inclusiva (CNMP).
-
-SOLICITAR ao CAOIJ que, juntamente com o CEAF, que realize cursos de formação e projetos institucionais sobre a política de educação especial na perspectiva da educação inclusiva destinadas a membros e servidores do Ministério Público, bem como estruture e/ou amplie, gradualmente e dentro das condições orçamentárias da Instituição, as equipes técnicas multidisciplinares compostas de, ao menos, psicólogos, pedagogos e assistentes sociais, observados os parâmetros do artigo 2º da Recomendação CNMP n. 33/2016. (CASO SE CONSTATE, DE FORMA GERAL, QUE OS COLEGAS NÃO CONHECEM A POLÍTICA DE EDUCAÇÃO ESPECIAL E NÃO HÁ EQUIPE TÉCNICA DISPONÍVEL)</div>
             </div>
 
             <!-- 7.3 -->
             <div class="proposal">
                 <div class="proposal-title">7.3 Acompanhamento do processo de elaboração das propostas de leis orçamentárias e vinculação orçamentária do Plano Nacional de Educação</div>
-                <div class="subtle"><em>(Termo - EDUCAÇÃO INFANTIL – Pergunta 04)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_76" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_73" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_73" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_73" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_73" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que promova, por meio do procedimento extrajudicial competente, o acompanhamento do processo de elaboração das propostas de leis orçamentárias nos municípios em que atua e a consequente execução do orçamento, observando a consignação de dotações orçamentárias compatíveis com as diretrizes, metas e estratégias do PNE e com os respectivos planos de educação, a fim de viabilizar sua plena execução (artigo 10 da Lei n. 13.005/2014). (CASO SE VERIFIQUE QUE NÃO HÁ ATUAÇÃO NO ACOMPANHAMENTO DO ORÇAMENTO)</div>
             </div>
 
             <!-- 7.4 -->
             <div class="proposal">
                 <div class="proposal-title">7.4 Infraestrutura escolar adequada e retomada das obras paralisadas</div>
-                <div class="subtle"><em>(Termo - EDUCAÇÃO INFANTIL – Pergunta 05)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_77" ></div>
+                        <div class="value" id="DM_78" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_74" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_74" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_74" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_74" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que instaura o respectivo procedimento extrajudicial para acompanhar a retomada de obra paralisada na educação existente na sua Comarca, nos termos da Lei n. 14.719/23.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que adote, se possível após visita às escolas, medidas administrativas ou judiciais voltadas à garantia da infraestrutura mínima adequada, incluída a acessibilidade e água potável, em escolas ou centros de educação infantil situados no município em que atua.</div>
             </div>
 
             <!-- 7.5 -->
             <div class="proposal">
                 <div class="proposal-title">7.5 Educação em tempo integral, gestão democrática e valorização do magistério</div>
-                <div class="subtle"><em>(Termo - EDUCAÇÃO INFANTIL – Pergunta 06)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_79" ></div>
+                        <div class="value" id="DM_80" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_75" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_75" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_75" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_75" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que promova medidas administrativas ou judiciais voltadas à expansão da educação em tempo integral (Meta 6 PNE), à defesa da gestão democrática do ensino (Meta 19 PNE) e à valorização dos(as) profissionais da educação (Meta 18 PNE).</div>
             </div>
 
-            <!-- ===== 8. FAMÍLIA ===== -->
+            <!-- ==== 8. FAMÍLIA ==== -->
             <h2>8. PROPOSIÇÕES ESPECÍFICAS — FAMÍLIA</h2>
             <div class="nao-aplica-row">
                 <label class="check"><input type="checkbox" id="na_8" /> Não se aplica</label>
@@ -1305,148 +1280,154 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que adote, se possível após visit
             <!-- 8.1 -->
             <div class="proposal">
                 <div class="proposal-title">8.1 Análise se a mulher é vítima de violência doméstica em pedidos de guarda compartilhada</div>
-                <div class="subtle"><em>(Termo – FAMÍLIA – Pergunta 01)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_85" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_81" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_81" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_81" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_81" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, nos procedimentos/processos que envolvam guarda compartilhada, analise se a mulher é vítima de violência doméstica e familiar, adotando as providências cabíveis para sua efetiva proteção e para a proteção das crianças e adolescentes envolvidos, na forma do artigo 1584, § 2º, do Código Civil (alterado pela Lei n. 14.713/2023).</div>
             </div>
 
             <!-- 8.2 -->
             <div class="proposal">
                 <div class="proposal-title">8.2 Atuação nas ações de família em que figure como parte vítima de violência doméstica e familiar, ainda que não haja incapazes envolvidos</div>
-                <div class="subtle"><em>(Termo – FAMÍLIA – Pergunta 02)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_86" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_82" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_82" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_82" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_82" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue em todos as ações de família em figure como parte vítima de violência doméstica e familiar, ainda que não haja incapaz envolvido, conforme estabelece o artigo 698, parágrafo único do CPC (incluído pela Lei n. 13.894/2019).</div>
             </div>
 
             <!-- 8.3 -->
             <div class="proposal">
                 <div class="proposal-title">8.3 Há atuação em ações de família que envolvam os direitos das crianças e adolescentes, dos incapazes e dos idosos em situação de vulnerabilidade</div>
-                <div class="subtle"><em>(Termo – FAMÍLIA – Pergunta 03)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_87" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_83" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_83" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_83" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_83" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue em todos as ações de família que envolvam os direitos de crianças e adolescentes, dos incapazes e de idosos em situação de vulnerabilidade, nos termos do artigo 698 do CPC e 5º, VIII, da Recomendação CNMP n. 34/2016.</div>
             </div>
 
             <!-- 8.4 -->
             <div class="proposal">
                 <div class="proposal-title">8.4 Atuação integrada com outras Promotorias de Justiça, diante de situação de crianças e adolescentes vítimas de violência</div>
-                <div class="subtle"><em>(Termo – FAMÍLIA – Pergunta 04)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_88" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_84" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_84" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_84" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_84" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) em situação de crianças e adolescentes vítimas de violência, atue de forma articulada e integrada com as Promotorias de Justiça criminais, as Promotorias de Justiça de violência doméstica e familiar e as Promotorias de Justiça da infância e juventude, na forma estabelecida pela Resolução CNMP n. 287/2024.</div>
             </div>
 
             <!-- 8.5 -->
             <div class="proposal">
                 <div class="proposal-title">8.5 Depoimento especial e compartilhamento de prova</div>
-                <div class="subtle"><em>(Termo – FAMÍLIA – Pergunta 05)</em></div>
+               <div class="field"> 
+                        <div class="value" id="DM_89" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_85" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_85" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_85" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_85" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) em situação de crianças e adolescentes vítimas de violência, zele para que o depoimento especial ocorra, preferencialmente, no âmbito criminal, com posterior compartilhamento de provas com a Promotoria de Justiça da área da família, nos termos do artigo 8º da Resolução CNMP n. 287/2024.</div>
             </div>
 
             <!-- 8.6 -->
             <div class="proposal">
                 <div class="proposal-title">8.6 Depoimento especial em caso de alienação parental</div>
-                <div class="subtle"><em>(Termo – FAMÍLIA – Pergunta 06)</em></div>
+                 <div class="field"> 
+                        <div class="value" id="DM_90" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field">
-                        <label>Observações da equipe</label>
-                        <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
                     </div>
                     <div class="field">
-                        <label>Necessidade de proposição</label>
-                        <div class="check-row">
-                            <label class="check"><input type="radio" name="prop_86" value="sim" /> Sim</label>
-                            <label class="check"><input type="radio" name="prop_86" value="nao" /> Não</label>
-                        </div>
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_86" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_86" value="nao" /> Não</label>
+                    </div>
                     </div>
                 </div>
                 <div class="field" style="margin-top:12px;">
                     <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que nos casos de alienação parental que não tenham repercussão criminal, zele para que, havendo necessidade de oitiva da criança ou do adolescente, seja realizado obrigatoriamente por meio de depoimento especial, na forma do artigo 8-A da Lei n. 12.318/2010.</div>
             </div>
 
-            <!-- ===== 9. VIOLÊNCIA DOMÉSTICA ===== -->
+            <!-- ==== 9. VIOLÊNCIA DOMÉSTICA ==== -->
             <h2>9. PROPOSIÇÕES ESPECÍFICAS — VIOLÊNCIA DOMÉSTICA E FAMILIAR</h2>
             <div class="nao-aplica-row">
                 <label class="check"><input type="checkbox" id="na_9" /> Não se aplica</label>
@@ -1455,154 +1436,149 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que adote, se possível após visit
             <!-- 9.1 a 9.13 -->
             <div class="proposal">
                 <div class="proposal-title">9.1 Fomento ao diálogo entre as polícias civis e militares e as redes de saúde e social</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 01)</em></div>
+                  <div class="field"> 
+                        <div class="value" id="DM_91" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_91" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_91" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que fomente o diálogo entre as polícias civis e militares e as redes de saúde e social, por meio de encontros temáticos, cursos de formação e outras atividades, com o objetivo de promover a proteção integral à mulher, evitando-se a revitimização nos atendimentos policiais.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.2 Análise do histórico de violência doméstica/familiar sofrida pela vítima</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 02)</em></div>
+              <div class="field"> 
+                        <div class="value" id="DM_92" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_92" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_92" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que analise o histórico de violência doméstica/familiar sofrida pela vítima a fim de instruir o processo criminal.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.3 Cadastro Nacional de Violência Doméstica</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 03)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_93" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_93" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_93" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que preencha o Cadastro Nacional de Violência Doméstica nos termos da Resolução CNMP nº 135/2016.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.4 Formulário Nacional de Avaliação de Risco</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 04)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_94" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_94" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_94" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposições</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que fiscalize se a Polícia Civil, ou outros órgãos, aplicam o formulário em todos os casos que envolva violência doméstica no âmbito familiar, bem como se o formulário acompanha todos os procedimentos policiais.
 
 RECOMENDAR ao(à) membro(a) correicionado(a) que aplique o Formulário Nacional de Avaliação de Risco – FONAR.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.5 Medidas protetivas</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 05)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_95" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_95" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue na fiscalização e no fomento do cumprimento das medidas protetivas de urgência com absoluta prioridade, nos termos da Recomendação CNMP nº 87/2021.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.6 Atuação integrada com Promotoria com atribuição em feminicídio</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 06)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_96" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_96" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva atuação integrada com o(a) Promotor(a) de Justiça com atribuição em feminicídio a fim de desenvolverem ações preventivas.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.7 Atuação integrada com o Promotor com atribuição nos crimes contra crianças e adolescentes</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 07)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_97" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_97" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva atuação integrada com o(a) Promotor(a) de Justiça com atribuição nos crimes contra crianças e adolescentes a fim de desenvolverem ações preventivas.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.8 Atuação integrada com as Promotorias de família</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 08)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_98" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_98" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva atuação integrada com o(a) Promotor(a) de Justiça com atribuição em direito de família para que, nas causas cíveis relacionadas a um contexto de violência doméstica contra a mulher, ocorra a intervenção obrigatória do Ministério Público, em razão da vulnerabilidade presumida da mulher.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.9 Recuperação e reeducação do agressor</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 09)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_100" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_99" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_99" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) a implementação de projetos de recuperação e reeducação do agressor, nos termos da Recomendação CNMP nº 93/2022.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.10 Atuação com perspectiva de gênero</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 10)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_910" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_910" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, no exercício de sua atividade, atue com perspectiva de gênero desde o controle externo da atividade policial até a instrução processual, aplicando, no que for cabível, os termos do Protocolo para Julgamento com Perspectiva de Gênero do CNJ (Resolução CNJ n. 492/2023); das Diretrizes nacionais de investigação criminal com perspectiva de gênero para o Ministério Público e a Segurança Pública do Brasil e as Diretrizes Nacionais Feminicídio da ONU, a fim de evitar exteriorização de preconceitos e estereótipos de gênero.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que, no exercício de sua atividade, atue de forma a valorizar a palavra da vítima, garantindo-lhe peso probatório diferenciado.
-
-SOLICITAR ao CEAF que realize cursos de formação e desenvolva projetos institucionais para estimular e induzir a atuação do Ministério Público com perspectiva de gênero. (CASO SE CONSTATE, DE FORMA GERAL, QUE NÃO HÁ ATUAÇÃO COM PERSPECTIVA DE GÊNERO NA INSTITUIÇÃO)</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.11 Fixação de valor mínimo para reparação dos danos</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 11)</em></div>
+               <div class="field"> 
+                        <div class="value" id="DM_98" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_911" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_911" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que diligencie de forma expressa, no bojo dos autos, a fixação de valor mínimo para reparação dos danos materiais, morais e psicológicos, causados pela infração penal, em prol das vítimas diretas, indiretas e coletivas, nos termos do art. 9º da Resolução CNMP nº 243/2021.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.12 Direito de informação</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 12)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_912" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_912" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que zele pelo direito de informação da vítima, tais como sobre seus direitos básicos, serviços de apoio, processos e outros meios de obtenção de reparação dos danos causados.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">9.13 Intimação da vítima em caso de liberdade provisória</div>
-                <div class="subtle"><em>(Termo VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER – Pergunta 13)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_913" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_913" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que fiscalize a efetiva intimação da vítima em caso de liberdade provisória do autuado, nos termos do art. 21 da Lei nº 11.340/06.</div>
             </div>
 
-            <!-- ===== 10. DISCRIMINAÇÃO ===== -->
+            <!-- ==== 10. DISCRIMINAÇÃO ==== -->
             <h2>10. PROPOSIÇÕES ESPECÍFICAS — ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E À POPULAÇÃO LGBTQIAPN+</h2>
             <div class="nao-aplica-row">
                 <label class="check"><input type="checkbox" id="na_10" /> Não se aplica</label>
@@ -1610,79 +1586,88 @@ SOLICITAR ao CEAF que realize cursos de formação e desenvolva projetos institu
 
             <div class="proposal">
                 <div class="proposal-title">10.1 Estratégia, projetos, ações ou atividades voltadas ao enfrentamento à discriminação</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 01)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_101" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_101" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_101" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva estratégia institucional específica, por meio de projetos, ações ou atividades voltadas ao enfrentamento à discriminação à raça, à população LGBTQIAPN+ e à diversidade.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">10.2 Fiscalização ou fomento de políticas públicas</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 02)</em></div>
+               <div class="field"> 
+                        <div class="value" id="DM_103" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_102" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_102" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que fiscalize/fomente a promoção de políticas públicas garantidoras do respeito à diversidade sexual, de gênero e de raça no âmbito de sua atuação.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">10.3 Monitoramento dos marcadores de violência locais</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 03)</em></div>
+              <div class="field"> 
+                        <div class="value" id="DM_104" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_103" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_103" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que proceda ao monitoramento dos marcadores de violência locais relativos à violência contra a população LGBTQIAPN+.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">10.4 Capacitação de agentes de segurança pública</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 04)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_102" ></div>
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_104" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_104" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva mecanismos tendentes a buscar a implementação ou aprimoramento pelo ente federativo competente de capacitação de agentes de segurança pública e/ou guardas civis municipais sobre a questão do enfrentamento à discriminação à raça, à população LGBTQIAPN+ e à diversidade, prevenindo eventuais abordagens, revistas e outras condutas discriminatórias.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">10.5 Pedido de indenização à vítima (artigo 387, inciso IV, CPP)</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 05)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_105" ></div>
+                        <div class="value" id="DM_106" ></div>
+                       
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_105" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_105" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que, quando do ajuizamento da ação penal, formule pedido de indenização à vítima (artigo 387, inciso IV, CPP) e, na hipótese de omissão do juiz na fixação de indenização, adote as providências cabíveis.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">10.6 Pessoas privadas de liberdade</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 06)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_107" ></div>
+                        
+                       
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_106" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_106" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que fiscalize os parâmetros de acolhimento das pessoas LGBTQIAPN+ privadas de liberdade em estabelecimentos penais, nos termos da Recomendação CNMP nº 85/2021.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">10.7 Atuação integrada com Promotoria com atribuição em homicídio</div>
-                <div class="subtle"><em>(Termo ENFRENTAMENTO À DISCRIMINAÇÃO À RAÇA E POPULAÇÃO LGBTQIAPN+ - Pergunta 07)</em></div>
+                <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_107" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_107" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que busque atuação integrada com o(a) Promotor(a) com atribuição em homicídio na condução de ações preventivas.</div>
             </div>
 
             <!-- ===== 11. DEFESA DAS PESSOAS COM DEFICIÊNCIA ===== -->
@@ -1693,52 +1678,55 @@ SOLICITAR ao CEAF que realize cursos de formação e desenvolva projetos institu
 
             <div class="proposal">
                 <div class="proposal-title">11.1 Estratégia institucional específica</div>
-                <div class="subtle"><em>(Termo – DEFESA DAS PESSOAS COM DEFICIÊNCIA – Pergunta 01)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_108" ></div>
+                      
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_111" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_111" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que desenvolva estratégia institucional específica voltada à atuação da defesa das pessoas com deficiência.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">11.2 Inspeção das Residências Inclusivas (RIs) e/ou outras instituições que prestem serviços de acolhimento de pessoas com deficiência</div>
-                <div class="subtle"><em>(Termo – DEFESA DAS PESSOAS COM DEFICIÊNCIA – Pergunta 02)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_109" ></div>
+                </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_112" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_112" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que inspecione pessoalmente, com periodicidade mínima anual, as Residências Inclusivas (RIs) e/ou outras instituições que prestem serviços de acolhimento de pessoas com deficiência, nos termos do art. 1º, Resolução CNMP nº 228/2021.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que promova atuação a partir das inspeções realizadas às Residências Inclusivas e/ou outras instituições de acolhimento, nos termos da Resolução CNMP nº 228/2021.
-
-SUGERIR ao(à) Procurador-Geral de Justiça que adote as providências necessárias para disponibilizar, RESPEITADA A AUTONOMIA ADMINISTRATIVA E A DISPONIBILIDADE FINANCEIRA, por ocasião das inspeções, ao(a) membro/membra com atribuição, uma equipe técnica especializada (assistente social e/ou psicólogo/a) do Ministério Público.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">11.3 Atuação na fiscalização das prestações de contas e/ou processos de tomada de decisão apoiada; integração com a Promotoria de Justiça com atribuição nas áreas cíveis e de família</div>
-                <div class="subtle"><em>(Termo – DEFESA DAS PESSOAS COM DEFICIÊNCIA – Pergunta 03)</em></div>
+                <div class="field"> 
+                        <div class="value" id="DM_110" ></div>
+                        <div class="value" id="DM_110.a" ></div>
+                       
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_113" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_113" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que atue na fiscalização das prestações de contas e/ou processos de tomada de decisão apoiada nos processos de curatela.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que busque atuação integrada com a Promotoria de Justiça com atribuição nas áreas cíveis e de família.</div>
             </div>
 
             <div class="proposal">
                 <div class="proposal-title">11.4 Atuação articulada/integrada com o Núcleo de proteção a vítima</div>
-                <div class="subtle"><em>(Termo – DEFESA DAS PESSOAS COM DEFICIÊNCIA – Pergunta 04)</em></div>
+              <div class="field"> 
+                        <div class="value" id="DM_111" ></div>
+                
+                       
+                        </div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_114" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_114" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro(a) correicionado(a) que busque uma atuação integrada com o Núcleo de Proteção à Vítima, no tocando à defesa das pessoas com deficiência, sempre que necessário.</div>
             </div>
 
             <!-- ===== EXECUÇÃO PENAL / CONTROLE EXTERNO ===== -->
@@ -1749,12 +1737,12 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que busque atuação integrada com 
 
             <div class="proposal">
                 <div class="proposal-title">Execução penal</div>
+                 <div class="subtle"><em>(NÃO IDENTIFICADO NO TERMO)</em></div>
                 <div class="proposal-fields">
                     <div class="field"><label>Observações da equipe</label><textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea></div>
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_exec1" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_exec1" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao membro(a) correicionado(a) que adote providências relacionadas a superlotação de presos.
 
 RECOMENDAR ao membro(a) correicionado(a) que estimule o desenvolvimento de ações para a remissão de pena.
 
@@ -1768,7 +1756,6 @@ RECOMENDAR ao membro(a) correicionado(a) que adote providências relacionadas a 
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_exec2" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_exec2" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao membro(a) correicionado(a) que fiscalize e adote providências, em sede de controle concentrado, se os órgãos de segurança pública dispõem de condições materiais, técnicas e operacionais necessárias e compatíveis para o exercício dessas atribuições.
 
 RECOMENDAR ao membro(a) correicionado(a) que, nas hipóteses de promoção de arquivamento das investigações criminais, a vítima e/ou seus familiares sejam notificadas sobre o pronunciamento do Ministério Público (art. 11, §2o, da Res. 279/2023-CNMP).
 
@@ -1788,13 +1775,7 @@ RECOMENDAR ao membro(a) correicionado(a) que acompanhe as investigações dos cr
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_pat" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_pat" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro/membra correicionado(a) a instauração de procedimento administrativo para verificar a existência e adequado funcionamento de Programa de Integridade na Administração Pública. (art. 4º, da Resolução nº 305/2025-CNMP)
 
-RECOMENDAR ao(à) membro/membra correicionado(a), respeitada a independência funcional, que avalie a pertinência da celebração do acordo de não persecução civil quando se mostrar proporcional e suficiente para a proteção do patrimônio público e da moralidade administrativa, mediante avaliação das peculiaridades do caso concreto que indiquem ser mais vantajoso ao interesse público do que o ajuizamento da ação de improbidade administrativa ou o seu prosseguimento. (art. 2o, da Resolução nº 306/2025-CNMP)
-
-RECOMENDAR ao(à) membro/membra correicionado(a) que observa nas celebrações do acordo de não persecução civil a aplicação de uma ou mais sanções previstas na Lei n.º 8.429/1992, bem como as condições necessárias para assegurar sua efetividade, sem prejuízo do ressarcimento integral do dano patrimonial e da perda de bens ou valores acrescidos ilicitamente, quando houver. (art. 3o, da Resolução nº 306/2025-CNMP)
-
-RECOMENDAR ao(à) membro/membra correicionado(a) que fiscalize, por meio de procedimento próprio, se o ente público observa os parâmetros legais mínimos obrigatórios que devem constar nos Portais da Transparência. (Nota Técnica CAO-PDC no 5.2025)</div>
             </div>
 
             <!-- ===== SAÚDE ===== -->
@@ -1810,7 +1791,6 @@ RECOMENDAR ao(à) membro/membra correicionado(a) que fiscalize, por meio de proc
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_saude" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_saude" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro/membra correicionado(a) que fiscalize, por meio de procedimento próprio, e que atue na defesa do custeio constitucionalmente adequado do direito à saúde, realizando ações para evitar e reprimir quaisquer desvios e retrocessos quantitativos ou qualitativos no piso de custeio do direito à saúde, acompanhando sua execução orçamentário-financeira e respectiva prestação de contas. (Art. 3o, da Recomendação n. 48/2016 – CNMP)
 
 RECOMENDAR ao(à) membro/membra correicionado(a) que fiscalize, por meio de procedimento próprio, as políticas públicas na área de saúde, bem como a garantia da oferta e a ampliação dos serviços públicos de saúde a toda a população.</div>
             </div>
@@ -1828,7 +1808,6 @@ RECOMENDAR ao(à) membro/membra correicionado(a) que fiscalize, por meio de proc
                     <div class="field"><label>Necessidade de proposição</label><div class="check-row"><label class="check"><input type="radio" name="prop_ma" value="sim" /> Sim</label><label class="check"><input type="radio" name="prop_ma" value="nao" /> Não</label></div></div>
                 </div>
                 <div class="field" style="margin-top:12px;"><label>Proposição</label><textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea></div>
-                <div class="proposal-text">RECOMENDAR ao(à) membro/membra correicionado(a) que, quando da atuação visando à responsabilização por danos ambientais e climáticos, observe o princípio da reparação integral, levando em conta todas as dimensões socioambientais, incluindo os impactos sobre a flora, fauna, clima, solo, ar, água e bem-estar coletivo.
 
 RECOMENDAR ao(à) membro/membra correicionado(a) que, quando da valoração e quantificação dos danos ambientais, utilize ferramentas como a calculadora CCAL, desenvolvida pelo IPAM, para mensurar os impactos climáticos decorrentes do desmatamento e das queimadas.
 
@@ -1855,18 +1834,16 @@ RECOMENDAR ao(à) membro/membra correicionado(a) que fiscalize, por meio de proc
                 <input class="manual-input" type="text" placeholder="Município/UF, data das assinaturas eletrônicas" />
             </div>
 
-            <div class="actions-row" style="margin-top:20px;">
+          <div class="actions-row" style="margin-top:20px;">
                 <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
             </div>
+        </div>
+    </div>
 
-        </div><!-- /paper -->
-    </div><!-- /page -->
-   
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/db-admin.js"></script>
+    <script src="js/Proposicao.js"></script>
     <script src="js/formulario.js"></script>
-   
 </body>
-
 </html>

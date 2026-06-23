@@ -7,7 +7,7 @@ const form = {
       {"id": "3", "pergunta": "Órgão(s) jurisdicional(is) perante o(s) qual(is) atua.", "tipo": "textarea"},
      
       {"id": "1.3", "pergunta": "Membro Correicionado", "tipo": "textarea"},
-      {"id": "1.4", "pergunta": "Designação", "tipo": "radio","opcoes":["Titular","Substituto"]},
+      {"id": "1.4", "pergunta": "Designação", "tipo": "radio","opcoes":["Titular","Ampliado"]},
       {"id": "1", "pergunta": "Ato(s) normativo(s) que fixa(m) as atribuições do órgão correicionado (com indicação dos artigos).", "tipo": "textarea"}//,
      /* {"id": "2", "pergunta": "Descrição detalhada das atribuições.", "tipo": "textarea"}//,
       {"id": "4", "pergunta": "Municípios que compõem a área de atuação e população abrangida.", "tipo": "textarea"} ( solicitado remover)*/
@@ -93,7 +93,7 @@ const form = {
       {"id": "40", "pergunta": "Utiliza, em suas atividades, mecanismos de resolução consensual (negociação, mediação, conciliação, práticas restaurativas, convenções processuais, acordos de resultado), bem como outros métodos e mecanismos eficazes na resolução de conflitos, controvérsias e problemas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "40.a", "pergunta": "Em caso positivo, indicar quais mecanismos utiliza e o número dos processos em que foram utilizados.", "tipo": "textarea", dependeDe: { id: "40", valor: "Sim" }},
       {"id": "41", "pergunta": "Possui Plano de Atuação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "41.a", "pergunta": "Quais medidas adota para garantir a celeridade dos feitos (judiciais e extrajudiciais) sob sua responsabilidade?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "41", valor: "Sim" }},
+      {"id": "41.a", "pergunta": "Em caso positivo, foi realizado diagnóstico prévio das carências e necessidades sociais para a sua construção?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "41", valor: "Sim" }},
       {"id": "42", "pergunta": "Que medidas adota para garantir a celeridade dos feitos (judiciais e extrajudiciais) sob sua responsabilidade?", "tipo": "textarea"},
       {"id": "43", "pergunta": "Prioriza a tutela coletiva, propondo ações individuais apenas quando absolutamente necessário?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "43.a", "pergunta": "Em caso afirmativo, exemplificar indicando número do(s) processo(s) em que houve prioridade da tutela coletiva.", "tipo": "textarea", dependeDe: { id: "43", valor: "Sim" }},
