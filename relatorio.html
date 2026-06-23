@@ -77,6 +77,46 @@
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
+        }
+
+        /* ── Sidebar search ── */
+        .sidebar-search-wrap {
+            padding: 8px 12px 4px;
+        }
+
+        .sidebar-search {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid #d7e3eb;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #263238;
+            background: #fff;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+            box-sizing: border-box;
+        }
+
+        .sidebar-search:focus {
+            border-color: #1C799B;
+            box-shadow: 0 0 0 3px rgba(28,121,155,.12);
+        }
+
+        .sidebar-item--hidden {
+            display: none !important;
+        }
+
+        .sidebar-item--warn {
+            border-color: #e67e22 !important;
+            background: #fff8f0 !important;
+        }
+
+        .sidebar-no-results {
+            padding: 20px 14px;
+            font-size: 13px;
+            color: #90a4ae;
+            text-align: center;
 
             tr {
                 break-inside: avoid;
@@ -106,6 +146,15 @@
         <h2>Textos predefinidos</h2>
         <div class="sidebar-hint">
             Clique em um campo de <strong>Proposição</strong> no relatório e, em seguida, escolha um texto nesta lateral.
+        </div>
+        <div class="sidebar-search-wrap">
+            <input
+                type="text"
+                id="proposalSidebarFilter"
+                class="sidebar-search"
+                placeholder="🔍 Filtrar proposições…"
+                autocomplete="off"
+            />
         </div>
         <div id="proposalSidebarStatus" class="sidebar-status">
             Nenhum campo selecionado ainda.

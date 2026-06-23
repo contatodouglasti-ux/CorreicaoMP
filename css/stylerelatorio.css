@@ -656,6 +656,13 @@ input[type="text"].auto-expand {
             box-shadow: none !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            /* Garante que o texto não fique colado na borda na impressão */
+            padding: 8px 12px !important;
+            line-height: 1.5 !important;
+            background: #fff !important;
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-size: 14px !important;
+            color: #1f2a37 !important;
         }
 
         .meta-grid,
@@ -779,3 +786,44 @@ input[type="text"].auto-expand {
             max-width: 100% !important;
         }
     }
+
+/* ── Sidebar: filtro de busca ────────────────────────────────── */
+.sidebar-search-wrap {
+    padding: 8px 0 4px;
+}
+
+.sidebar-search {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #d9e1ea;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #1f2a37;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.sidebar-search:focus {
+    border-color: #124b5f;
+    box-shadow: 0 0 0 3px rgba(18,75,95,.12);
+}
+
+.sidebar-item--hidden {
+    display: none !important;
+}
+
+.sidebar-item--warn {
+    border-color: #e67e22 !important;
+    background: #fff8f0 !important;
+}
+
+.sidebar-no-results {
+    padding: 16px 10px;
+    font-size: 12px;
+    color: #90a4ae;
+    text-align: center;
+    font-style: italic;
+}

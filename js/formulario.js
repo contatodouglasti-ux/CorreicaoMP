@@ -1518,6 +1518,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Instrução inicial
             status.textContent = `${proposicoes.length} proposições disponíveis. Clique em um campo de Proposição no relatório para ativar.`;
+
+            // ── Filtro de busca ───────────────────────────────────────────────────
+            const filterInput = document.getElementById('proposalSidebarFilter');
+            if (filterInput) {
+                filterInput.addEventListener('input', () => {
+                    const termo = filterInput.value.trim().toLowerCase();
+                    let visiveis = 0;
+
+                    // Remove aviso anterior de "sem resultados"
+                    const avisoAnterior = list.querySelector('.sidebar-no-results');
+                    if (avisoAnterior) avisoAnterior.remove();
+
+                    list.querySelectorAll('.sidebar-item').forEach(btn => {
+                        const texto = btn.textContent.toLowerCase();
+                        const visivel = !termo || texto.includes(termo);
+                        btn.classList.toggle('sidebar-item--hidden', !visivel);
+                        if (visivel) visiveis++;
+                    });
+
+                    // Mostra mensagem se nenhuma proposição bater
+                    if (termo && visiveis === 0) {
+                        const aviso = document.createElement('div');
+                        aviso.className = 'sidebar-no-results';
+                        aviso.textContent = `Nenhuma proposição encontrada para "${filterInput.value.trim()}".`;
+                        list.appendChild(aviso);
+                    }
+                });
+            }
         }
 
         if (document.readyState === 'loading') {
