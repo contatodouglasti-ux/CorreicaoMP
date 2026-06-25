@@ -35,7 +35,7 @@ async function verificarAdmin() {
 
   if (error || !data || data.ativo === false) {
     alert('Acesso restrito. Você não tem permissão para acessar esta página.');
-    window.location.replace('/index.html');
+    window.location.replace('/home.html');
     throw new Error('Não autorizado');
   }
 }

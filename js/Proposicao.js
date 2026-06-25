@@ -738,5 +738,10 @@ window.PROPOSICOES_JSON = [
     id: "11.9.3",
     titulo: "Meio ambiente - resíduos sólidos e lixo hospitalar",
     texto: "RECOMENDAR ao (à) membro/membra correicionado(a) que fiscalize, por meio de procedimento próprio, a política de descarte de resíduos sólidos e de lixo hospitalar."
+  },
+   {
+    id: "11.9.3",
+    titulo: "Meio ambiente - resíduos sólidos e lixo hospitalar",
+    texto: "texto com mesmo id."
   }
 ];

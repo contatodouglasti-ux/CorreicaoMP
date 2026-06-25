@@ -143,9 +143,9 @@
       text-align: center;
     }
 
-    /* ══════════════════════════════════════════
+    /* ════
        TELA DE LOADING (substitui o card)
-    ══════════════════════════════════════════ */
+    ════ */
 
     .loading-screen {
       display: none;
@@ -238,7 +238,7 @@
       <div class="loading-screen" id="loadingScreen">
         <div class="ring"></div>
         <div class="loading-title">Autenticado!</div>
-        <div class="loading-sub" id="loadingSubText">Carregando o sistema…</div>
+        <div class="loading-sub" id="loadingSubText">Carregando a tela inicial…</div>
         <div class="loading-bar-wrap">
           <div class="loading-bar"></div>
         </div>
@@ -317,7 +317,7 @@
             const nome = response.account.name || response.account.username || '';
             mostrarLoading(nome);
             // Redireciona após 2s para o usuário ver o loading
-            setTimeout(() => { window.location.href = '/index.html'; }, 2200);
+            setTimeout(() => { window.location.href = '/home.html'; }, 2200);
           }
         })
         .catch(err => {

@@ -251,3 +251,53 @@ async function buscarSecoesOk(id) {
     .eq('id', id)
     .single();
   return data ? (data.secoes_ok || {}) : {};}
+
+
+  /**
+ * Carrega os dados pessoais do membro logado.
+ */
+async function carregarDadosPessoaisUsuario() {
+  const userId = getEmailUsuario();
+
+  const { data, error } = await sb
+    .from('dados_pessoais_membros')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+async function salvarDadosPessoaisUsuario({
+  nome_completo,
+  rua,
+  numero,
+  complemento,
+  bairro,
+  cidade_municipio,
+  estado,
+  cep,
+}) {
+  const payload = {
+    user_id: getEmailUsuario(),
+    nome_completo,
+    rua,
+    numero,
+    complemento,
+    bairro,
+    cidade_municipio,
+    estado,
+    cep,
+    atualizado_em: new Date().toISOString(),
+  };
+
+  const { data, error } = await sb
+    .from('dados_pessoais_membros')
+    .upsert(payload, { onConflict: 'user_id' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
