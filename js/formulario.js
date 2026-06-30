@@ -162,6 +162,8 @@ if (campoTitular) {
         campoSubstituto.disabled = false;
     }
 
+setText('DM_5', extrairTexto(dados['5']));
+
 
        const resposta6 = String(extrairTexto(dados['6'])).trim().toUpperCase();
 setText(
@@ -343,6 +345,18 @@ setText(
       ? 'O membro afirmou que o acúmulo se deu de forma involuntária.'
       : extrairTexto(dados['16.a'])
 );
+
+const resposta17 = String(extrairTexto(dados['17'])).trim().toUpperCase();
+
+setText(
+  'DM_17',
+  resposta17 === 'NÃO'
+    ? 'O(a) membro(a) informou não ter se afastado no período.'
+    : resposta17 === 'SIM'
+      ? `O(a) membro(a) informou ter os seguintes afastamentos no período: ${extrairTexto(dados['17.a'])}`
+      : extrairTexto(dados['17'])
+);
+
 
 const resposta18 = String(extrairTexto(dados['18'])).trim().toUpperCase();
 
@@ -1519,14 +1533,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Instrução inicial
             status.textContent = `${proposicoes.length} proposições disponíveis. Clique em um campo de Proposição no relatório para ativar.`;
 
-            // ── Filtro de busca ───────────────────────────────────────────────────
+            // ── Renderiza seção de textos personalizados (localStorage) ──────────
+            renderizarCustomizados(list, () => setActiveTextarea, () => activeTextarea, status);
+
+            // ── Filtro de busca (filtra predefinidos + customizados) ──────────────
             const filterInput = document.getElementById('proposalSidebarFilter');
             if (filterInput) {
                 filterInput.addEventListener('input', () => {
                     const termo = filterInput.value.trim().toLowerCase();
                     let visiveis = 0;
 
-                    // Remove aviso anterior de "sem resultados"
                     const avisoAnterior = list.querySelector('.sidebar-no-results');
                     if (avisoAnterior) avisoAnterior.remove();
 
@@ -1537,7 +1553,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (visivel) visiveis++;
                     });
 
-                    // Mostra mensagem se nenhuma proposição bater
                     if (termo && visiveis === 0) {
                         const aviso = document.createElement('div');
                         aviso.className = 'sidebar-no-results';
@@ -1546,7 +1561,141 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            // Expõe referência ao activeTextarea para funções globais
+            window._sidebarGetActive   = () => activeTextarea;
+            window._sidebarSetActive   = setActiveTextarea;
+            window._sidebarList        = list;
+            window._sidebarStatus      = status;
         }
+
+        // ── Renderiza bloco de textos personalizados na sidebar ─────────────────
+        // Agora usa dados vindos do Supabase (item.id = UUID do banco)
+        function renderizarCustomizados(list, _unused1, _unused2, status) {
+            const secaoAnterior = list.querySelector('.sidebar-custom-section');
+            if (secaoAnterior) secaoAnterior.remove();
+
+            // Carrega do Supabase de forma assíncrona e re-renderiza quando pronto
+            listarProposicoesCustomizadas()
+                .then(customizados => {
+                    const secaoExistente = list.querySelector('.sidebar-custom-section');
+                    if (secaoExistente) secaoExistente.remove();
+
+                    if (!customizados.length) return;
+
+                    const secao = document.createElement('div');
+                    secao.className = 'sidebar-custom-section';
+
+                    const labelWrap = document.createElement('div');
+                    labelWrap.className = 'sidebar-custom-label';
+                    labelWrap.innerHTML = `<span>⭐ Meus textos (${customizados.length})</span>`;
+                    secao.appendChild(labelWrap);
+
+                    customizados.forEach((item) => {
+                        const wrap = document.createElement('div');
+                        wrap.style.position = 'relative';
+
+                        const button = document.createElement('button');
+                        button.type      = 'button';
+                        button.className = 'sidebar-item sidebar-item--custom';
+
+                        const titleEl = document.createElement('strong');
+                        titleEl.textContent = item.titulo || 'Texto personalizado';
+
+                        const preview = document.createElement('div');
+                        preview.className   = 'sidebar-preview';
+                        preview.textContent = item.texto.length > 260
+                            ? item.texto.slice(0, 260) + '…'
+                            : item.texto;
+
+                        button.appendChild(titleEl);
+                        button.appendChild(preview);
+
+                        button.addEventListener('click', () => {
+                            const activeTextarea = window._sidebarGetActive();
+                            if (!activeTextarea) {
+                                if (window._sidebarStatus)
+                                    window._sidebarStatus.textContent = 'Clique primeiro em um campo de Proposição no relatório.';
+                                button.classList.add('sidebar-item--warn');
+                                setTimeout(() => button.classList.remove('sidebar-item--warn'), 1800);
+                                return;
+                            }
+                            activeTextarea.value = item.texto;
+                            activeTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            activeTextarea.focus();
+                            if (window._sidebarStatus)
+                                window._sidebarStatus.textContent = '✅ Texto personalizado aplicado.';
+                        });
+
+                        // Botão excluir — usa item.id (UUID do Supabase)
+                        const btnExcluir = document.createElement('button');
+                        btnExcluir.type      = 'button';
+                        btnExcluir.title     = 'Excluir este texto';
+                        btnExcluir.style.cssText = 'position:absolute;top:6px;right:6px;background:none;border:none;color:#b42318;font-size:14px;cursor:pointer;line-height:1;padding:2px 4px;border-radius:4px;';
+                        btnExcluir.textContent = '✕';
+                        btnExcluir.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            if (!confirm(`Excluir "${item.titulo || 'este texto'}" do histórico?`)) return;
+                            try {
+                                await excluirProposicaoCustomizada(item.id);
+                                renderizarCustomizados(window._sidebarList, null, null, window._sidebarStatus);
+                            } catch(err) {
+                                alert('Erro ao excluir: ' + err.message);
+                            }
+                        });
+
+                        wrap.appendChild(button);
+                        wrap.appendChild(btnExcluir);
+                        secao.appendChild(wrap);
+                    });
+
+                    list.appendChild(secao);
+                })
+                .catch(err => {
+                    console.warn('[Proposições] Erro ao carregar do Supabase:', err.message);
+                });
+        }
+
+        // ── Funções globais chamadas pelo HTML ───────────────────────────────────
+        window.toggleSidebarAdd = function () {
+            const toggle = document.getElementById('sidebarAddToggle');
+            const panel  = document.getElementById('sidebarAddPanel');
+            if (!toggle || !panel) return;
+            const aberto = panel.classList.toggle('aberto');
+            toggle.classList.toggle('aberto', aberto);
+        };
+
+        window.salvarTextoPersonalizado = async function () {
+            const titulo = (document.getElementById('sidebarAddTitulo')?.value || '').trim();
+            const texto  = (document.getElementById('sidebarAddTexto')?.value  || '').trim();
+
+            if (!texto) {
+                alert('Digite o texto da proposição antes de salvar.');
+                return;
+            }
+
+            const btn = document.querySelector('.sidebar-add-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+
+            try {
+                await salvarProposicaoCustomizada(titulo, texto);
+
+                // Limpa campos e fecha painel
+                document.getElementById('sidebarAddTitulo').value = '';
+                document.getElementById('sidebarAddTexto').value  = '';
+                window.toggleSidebarAdd();
+
+                // Re-renderiza a seção customizada
+                if (window._sidebarList && window._sidebarStatus) {
+                    renderizarCustomizados(window._sidebarList, null, null, window._sidebarStatus);
+                    window._sidebarStatus.textContent = '✅ Texto salvo no histórico!';
+                }
+            } catch(err) {
+                alert('Erro ao salvar: ' + err.message);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '💾 Salvar no histórico'; }
+            }
+        };
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initProposalSidebar);

@@ -176,3 +176,41 @@ async function buscarPendenciaPorIdentificador(identificador) {
   if (error) throw error;
   return data && data.length ? data[0] : null;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Proposições Customizadas
+   Textos personalizados salvos por cada usuário no Supabase.
+───────────────────────────────────────────────────────────── */
+
+async function listarProposicoesCustomizadas() {
+  const { data, error } = await sbAdmin
+    .from('proposicoes_customizadas')
+    .select('*')
+    .eq('user_id', getEmailUsuario())
+    .order('criado_em', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+async function salvarProposicaoCustomizada(titulo, texto) {
+  const { data, error } = await sbAdmin
+    .from('proposicoes_customizadas')
+    .insert({
+      user_id: getEmailUsuario(),
+      titulo:  titulo || 'Texto personalizado',
+      texto,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function excluirProposicaoCustomizada(id) {
+  const { error } = await sbAdmin
+    .from('proposicoes_customizadas')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', getEmailUsuario());
+  if (error) throw error;
+}

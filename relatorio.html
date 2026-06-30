@@ -123,6 +123,112 @@
                 page-break-inside: avoid;
             }
         }
+
+        /* ── Sidebar: adicionar texto personalizado ── */
+        .sidebar-add-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: none;
+            border: 1.5px dashed #b0c4d8;
+            border-radius: 8px;
+            padding: 7px 10px;
+            width: 100%;
+            font-size: 12px;
+            font-weight: 700;
+            color: #124b5f;
+            cursor: pointer;
+            margin: 6px 0 0;
+            transition: background .15s;
+        }
+        .sidebar-add-toggle:hover { background: #f0f7fb; }
+        .sidebar-add-toggle .toggle-arrow { font-size: 10px; transition: transform .2s; }
+        .sidebar-add-toggle.aberto .toggle-arrow { transform: rotate(180deg); }
+
+        .sidebar-add-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            background: #f7fbff;
+            border: 1px solid #d1e3f0;
+            border-radius: 0 0 10px 10px;
+            margin-top: -2px;
+        }
+        .sidebar-add-panel.aberto { display: flex; }
+
+        .sidebar-add-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #667085;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-add-input,
+        .sidebar-add-textarea {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1.5px solid #cfd8e3;
+            border-radius: 8px;
+            font: inherit;
+            font-size: 12px;
+            color: #1f2a37;
+            background: #fff;
+            outline: none;
+            box-sizing: border-box;
+            resize: none;
+            transition: border-color .15s;
+        }
+        .sidebar-add-input:focus,
+        .sidebar-add-textarea:focus { border-color: #124b5f; }
+        .sidebar-add-textarea { min-height: 80px; }
+
+        .sidebar-add-btn {
+            background: #124b5f;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+        .sidebar-add-btn:hover { opacity: .85; }
+
+        .sidebar-custom-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e4ebf3;
+        }
+        .sidebar-custom-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #90a4ae;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sidebar-custom-label button {
+            background: none;
+            border: none;
+            font-size: 10px;
+            color: #b42318;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 0;
+        }
+        .sidebar-item--custom { border-color: #c5dff2; background: #f5faff; }
+        .sidebar-item--custom strong::after {
+            content: ' ★';
+            color: #5b9bd5;
+            font-size: 10px;
+        }
     </style>
 
     <script>
@@ -156,6 +262,23 @@
                 autocomplete="off"
             />
         </div>
+        <!-- Adicionar texto personalizado -->
+        <button class="sidebar-add-toggle" id="sidebarAddToggle" onclick="toggleSidebarAdd()">
+            <span>➕ Adicionar texto personalizado</span>
+            <span class="toggle-arrow">▼</span>
+        </button>
+        <div class="sidebar-add-panel" id="sidebarAddPanel">
+            <div>
+                <div class="sidebar-add-label">Título</div>
+                <input type="text" class="sidebar-add-input" id="sidebarAddTitulo" placeholder="Ex: Recomendação especial…" maxlength="100"/>
+            </div>
+            <div>
+                <div class="sidebar-add-label">Texto da proposição</div>
+                <textarea class="sidebar-add-textarea" id="sidebarAddTexto" placeholder="Digite o texto completo da proposição…"></textarea>
+            </div>
+            <button class="sidebar-add-btn" onclick="salvarTextoPersonalizado()">💾 Salvar no histórico</button>
+        </div>
+
         <div id="proposalSidebarStatus" class="sidebar-status">
             Nenhum campo selecionado ainda.
         </div>
@@ -214,7 +337,22 @@
 </div>
  
 </div>
+                
                 <div class="field">
+  <label>Período Avaliado</label>
+
+  <div class="datas-row">
+    <div class="campo">
+      <label>INICIO</label>
+      <input class="manual-input" type="date" id="data_realizacao">
+    </div>
+
+    <div class="campo">
+      <label>FIM</label>
+      <input class="manual-input" type="date" id="data_final">
+    </div>
+  </div>
+</div><div class="field">
                     <label>Tipo de Correição</label>
                     <div class="check-row">
                     <label class="check"><input type="radio" name="tipo_correcao" value="Virtual" /> Virtual</label>
@@ -250,6 +388,14 @@
                 <div class="field">
                     <label>Órgão(s) jurisdicional(is) perante o(s) qual(is) atua</label>
                     <span class="inline-value" id="DM_3"></span>
+                </div>
+                <div class="field">
+                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
+                    <span class="inline-value" id="DM_5"></span>
+                </div>
+                 <div class="field">
+                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
+                    <span class="inline-value" id="DM_17"></span>
                 </div>
             </div>
 
