@@ -78,7 +78,7 @@ function adicionarLinha() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-        <td><input class="table-input" placeholder="Número" /></td>
+        <td><input class="table-input" placeholder="Número" /></td><td><input class="table-input" placeholder="Objeto" /></td>
         <td><input class="table-input" type="date" /></td>
         <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
         <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
@@ -97,6 +97,80 @@ function removerLinha(btn) {
     tr.remove();
 }
 
+function adicionarLinhaExtra() {
+    const tbody = document.querySelector('#tabela-procedimentos-extra tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
+        <td><input class="table-input" placeholder="Número do procedimento" /></td>
+        <td><input class="table-input" type="date" /></td>
+        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+        <td><button type="button" class="btn btn-danger" onclick="removerLinhaExtra(this)">Apagar</button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function removerLinhaExtra(btn) {
+    const tbody = document.querySelector('#tabela-procedimentos-extra tbody');
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    if (tbody.querySelectorAll('tr').length <= 1) {
+        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        return;
+    }
+    tr.remove();
+}
+
+function adicionarLinhaExcessoJudicial() {
+    const tbody = document.querySelector('#tabela-excesso-judicial tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input class="table-input" placeholder="Ex.: Procedimento judicial" /></td>
+        <td><input class="table-input" placeholder="Número do processo" /></td>
+        <td><input class="table-input" placeholder="objeto" /></td>
+        <td><input class="table-input" type="date" /></td>
+        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+        <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoJudicial(this)">Apagar</button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function removerLinhaExcessoJudicial(btn) {
+    const tbody = document.querySelector('#tabela-excesso-judicial tbody');
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    if (tbody.querySelectorAll('tr').length <= 1) {
+        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        return;
+    }
+    tr.remove();
+}
+
+function adicionarLinhaExcessoExtra() {
+    const tbody = document.querySelector('#tabela-excesso-extra tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
+        <td><input class="table-input" placeholder="Número do procedimento" /></td>
+        <td><input class="table-input" placeholder="objeto" /></td>
+        <td><input class="table-input" type="date" /></td>
+        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+        <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoExtra(this)">Apagar</button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function removerLinhaExcessoExtra(btn) {
+    const tbody = document.querySelector('#tabela-excesso-extra tbody');
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    if (tbody.querySelectorAll('tr').length <= 1) {
+        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        return;
+    }
+    tr.remove();
+}
+
 /* ─── Auto-expand textareas ────────────────────────────────────── */
 function autoExpand(el) {
     el.style.height = 'auto';
@@ -104,7 +178,7 @@ function autoExpand(el) {
 }
 
 document.addEventListener('input', function (e) {
-    if (e.target.classList.contains('auto-expand') || e.target.classList.contains('manual-textarea')) {
+    if (e.target.matches('textarea.auto-expand, textarea.table-textarea')) {
         autoExpand(e.target);
     }
 });
@@ -448,6 +522,21 @@ setText(
     ? extrairTexto(dados['24.a'])
     : ''
 );
+const resposta24b = String(extrairTexto(dados['24.b'])).trim().toUpperCase();
+
+setText(
+  'DM_24.b',
+  resposta24b === 'PRÓPRIO'
+    ? 'O(a) membro(a) informou que o órgão funciona em prédio próprio.'
+    : resposta24b === 'ALUGADO'
+      ? 'O(a) membro(a) informou que o órgão funciona em prédio alugado.'
+      : resposta24b === 'FÓRUM DA COMARCA'
+        ? 'O(a) membro(a) informou que o órgão funciona em prédio do Fórum da Comarca.'
+        : resposta24b === 'OUTROS'
+          ? `O(a) membro(a) informou que o órgão funciona em outro prédio, da seguinte forma: ${extrairTexto(dados['24.c'])}`
+          : extrairTexto(dados['24.b'])
+);
+
 
 const resposta25 = String(extrairTexto(dados['25'])).trim().toUpperCase();
 

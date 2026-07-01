@@ -124,6 +124,36 @@
             }
         }
 
+        .proposal-sidebar.hidden {
+            display: none !important;
+        }
+
+        /* Center the main report and allow shifting when proposal sidebar opens */
+        .page {
+            max-width: 980px;
+            margin: 18px auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+            transition: margin-right .18s ease, width .18s ease;
+        }
+
+        /* When the proposal sidebar is visible, move the page left to make room */
+        body.proposal-open .page {
+            margin-right: calc(340px + 32px);
+        }
+
+        /* Center the paper and shift it right when the proposal sidebar is open */
+        .paper {
+            max-width: 920px;
+            margin: 0 auto;
+            transition: margin .18s ease, transform .18s ease;
+        }
+
+        body.proposal-open .paper {
+            margin-left: auto;
+            margin-right: calc(340px + 32px);
+        }
+
         /* ── Sidebar: adicionar texto personalizado ── */
         .sidebar-add-toggle {
             display: flex;
@@ -248,7 +278,7 @@
 </head>
 
 <body>
-    <aside id="proposalSidebar" class="proposal-sidebar no-print">
+    <aside id="proposalSidebar" class="proposal-sidebar no-print hidden">
         <h2>Textos predefinidos</h2>
         <div class="sidebar-hint">
             Clique em um campo de <strong>Proposição</strong> no relatório e, em seguida, escolha um texto nesta lateral.
@@ -299,9 +329,20 @@
         </div>
         <div class="actions">
             <button class="btn btn-secondary" type="button" onclick="voltarAoAdmin()">Voltar ao admin</button>
+            <button class="btn btn-secondary" type="button" onclick="toggleProposalSidebar()">☰ Textos predefinidos</button>
             <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
         </div>
     </header>
+
+    <script>
+        function toggleProposalSidebar() {
+            const proposalSidebar = document.getElementById('proposalSidebar');
+            if (!proposalSidebar) return;
+            proposalSidebar.classList.toggle('hidden');
+            const visible = !proposalSidebar.classList.contains('hidden');
+            document.body.classList.toggle('proposal-open', visible);
+        }
+    </script>
 
     <div class="page">
         <div class="paper">
@@ -394,51 +435,18 @@
                     <span class="inline-value" id="DM_5"></span>
                 </div>
                  <div class="field">
-                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
+                    <label>Afastamentos realizados nos últimos 12(doze) meses: </label>
                     <span class="inline-value" id="DM_17"></span>
                 </div>
             </div>
 
-            <h3>2. PROCESSOS JUDICIAIS E/OU PROCEDIMENTOS EXTRAJUDICIAIS COM EXCESSO DE PRAZO</h3>
-            <div class="subtle">(Obs.: Especificar a numeração dos autos e há quanto tempo está em excesso de prazo.)</div>
-            <div class="section-box">
-                <div class="doc-block">
-                    <p id="auto_excesso_prazo"></p>
-                </div>
-            </div>
-
-            <h3>3. PROCESSOS JUDICIAIS E PROCEDIMENTOS EXTRAJUDICIAIS ANALISADOS</h3>
-            <table id="tabela-processos">
-                <thead>
-                    <tr>
-                    <th style="width:18%">Espécie</th>
-                    <th style="width:24%">Número do processo/procedimento</th>
-                    <th style="width:20%">Data da instauração</th>
-                    <th style="width:32%">Situação detectada</th>
-                    <th style="width:6%">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-                    <td><input class="table-input" placeholder="Número" /></td>
-                    <td><input class="table-input" type="date" /></td>
-                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="actions-row">
-                <button class="btn btn-ok" type="button" onclick="adicionarLinha()">+ Adicionar linha</button>
-            </div>
-
-            <!-- ==== 4. PROPOSIÇÕES GERAIS ==== -->
-            <h2>4. PROPOSIÇÕES GERAIS</h2>
+        <!-- ==== 2. PROPOSIÇÕES GERAIS ==== -->
+            <h2>2. PROPOSIÇÕES GERAIS</h2>
             <div class="subtle">Preenchimento obrigatório</div>
 
-            <!-- 4.1 -->
+            <!-- 2.1 -->
             <div class="proposal">
-    <div class="proposal-title">4.1 Residência na comarca de lotação</div>
+    <div class="proposal-title">2.1 Residência na comarca de lotação</div>
     <div class="subtle">
         Caso não resida na comarca de lotação, especificar o local de residência, o motivo,
         a distância da sede e se está autorizado pelo Procurador-Geral (informar o ato autorizativo)
@@ -471,9 +479,9 @@
                 </div>
 </div>
 
-            <!-- 4.2 -->
+            <!-- 2.2 -->
             <div class="proposal">
-                <div class="proposal-title">4.2 Regularidade do comparecimento físico à Promotoria de Justiça</div>
+                <div class="proposal-title">2.2 Regularidade do comparecimento físico à Promotoria de Justiça</div>
             <div class="field">
                         <div class="value" id="DM_7"></div>
                         <div class="value" id="DM_8"></div>
@@ -499,9 +507,9 @@
                 </div>
             </div>
 
-            <!-- 4.3 -->
+            <!-- 2.3 -->
             <div class="proposal">
-                <div class="proposal-title">4.3.a Participação em audiências judiciais de forma presencial</div>
+                <div class="proposal-title">2.3.a Participação em audiências judiciais de forma presencial</div>
                       <div class="field"> 
                         <div class="value" id="DM_9"></div>
                         <div class="value" id="DM_9.a"></div>
@@ -525,9 +533,9 @@
                 </div>
             </div>
 
-            <!-- 4.3.b -->
+            <!-- 2.4 -->
             <div class="proposal">
-                <div class="proposal-title">4.3.b Participação em audiências extrajudiciais de forma presencial</div>
+                <div class="proposal-title">2.4 Participação em audiências extrajudiciais de forma presencial</div>
                       <div class="field"> 
                         <div class="value" id="DM_9.b"></div>
                         <div class="value" id="DM_9.c"></div>
@@ -551,9 +559,9 @@
                 </div>
             </div>
 
-            <!-- 4.4 -->
+            <!-- 2.5 -->
             <div class="proposal">
-                <div class="proposal-title">4.4 Participação em cursos de aperfeiçoamento, de capacitação em negociação e mediação e/ou sobre atuação resolutiva</div>
+                <div class="proposal-title">2.5 Participação em cursos de aperfeiçoamento, de capacitação em negociação e mediação e/ou sobre atuação resolutiva</div>
                 <div class="field"> 
                         <div class="value" id="DM_10"></div>
                         <div class="value" id="DM_10.a"></div>
@@ -578,9 +586,39 @@
                 </div>
             </div>
 
-            <!-- 4.5 -->
+
+<!-- 2.6 -->
             <div class="proposal">
-                <div class="proposal-title">4.5 Exercício do magistério, atividade de coaching, exercício da advocacia, participação de sociedade comercial ou organização não governamental</div>
+                <div class="proposal-title">2.6 Recebeu prêmio, homenagem, anotação ou elogio no prontuário em decorrência de sua atuação nos últimos 12 meses?</div>
+                <div class="field"> 
+                        <div class="value" id="DM_11"></div>
+                        
+                 </div>
+                <div class="proposal-fields">
+                    <div class="field">
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    </div>
+                    <div class="field">
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_44" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_44" value="nao" /> Não</label>
+                    </div>
+                    </div>
+                </div>
+                <div class="field" style="margin-top:12px;">
+                    <label>Proposição</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
+                </div>
+            </div>
+
+
+
+
+            <!-- 2.7 -->
+            <div class="proposal">
+                <div class="proposal-title">2.7 Exercício do magistério, atividade de coaching, exercício da advocacia, participação de sociedade comercial ou organização não governamental</div>
                 
                  <div class="field"> 
                         <div class="value" id="DM_12"></div>
@@ -610,9 +648,9 @@
 
             </div>
 
-            <!-- 4.6 -->
+            <!-- 2.8 -->
             <div class="proposal">
-                <div class="proposal-title">4.6 Atuação Eficiente com a Cumulação voluntária de órgãos</div>
+                <div class="proposal-title">2.8 Atuação Eficiente com a Cumulação voluntária de órgãos</div>
                   <div class="field"> 
                         <div class="value" id="DM_15"></div>
                         <div class="value" id="DM_16"></div>
@@ -640,9 +678,9 @@
                 </div>
             </div>
 
-            <!-- 4.7 -->
+            <!-- 2.9 -->
             <div class="proposal">
-                <div class="proposal-title">4.7 Atendimento ao público: Realização bem como registro do atendimento ao público (atas, memórias, termos etc.). Como o membro procede e encaminha as demandas. Horário de atendimento ao público</div>
+                <div class="proposal-title">2.9 Atendimento ao público: Realização bem como registro do atendimento ao público (atas, memórias, termos etc.). Como o membro procede e encaminha as demandas. Horário de atendimento ao público</div>
                 <div class="field"> 
                         <div class="value" id="DM_18" ></div>
                         <div class="value" id="DM_18.e"></div>
@@ -667,19 +705,18 @@
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
                 <div class=RECOMENDAR ao(à) membro(a) correicionado(a) que efetue atendimento ao público, registrando-o e especificando, inclusive, os encaminhamentos adotados em cada caso.
-
-RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampliar o horário do atendimento ao público.</div>
+                RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampliar o horário do atendimento ao público.</div>
             </div>
 
-            <!-- 4.8 -->
+            <!-- 2.10 -->
             <div class="proposal">
-                <div class="proposal-title">4.8 Quantidade de membros, servidores, terceirizados e estagiários lotados no órgão correicionado. Adequação de Recursos humanos à demanda da unidade</div>
+                <div class="proposal-title">2.10 Quantidade de membros, servidores, terceirizados e estagiários lotados no órgão correicionado. Adequação de Recursos humanos à demanda da unidade</div>
                <div class="field"> 
                         <div class="value" id="DM_19" ></div>
                         <div class="value" id="DM_20"></div>
-                        <div class="value" id="DM_21"></div>
-                        <div class="value" id="DM_22"></div>
-                        <div class="value" id="DM_23"></div>
+                       <!--  <div class="value" id="DM_21"></div>
+                        <div class="value" id="DM_22"></div>-->
+                       <div class="value" id="DM_23"></div>
                         <div class="value" id="DM_23.a"></div>
                  </div>
                 <div class="proposal-fields">
@@ -701,11 +738,12 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampli
                 </div>
             </div>
 
-            <!-- 4.9 -->
+            <!-- 2.11 -->
             <div class="proposal">
-                <div class="proposal-title">4.9 Adequação das instalações físicas, mobiliário, equipamentos de informática e conectividade à internet</div>
+                <div class="proposal-title">2.11 Adequação das instalações físicas, mobiliário, equipamentos de informática e conectividade à internet</div>
                   <div class="field"> 
                         <div class="value" id="DM_24" ></div>
+                        <div class="value" id="DM_24.b" ></div>
                         <div class="value" id="DM_25"></div>
                         <div class="value" id="DM_25.b"></div>
                        
@@ -729,9 +767,122 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampli
                 </div>
             </div>
 
-            <!-- 4.10 -->
+            <!-- 3 --><h2>3 Estatísticas do Órgão</h2>
             <div class="proposal">
-                <div class="proposal-title">4.10 Estatísticas do Órgão</div>
+                <div class="proposal-title">3.1 Estatísticas Gerais</div>
+                
+                    <div class="field">
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    </div>
+                    
+                
+            
+
+            
+
+            <h3>3.2 PROCEDIMENTOS ANALISADOS NA CORREIÇÃO</h3>
+            <table id="tabela-processos">
+                <thead>
+                    <tr>
+                    <th style="width:18%">Classe</th>
+                    <th style="width:24%">Nº dos Autos </th>
+                    <th style="width:24%">Objeto</th>
+                    <th style="width:20%">Data da instauração</th>
+                    <th style="width:32%">Situação detectada</th>
+                    <th style="width:6%">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
+                    <td><input class="table-input" placeholder="Número" /></td>
+                    <td><input class="table-input" placeholder="Objeto" /></td>
+                    <td><input class="table-input" type="date" /></td>
+                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+                    <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="actions-row">
+                <button class="btn btn-ok" type="button" onclick="adicionarLinha()">+ Adicionar linha</button>
+                
+            </div>
+            <p> </p>
+
+                    <div class="proposal-fields">
+                    <div class="field">
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    </div>
+                    <div class="field">
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
+                    </div>
+                    </div>
+                    
+                </div>
+             <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
+
+                <div class="field" style="margin-top:12px;">
+                    <label>Proposição</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
+                </div>
+            </div>
+ <h3>3.2.2  PROCEDIMENTOS EXTRAJUDICIAIS ANALISADOS</h3>
+            <table id="tabela-procedimentos-extra">
+                <thead>
+                    <tr>
+                    <th style="width:18%">Classe</th>
+                    <th style="width:24%">Nº do procedimento</th>
+                    <th style="width:24%">Data da instauração</th>
+                    <th style="width:32%">Situação detectada</th>
+                    <th style="width:6%">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
+                    <td><input class="table-input" placeholder="Número do procedimento" /></td>
+                    <td><input class="table-input" type="date" /></td>
+                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+                    <td><button type="button" class="btn btn-danger" onclick="removerLinhaExtra(this)">Apagar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="actions-row">
+                <button class="btn btn-ok" type="button" onclick="adicionarLinhaExtra()">+ Adicionar linha</button>
+            </div>
+            <p> </p>
+
+                    <div class="proposal-fields">
+                    <div class="field">
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    </div>
+                    <div class="field">
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
+                    </div>
+                    </div>
+                    
+                </div>
+             <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
+
+                <div class="field" style="margin-top:12px;">
+                    <label>Proposição</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
+                </div>
+            </div>
+
+ <!-- 3.3 -->
+            <div class="proposal">
+                <div class="proposal-title">3.3 Análise por amostragem de processos judiciais e procedimentos extrajudiciais. Avaliação da equipe correicional sobre medidas adotadas para garantir a celeridade dos feitos (judiciais e extrajudiciais).</div>
+                 
                 <div class="proposal-fields">
                     <div class="field">
                     <label>Observações da equipe</label>
@@ -740,17 +891,111 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampli
                     <div class="field">
                     <label>Necessidade de proposição</label>
                     <div class="check-row">
-                    <label class="check"><input type="radio" name="prop_410" value="sim" /> Sim</label>
-                    <label class="check"><input type="radio" name="prop_410" value="nao" /> Não</label>
+                    <label class="check"><input type="radio" name="prop_49" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_49" value="nao" /> Não</label>
                     </div>
                     </div>
                 </div>
-                <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
+                             <div class="proposal-notice">Obs.: Lançar nas observações de equipe todas as situações dignas de registro identificadas durante a análise por amostragem de processos judiciais e procedimentos extrajudiciais. A equipe deve criar outras proposições a partir das situações encontradas.</div>
+
                 <div class="field" style="margin-top:12px;">
-                    <label>Proposições</label>
+                    <label>Proposição</label>
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
             </div>
+
+<h3>3.4  EXCESSOS DE PRAZO</h3>
+<div class="field" style="margin-top:12px;">
+    <label>3.4.1 PROCESSOS JUDICIAIS COM EXCESSO DE PRAZO </label>
+            <table id="tabela-excesso-judicial">
+                <thead>
+                    <tr>
+                    <th style="width:13%">Classe</th>
+                    <th style="width:24%">Nº dos Autos</th>
+                    <th style="width:24%">Objeto</th>
+                    <th style="width:24%">Data da instauração</th>
+                    <th style="width:32%">Situação detectada</th>
+                    <th style="width:6%">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td><input class="table-input" placeholder="Ex.: Procedimento judicial" /></td>
+                    <td><input class="table-input" placeholder="Número do processo" /></td>
+                    <td><input class="table-input" placeholder="objeto" /></td>
+                    <td><input class="table-input" type="date" /></td>
+                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+                    <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoJudicial(this)">Apagar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="actions-row">
+                <button class="btn btn-ok" type="button" onclick="adicionarLinhaExcessoJudicial()">+ Adicionar linha</button>
+            </div>
+            <p> </p>
+            <label>3.4.2 PROCEDIMENTOS EXTRAJUDICIAIS COM EXCESSO DE PRAZO </label>
+            <table id="tabela-excesso-extra">
+                <thead>
+                    <tr>
+                    <th style="width:13%">Classe</th>
+                    <th style="width:24%">Nº dos Autos</th>
+                    <th style="width:24%">Objeto</th>
+                    <th style="width:24%">Data da instauração</th>
+                    <th style="width:32%">Situação detectada</th>
+                    <th style="width:6%">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
+                    <td><input class="table-input" placeholder="Número do procedimento" /></td>
+                    <td><input class="table-input" placeholder="objeto" /></td>
+                    <td><input class="table-input" type="date" /></td>
+                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
+                    <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoExtra(this)">Apagar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="actions-row">
+                <button class="btn btn-ok" type="button" onclick="adicionarLinhaExcessoExtra()">+ Adicionar linha</button>
+            </div>
+            <p> </p>
+
+                    <div class="proposal-fields">
+                    <div class="field">
+                    <label>Observações da equipe</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    </div>
+                    <div class="field">
+                    <label>Necessidade de proposição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
+                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
+                    </div>
+                    </div>
+                    
+                </div>
+             <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
+
+                <div class="field" style="margin-top:12px;">
+                    <label>Proposição</label>
+                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
+                </div>
+            
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             <!-- 4.11 -->
             <div class="proposal">
@@ -1007,6 +1252,7 @@ RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampli
                     <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
                 </div>
             </div>
+            
 
             <!-- ==== 5. INFÂNCIA E JUVENTUDE ==== -->
             <h2>5. PROPOSIÇÕES ESPECÍFICAS — INFÂNCIA E JUVENTUDE</h2>
