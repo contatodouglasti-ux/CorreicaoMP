@@ -911,6 +911,16 @@ setText(
       : extrairTexto(dados['57'])
 );
 
+const resposta58 = String(extrairTexto(dados['58'])).trim().toUpperCase();
+
+setText(
+  'DM_58',
+  resposta58 === 'NÃO'
+    ? 'O membro informou que não adota as medidas cabíveis para garantir o direito à convivência familiar das crianças e adolescentes acolhidos, zelando prioritariamente pela reintegração familiar, quando cabível, ou pela colocação em família substituta.'
+    : resposta58 === 'SIM'
+      ? `O membro informou que adota as medidas cabíveis para garantir o direito à convivência familiar das crianças e adolescentes acolhidos, zelando prioritariamente pela reintegração familiar, quando cabível, ou pela colocação em família substituta. ${extrairTexto(dados['58.a'])}`
+      : extrairTexto(dados['58'])
+);
 const resposta59 = String(extrairTexto(dados['59'])).trim().toUpperCase();
 
 setText(
@@ -960,6 +970,19 @@ setText(
    extrairTexto(dados['61'])
     
 );
+
+const resposta62 = String(extrairTexto(dados['62'])).trim().toUpperCase();
+
+setText(
+  'DM_62',
+  resposta62 === 'NÃO'
+    ? 'O membro informou que não existe fluxo estabelecido com a Delegacia de Polícia, Poder Judiciário, Defensoria Pública e Assistência Social para agilizar o atendimento inicial ao adolescente a quem se atribua autoria de ato infracional, nos termos do artigo 88, V, do ECA.'
+    : resposta62 === 'SIM'
+      ? `O membro informou que existe fluxo estabelecido com a Delegacia de Polícia, Poder Judiciário, Defensoria Pública e Assistência Social para agilizar o atendimento inicial ao adolescente a quem se atribua autoria de ato infracional, nos termos do artigo 88, V, do ECA. ${extrairTexto(dados['62.a'])}`
+      : extrairTexto(dados['62'])
+);
+
+
 const resposta63 = String(extrairTexto(dados['63'])).trim().toUpperCase();
 
 setText(
@@ -1046,10 +1069,21 @@ const resposta68 = String(extrairTexto(dados['68'])).trim().toUpperCase();
 setText(
   'DM_68',
   resposta68 === 'SIM'
-    ? 'O(a) membro(a) afirmou que há articulação ou atuação integrada entre as Promotorias de Justiça criminais, de violência doméstica e familiar, de família e da infância e juventude, nos termos do art. 2º da Resolução CNMP nº 287/2024.'
+    ? `O membro informou que há articulação ou atuação integrada entre as Promotorias de Justiça criminais, de violência doméstica e familiar, de família e da infância e juventude, nos termos do art. 2º da Resolução CNMP nº 287/2024. ${extrairTexto(dados['68.a'])}`
     : resposta68 === 'NÃO'
-      ? 'O(a) membro(a) afirmou que não há articulação ou atuação integrada entre as Promotorias de Justiça criminais, de violência doméstica e familiar, de família e da infância e juventude, nos termos do art. 2º da Resolução CNMP nº 287/2024.'
+      ? `O membro informou que não há articulação ou atuação integrada entre as Promotorias de Justiça criminais, de violência doméstica e familiar, de família e da infância e juventude, nos termos do art. 2º da Resolução CNMP nº 287/2024. ${extrairTexto(dados['68.a'])}`
       : extrairTexto(dados['68'])
+);
+
+const resposta69 = String(extrairTexto(dados['69'])).trim().toUpperCase();
+
+setText(
+  'DM_69',
+  resposta69 === 'SIM'
+    ? 'O membro informou que, no caso de realização de depoimento especial, ele é emprestado aos demais juízos quando necessário.'
+    : resposta69 === 'NÃO'
+      ? 'O membro informou que, no caso de realização de depoimento especial, ele não é emprestado aos demais juízos quando necessário.'
+      : extrairTexto(dados['69'])
 );
 
 const resposta70 = String(extrairTexto(dados['70'])).trim().toUpperCase();
@@ -1061,6 +1095,22 @@ setText(
     : resposta70 === 'NÃO'
       ? 'O(a) membro(a) afirmou que não há atuação para garantir a implementação local da política pública de enfrentamento à violência contra crianças e adolescentes vítima ou testemunha de violência, nos termos do artigo 3º da Resolução CNMP nº 287/2024.'
       : extrairTexto(dados['70'])
+);
+
+setText(
+  'DM_71',
+  `O membro informou que o fluxo para o depoimento especial na comarca tem sido o seguinte: ${extrairTexto(dados['71'])}`
+);
+
+const resposta71a = String(extrairTexto(dados['71.a'])).trim().toUpperCase();
+
+setText(
+  'DM_71.a',
+  resposta71a === 'SIM'
+    ? 'O membro informou que há utilização desta prova como prova emprestada nos outros juízos.'
+    : resposta71a === 'NÃO'
+      ? 'O membro informou que não há utilização desta prova como prova emprestada nos outros juízos.'
+      : extrairTexto(dados['71.a'])
 );
 
 const resposta72 = String(extrairTexto(dados['72'])).trim().toUpperCase();
@@ -1085,6 +1135,23 @@ setText(
     : resposta73 === 'NÃO'
       ? 'O(a) membro(a) afirmou que não foram adotadas medidas administrativas ou judiciais voltadas ao aumento da oferta de vagas em creches públicas, com vistas a ampliar o atendimento da demanda manifesta e por meio da realização de busca ativa, visando ao atendimento em creches, das Metas do Plano Nacional de Educação.'
       : extrairTexto(dados['73'])
+);
+
+const resposta74 = String(extrairTexto(dados['74'])).trim().toUpperCase();
+const resposta74a = extrairTexto(dados['74.a']);
+
+setText(
+  'DM_74',
+  resposta74 === 'SIM'
+    ? `O membro afirmou que adotou medidas administrativas ou judiciais voltadas à garantia da universalização da pré-escola, obrigatória para crianças de 4 a 5 anos, conforme a Meta do Plano Nacional de Educação${resposta74a ? `: ${resposta74a}` : '.'}`
+    : 'O membro afirmou que não adotou medidas administrativas ou judiciais voltadas à garantia da universalização da pré-escola, obrigatória para crianças de 4 a 5 anos, conforme a Meta do Plano Nacional de Educação.'
+);
+
+setText(
+  'DM_74.a',
+  resposta74 === 'SIM'
+    ? resposta74a
+    : ''
 );
 
 const resposta75 = String(extrairTexto(dados['75'])).trim().toUpperCase();
@@ -1151,6 +1218,37 @@ setText(
     : resposta80 === 'NÃO'
       ? 'O(a) membro(a) afirmou que não foram adotadas medidas administrativas ou judiciais voltadas à defesa da gestão democrática do ensino, conforme Meta do Plano Nacional de Educação.'
       : extrairTexto(dados['80'])
+);
+
+
+const resposta82 = String(extrairTexto(dados['82'])).trim().toUpperCase();
+const resposta82a = extrairTexto(dados['82.a']);
+
+setText(
+  'DM_82',
+  resposta82 === 'SIM'
+    ? `O membro afirmou que acompanha as estratégias adotadas pela Secretaria Municipal de Educação e pelo Conselho Tutelar para combater a evasão e o abandono escolar${resposta82a ? `: ${resposta82a}` : '.'}`
+    : 'O membro afirmou que não acompanha as estratégias adotadas pela Secretaria Municipal de Educação e pelo Conselho Tutelar para combater a evasão e o abandono escolar.'
+);
+
+const resposta83 = String(extrairTexto(dados['83'])).trim().toUpperCase();
+const resposta83a = extrairTexto(dados['83.a']);
+
+setText(
+  'DM_83',
+  resposta83 === 'SIM'
+    ? `O membro afirmou que atua na Educação de Jovens e Adultos (EJA) com foco na defesa do direito constitucional à educação, garantindo oferta suficiente, busca ativa de alunos, qualidade na infraestrutura e combate à evasão escolar${resposta83a ? `: ${resposta83a}` : '.'}`
+    : 'O membro afirmou que não atua na Educação de Jovens e Adultos (EJA) com foco na defesa do direito constitucional à educação, garantindo oferta suficiente, busca ativa de alunos, qualidade na infraestrutura e combate à evasão escolar.'
+);
+
+const resposta84 = String(extrairTexto(dados['84'])).trim().toUpperCase();
+const resposta84a = extrairTexto(dados['84.a']);
+
+setText(
+  'DM_84',
+  resposta84 === 'SIM'
+    ? `O membro afirmou que tem atuação voltada ao enfrentamento ao analfabetismo${resposta84a ? `: ${resposta84a}` : '.'}`
+    : 'O membro afirmou que não tem atuação voltada ao enfrentamento ao analfabetismo.'
 );
 
 const resposta85 = String(extrairTexto(dados['85'])).trim().toUpperCase();
@@ -1258,6 +1356,36 @@ setText(
       ? 'O membro informou que tem fiscalizado se a Polícia Civil — ou outros órgãos competentes — aplica o Formulário Nacional de Avaliação de Risco (FONAR) em todos os casos que envolvam violência doméstica no âmbito familiar.'
       : extrairTexto(dados['94'])
 );
+const resposta94a = extrairTexto(dados['94.a']);
+
+setText(
+  'DM_94.a',
+  resposta94a
+    ? `O membro afirmou que atua na fiscalização e no fomento do cumprimento das medidas protetivas de urgência com absoluta prioridade, nos termos da Recomendação CNMP nº 87/2021: ${resposta94a}`
+    : 'O membro afirmou que atua na fiscalização e no fomento do cumprimento das medidas protetivas de urgência com absoluta prioridade, nos termos da Recomendação CNMP nº 87/2021.'
+);
+
+const resposta95 = String(extrairTexto(dados['95'])).trim().toUpperCase();
+const resposta95a = extrairTexto(dados['95.a']);
+
+setText(
+  'DM_95',
+  resposta95 === 'SIM'
+    ? 'O membro afirmou que existe delegacia especializada.'
+    : `O membro afirmou que não existe delegacia especializada${resposta95a ? `, informando que ${resposta95a}` : '.'}`
+);
+
+const resposta96 = String(extrairTexto(dados['96'])).trim().toUpperCase();
+const resposta96a = extrairTexto(dados['96.a']);
+
+setText(
+  'DM_96',
+  resposta96 === 'SIM'
+    ? `O membro afirmou que há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher${resposta96a ? `: ${resposta96a}` : '.'}`
+    : 'O membro afirmou que não há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher.'
+);
+
+
 
 const resposta98 = String(extrairTexto(dados['98'])).trim().toUpperCase();
 setText(
