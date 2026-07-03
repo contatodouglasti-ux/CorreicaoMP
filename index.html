@@ -31,12 +31,6 @@
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
-<!-- Badge do usuário -->
-<div id="userBadge" style="display:none">
-  <div class="avatar" id="userAvatar">?</div>
-  <span id="userName">Carregando…</span>
-</div>
-
 <!-- Loading overlay -->
 <div id="loadingOverlay">
   <div class="spinner"></div>
@@ -88,6 +82,24 @@
 
   <!-- CONTEÚDO PRINCIPAL -->
   <div class="main-content">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="brand-area">
+        <div class="brand-logo">M</div>
+        <div class="brand-text">
+          <div class="kicker">Ministério Público do Amazonas</div>
+          <h1>MPAM CGMP</h1>
+          <p>Página inicial de acesso rápido</p>
+        </div>
+      </div>
+      <div id="userBadge" class="user-box" style="display:none;">
+        <div class="avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <strong id="userName">Carregando…</strong>
+        </div>
+      </div>
+    </header>
 
     <!-- Barra de progresso -->
     <div class="progress">

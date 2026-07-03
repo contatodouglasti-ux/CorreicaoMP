@@ -243,7 +243,7 @@ setText('DM_5', extrairTexto(dados['5']));
 setText(
   'DM_6',
   resposta6 === 'SIM'
-    ? 'O membro reside na comarca'
+    ? ' O membro reside na comarca'
     : resposta6 === 'NÃO'
       ? 'O membro não reside na comarca'
       : extrairTexto(dados['6'])
@@ -337,7 +337,14 @@ setText(
       : extrairTexto(dados['10.b'])
 );
 
+const resposta11 = String(extrairTexto(dados['11'])).trim().toUpperCase();
 
+setText(
+  'DM_11',
+  resposta11 === 'SIM'
+    ? 'O membro informou que recebeu prêmio, homenagem, anotação ou elogio no prontuário em decorrência de sua atuação nos últimos 12 meses.'
+    : 'O membro informou que não recebeu prêmio, homenagem, anotação ou elogio no prontuário em decorrência de sua atuação nos últimos 12 meses.'
+);
 
  const resposta12 = String(extrairTexto(dados['12'])).trim().toUpperCase();
 setText(
@@ -1417,11 +1424,42 @@ setText(
 );
 
 
+const resposta97 = String(extrairTexto(dados['97'])).trim().toUpperCase();
+const resposta97a = String(extrairTexto(dados['97.a'])).trim();
 
+setText(
+  'DM_97',
+  resposta97 === 'SIM'
+    ? `O membro informou que a Promotoria de Justiça possui procedimento ou ação judicial com o objetivo de buscar a implementação ou o aprimoramento, pelo ente federativo competente, da capacitação de agentes de segurança pública e/ou guardas civis municipais sobre o enfrentamento à violência doméstica e familiar contra a mulher, da seguinte forma: ${resposta97a}`
+    : 'O membro informou que a Promotoria de Justiça não possui procedimento ou ação judicial com o objetivo de buscar a implementação ou o aprimoramento, pelo ente federativo competente, da capacitação de agentes de segurança pública e/ou guardas civis municipais sobre o enfrentamento à violência doméstica e familiar contra a mulher.'
+);
 
+const resposta98a = String(extrairTexto(dados['98.a'])).trim().toUpperCase();
 
+setText(
+  'DM_98.a',
+  resposta98a === 'SIM'
+    ? 'O membro informou que zela pelo direito de informação da vítima, tais como sobre seus direitos básicos, serviços de apoio, processos e outros meios de obtenção de reparação dos danos causados.'
+    : 'O membro informou que não zela pelo direito de informação da vítima, tais como sobre seus direitos básicos, serviços de apoio, processos e outros meios de obtenção de reparação dos danos causados.'
+);
+const resposta98b = String(extrairTexto(dados['98.b'])).trim().toUpperCase();
 
+setText(
+  'DM_98.b',
+  resposta98b === 'SIM'
+    ? 'O membro informou que fiscaliza a efetiva intimação da vítima em caso de liberdade provisória do autuado, nos termos do art. 21 da Lei nº 11.340/06.'
+    : 'O membro informou que não fiscaliza a efetiva intimação da vítima em caso de liberdade provisória do autuado, nos termos do art. 21 da Lei nº 11.340/06.'
+);
 
+const resposta100b = String(extrairTexto(dados['100.b'])).trim().toUpperCase();
+const resposta100c = String(extrairTexto(dados['100.c'])).trim();
+
+setText(
+  'DM_100.b',
+  resposta100b === 'SIM'
+    ? `O membro informou que realiza atuação com perspectiva de gênero, da seguinte forma: ${resposta100c}`
+    : 'O membro informou que não realiza atuação com perspectiva de gênero.'
+);
 
 
 
@@ -1526,6 +1564,17 @@ setText(
       : extrairTexto(dados['107'])
 );
 
+const resposta107a = String(extrairTexto(dados['107.a'])).trim().toUpperCase();
+const resposta107b = String(extrairTexto(dados['107.b'])).trim();
+
+setText(
+  'DM_107.a',
+  resposta107a === 'SIM'
+    ? `O membro informou que realiza atuação integrada com Promotorias de Justiça com atribuição em homicídio na condução de ações preventivas, da seguinte forma: ${resposta107b}`
+    : 'O membro informou que não realiza atuação integrada com Promotorias de Justiça com atribuição em homicídio na condução de ações preventivas.'
+);
+
+
 const resposta108 = String(extrairTexto(dados['108'])).trim().toUpperCase();
 setText(
   'DM_108',
@@ -1576,6 +1625,301 @@ setText(
       : extrairTexto(dados['111'])
 );
 
+
+
+const resposta112 = String(extrairTexto(dados['112'])).trim().toUpperCase();
+
+setText(
+  'DM_112',
+  resposta112 === 'SIM'
+    ? 'O membro informou que, quando do ajuizamento da ação penal, formula pedido de indenização à vítima, nos termos do art. 387, inciso IV, do CPP.'
+    : 'O membro informou que, quando do ajuizamento da ação penal, não formula pedido de indenização à vítima, nos termos do art. 387, inciso IV, do CPP.'
+);
+
+const resposta113 = String(extrairTexto(dados['113'])).trim().toUpperCase();
+
+setText(
+  'DM_113',
+  resposta113 === 'SIM'
+    ? 'O membro informou que, na hipótese de omissão do juiz na fixação de indenização, são interpostos recursos.'
+    : 'O membro informou que, na hipótese de omissão do juiz na fixação de indenização, não são interpostos recursos.'
+);
+
+const resposta114 = String(extrairTexto(dados['114'])).trim().toUpperCase();
+const resposta114a = String(extrairTexto(dados['114.a'])).trim();
+
+setText(
+  'DM_114',
+  resposta114 === 'SIM'
+    ? `O membro informou que há presos da comarca correicionada que estejam custodiados em outras jurisdições, informando o quantitativo de ${resposta114a}.`
+    : 'O membro informou que não há presos da comarca correicionada que estejam custodiados em outras jurisdições.'
+);
+
+const resposta115 = String(extrairTexto(dados['115'])).trim();
+
+setText(
+  'DM_115',
+  `O membro informou que o cumprimento de pena para os sentenciados em regime semiaberto e aberto ocorre da seguinte forma: ${resposta115}.`
+);
+
+const resposta116 = String(extrairTexto(dados['116'])).trim().toUpperCase();
+const resposta116a = String(extrairTexto(dados['116.a'])).trim();
+
+setText(
+  'DM_116',
+  resposta116 === 'SIM'
+    ? `O membro informou que estimula, de alguma forma, o desenvolvimento de ações para a remissão de pena, da seguinte forma: ${resposta116a}.`
+    : 'O membro informou que não estimula, de alguma forma, o desenvolvimento de ações para a remissão de pena.'
+);
+
+const resposta117 = String(extrairTexto(dados['117'])).trim().toUpperCase();
+const resposta117a = String(extrairTexto(dados['117.a'])).trim();
+
+setText(
+  'DM_117',
+  resposta117 === 'SIM'
+    ? `O membro informou que tem fiscalizado, em sede de controle concentrado, se os órgãos de segurança pública dispõem de condições materiais, técnicas e operacionais necessárias e compatíveis para o exercício de suas atribuições, da seguinte forma: ${resposta117a}`
+    : 'O membro informou que não tem fiscalizado, em sede de controle concentrado, se os órgãos de segurança pública dispõem de condições materiais, técnicas e operacionais necessárias e compatíveis para o exercício de suas atribuições.'
+);
+
+const resposta118 = String(extrairTexto(dados['118'])).trim().toUpperCase();
+const resposta118a = String(extrairTexto(dados['118.a'])).trim();
+
+setText(
+  'DM_118',
+  resposta118 === 'SIM'
+    ? `O membro informou que, nas hipóteses de promoção de arquivamento das investigações criminais, a vítima e/ou seus familiares têm sido notificados sobre o pronunciamento do Ministério Público, conforme art. 11, § 2º, da Resolução CNMP nº 279/2023, da seguinte forma: ${resposta118a}`
+    : 'O membro informou que, nas hipóteses de promoção de arquivamento das investigações criminais, a vítima e/ou seus familiares não têm sido notificados sobre o pronunciamento do Ministério Público, conforme art. 11, § 2º, da Resolução CNMP nº 279/2023.'
+);
+
+const resposta119 = String(extrairTexto(dados['119'])).trim().toUpperCase();
+const resposta119a = String(extrairTexto(dados['119.a'])).trim();
+
+setText(
+  'DM_119',
+  resposta119 === 'SIM'
+    ? `O membro informou que acompanha as investigações dos crimes que envolvam letalidade e vitimização policiais a partir das primeiras 24 horas da ocorrência ou do conhecimento dos fatos, com pleno e irrestrito acesso aos autos e demais atos e fases da investigação, conforme art. 11, § 3º, da Resolução CNMP nº 279/2023, da seguinte forma: ${resposta119a}`
+    : 'O membro informou que não acompanha as investigações dos crimes que envolvam letalidade e vitimização policiais a partir das primeiras 24 horas da ocorrência ou do conhecimento dos fatos, com pleno e irrestrito acesso aos autos e demais atos e fases da investigação, conforme art. 11, § 3º, da Resolução CNMP nº 279/2023.'
+);
+
+const resposta120 = String(extrairTexto(dados['120'])).trim().toUpperCase();
+const resposta120a = String(extrairTexto(dados['120.a'])).trim();
+
+setText(
+  'DM_120',
+  resposta120 === 'SIM'
+    ? `O membro informou que instaurou procedimento administrativo para verificar a existência e o adequado funcionamento de Programa de Integridade na Administração Pública, conforme o art. 4º da Resolução nº 305/2025-CNMP, da seguinte forma: ${resposta120a}`
+    : 'O membro informou que não instaurou procedimento administrativo para verificar a existência e o adequado funcionamento de Programa de Integridade na Administração Pública, conforme o art. 4º da Resolução nº 305/2025-CNMP.'
+);
+
+const resposta121 = String(extrairTexto(dados['121'])).trim().toUpperCase();
+const resposta121a = String(extrairTexto(dados['121.a'])).trim();
+
+setText(
+  'DM_121',
+  resposta121 === 'SIM'
+    ? `O membro informou que tem celebrado acordo de não persecução cível quando este se mostra proporcional e suficiente para a proteção do patrimônio público e da moralidade administrativa, nos termos do art. 2º da Resolução nº 306/2025-CNMP, da seguinte forma: ${resposta121a}`
+    : 'O membro informou que não tem celebrado acordo de não persecução cível quando este se mostra proporcional e suficiente para a proteção do patrimônio público e da moralidade administrativa, nos termos do art. 2º da Resolução nº 306/2025-CNMP.'
+);
+
+const resposta121b = String(extrairTexto(dados['121.b'])).trim().toUpperCase();
+const resposta121c = String(extrairTexto(dados['121.c'])).trim();
+
+setText(
+  'DM_121.b',
+  resposta121b === 'SIM'
+    ? `O membro informou que, em caso afirmativo, o acordo de não persecução cível tem contemplado a aplicação de uma ou mais sanções previstas na Lei nº 8.429/1992, bem como as condições necessárias para assegurar sua efetividade, sem prejuízo do ressarcimento integral do dano patrimonial e da perda de bens ou valores acrescidos ilicitamente, quando houver, conforme o art. 3º da Resolução nº 306/2025-CNMP, da seguinte forma: ${resposta121c}`
+    : 'O membro informou que, em caso afirmativo, o acordo de não persecução cível não tem contemplado a aplicação de uma ou mais sanções previstas na Lei nº 8.429/1992, bem como as condições necessárias para assegurar sua efetividade, sem prejuízo do ressarcimento integral do dano patrimonial e da perda de bens ou valores acrescidos ilicitamente, quando houver, conforme o art. 3º da Resolução nº 306/2025-CNMP.'
+);
+
+const resposta122 = String(extrairTexto(dados['122'])).trim().toUpperCase();
+const resposta122a = String(extrairTexto(dados['122.a'])).trim();
+
+setText(
+  'DM_122',
+  resposta122 === 'SIM'
+    ? `O membro informou que tem fiscalizado se o ente público observa os parâmetros legais mínimos obrigatórios que devem constar nos Portais da Transparência, conforme a Nota Técnica CAO-PDC nº 5/2025, da seguinte forma: ${resposta122a}`
+    : 'O membro informou que não tem fiscalizado se o ente público observa os parâmetros legais mínimos obrigatórios que devem constar nos Portais da Transparência, conforme a Nota Técnica CAO-PDC nº 5/2025.'
+);
+
+const resposta123 = String(extrairTexto(dados['123'])).trim().toUpperCase();
+const resposta123a = String(extrairTexto(dados['123.a'])).trim();
+
+setText(
+  'DM_123',
+  resposta123 === 'SIM'
+    ? `O membro informou que realiza vistorias em hospitais, UPAs e postos de saúde para verificar condições de higiene, presença de médicos, estoque de medicamentos e funcionamento de equipamentos, da seguinte forma: ${resposta123a}`
+    : 'O membro informou que não realiza vistorias em hospitais, UPAs e postos de saúde para verificar condições de higiene, presença de médicos, estoque de medicamentos e funcionamento de equipamentos.'
+);
+
+const resposta124 = String(extrairTexto(dados['124'])).trim().toUpperCase();
+const resposta124a = String(extrairTexto(dados['124.a'])).trim();
+
+setText(
+  'DM_124',
+  resposta124 === 'SIM'
+    ? `O membro informou que fiscaliza a correta aplicação de verbas públicas destinadas à saúde e o cumprimento de metas de vacinação e saneamento, da seguinte forma: ${resposta124a}`
+    : 'O membro informou que não fiscaliza a correta aplicação de verbas públicas destinadas à saúde e o cumprimento de metas de vacinação e saneamento.'
+);
+
+const resposta125 = String(extrairTexto(dados['125'])).trim().toUpperCase();
+const resposta125a = String(extrairTexto(dados['125.a'])).trim();
+
+setText(
+  'DM_125',
+  resposta125 === 'SIM'
+    ? `O membro informou que tem atuado para reduzir o tempo de espera por cirurgias, exames e consultas especializadas, da seguinte forma: ${resposta125a}`
+    : 'O membro informou que não tem atuado para reduzir o tempo de espera por cirurgias, exames e consultas especializadas.'
+);
+
+const resposta126 = String(extrairTexto(dados['126'])).trim().toUpperCase();
+const resposta126a = String(extrairTexto(dados['126.a'])).trim();
+
+setText(
+  'DM_126',
+  resposta126 === 'SIM'
+    ? `O membro informou que tem atuado visando assegurar o atendimento prioritário e adequado a idosos, crianças, pessoas com deficiências e pacientes com doenças raras ou transtornos mentais, da seguinte forma: ${resposta126a}`
+    : 'O membro informou que não tem atuado visando assegurar o atendimento prioritário e adequado a idosos, crianças, pessoas com deficiências e pacientes com doenças raras ou transtornos mentais.'
+);
+
+const resposta127 = String(extrairTexto(dados['127'])).trim().toUpperCase();
+const resposta127a = String(extrairTexto(dados['127.a'])).trim();
+
+setText(
+  'DM_127',
+  resposta127 === 'SIM'
+    ? `O membro informou que tem investigado desvios de recursos, fraude em licitações na área da saúde ou omissão de gestores que coloquem a vida da população em risco, da seguinte forma: ${resposta127a}`
+    : 'O membro informou que não tem investigado desvios de recursos, fraude em licitações na área da saúde ou omissão de gestores que coloquem a vida da população em risco.'
+);
+
+const resposta128 = String(extrairTexto(dados['128'])).trim().toUpperCase();
+const resposta128a = String(extrairTexto(dados['128.a'])).trim();
+
+setText(
+  'DM_128',
+  resposta128 === 'SIM'
+    ? 'O membro informou que o Município possui TFD (Tratamento Fora do Domicílio).'
+    : `O membro informou que o Município não possui TFD (Tratamento Fora do Domicílio), informando que ${resposta128a}.`
+);
+
+const resposta129 = String(extrairTexto(dados['129'])).trim().toUpperCase();
+const resposta129a = String(extrairTexto(dados['129.a'])).trim();
+
+setText(
+  'DM_129',
+  resposta129 === 'SIM'
+    ? `O membro informou que existe CAPS no Município, especificando o tipo: ${resposta129a}.`
+    : 'O membro informou que não existe CAPS no Município.'
+);
+
+const resposta130 = String(extrairTexto(dados['130'])).trim().toUpperCase();
+const resposta130a = String(extrairTexto(dados['130.a'])).trim();
+
+setText(
+  'DM_130',
+  resposta130 === 'SIM'
+    ? `O membro informou que fiscaliza os repasses fundo a fundo, da seguinte forma: ${resposta130a}`
+    : 'O membro informou que não fiscaliza os repasses fundo a fundo.'
+);
+
+const resposta131 = String(extrairTexto(dados['131'])).trim().toUpperCase();
+const resposta131a = String(extrairTexto(dados['131.a'])).trim();
+
+setText(
+  'DM_131',
+  resposta131 === 'SIM'
+    ? 'O membro informou que o Município informou que possui usina própria de oxigênio.'
+    : `O membro informou que o Município informou que não possui usina própria de oxigênio, informando que ${resposta131a}.`
+);
+
+const resposta132 = String(extrairTexto(dados['132'])).trim().toUpperCase();
+const resposta132a = String(extrairTexto(dados['132.a'])).trim();
+const resposta132b = String(extrairTexto(dados['132.b'])).trim();
+
+setText(
+  'DM_132',
+  resposta132 === 'SIM'
+    ? `O membro informou que o Município informou que possui sistema de tratamento de água distribuída para a população, da seguinte forma: ${resposta132a}`
+    : `O membro informou que o Município informou que não possui sistema de tratamento de água distribuída para a população, informando que ${resposta132b}.`
+);
+
+const resposta133 = String(extrairTexto(dados['133'])).trim().toUpperCase();
+const resposta133a = String(extrairTexto(dados['133.a'])).trim();
+
+setText(
+  'DM_133',
+  resposta133 === 'SIM'
+    ? `O membro informou que, quando atua na responsabilização por danos ambientais e climáticos, observa o princípio da reparação integral, levando em conta todas as dimensões socioambientais, incluindo os impactos sobre a flora, fauna, clima, solo, ar, água e bem-estar coletivo, da seguinte forma: ${resposta133a}`
+    : 'O membro informou que, quando atua na responsabilização por danos ambientais e climáticos, não observa o princípio da reparação integral, levando em conta todas as dimensões socioambientais, incluindo os impactos sobre a flora, fauna, clima, solo, ar, água e bem-estar coletivo.'
+);
+
+const resposta134 = String(extrairTexto(dados['134'])).trim().toUpperCase();
+const resposta134a = String(extrairTexto(dados['134.a'])).trim();
+
+setText(
+  'DM_134',
+  resposta134 === 'SIM'
+    ? `O membro informou que adota medidas preventivas e articuladas para o combate às queimadas e desmatamento, da seguinte forma: ${resposta134a}`
+    : 'O membro informou que não adota medidas preventivas e articuladas para o combate às queimadas e desmatamento.'
+);
+
+const resposta135 = String(extrairTexto(dados['135'])).trim().toUpperCase();
+const resposta135a = String(extrairTexto(dados['135.a'])).trim();
+
+setText(
+  'DM_135',
+  resposta135 === 'SIM'
+    ? `O membro informou que fiscaliza a política de descarte de resíduos sólidos e de lixo hospitalar, da seguinte forma: ${resposta135a}`
+    : 'O membro informou que não fiscaliza a política de descarte de resíduos sólidos e de lixo hospitalar.'
+);
+
+const resposta136 = String(extrairTexto(dados['136'])).trim().toUpperCase();
+
+setText(
+  'DM_136',
+  resposta136 === 'SIM'
+    ? 'O membro informou que o Município possui Plano Diretor.'
+    : 'O membro informou que o Município não possui Plano Diretor.'
+);
+
+const resposta136a = String(extrairTexto(dados['136.a'])).trim().toUpperCase();
+const resposta136b = String(extrairTexto(dados['136.b'])).trim();
+
+setText(
+  'DM_136.a',
+  resposta136a === 'SIM'
+    ? `O membro informou que fiscaliza a ocupação do solo e o parcelamento urbano para evitar o crescimento desordenado que degrada o ecossistema local, da seguinte forma: ${resposta136b}`
+    : 'O membro informou que não fiscaliza a ocupação do solo e o parcelamento urbano para evitar o crescimento desordenado que degrada o ecossistema local.'
+);
+
+const resposta137 = String(extrairTexto(dados['137'])).trim();
+
+setText(
+  'DM_137',
+  `O membro informou que as principais áreas em que tem encontrado entraves nas demandas encaminhadas ao poder público são: ${resposta137}`
+);
+
+const resposta138 = String(extrairTexto(dados['138'])).trim();
+
+setText(
+  'DM_138',
+  `O membro informou que tem as seguintes sugestões voltadas à melhoria da atuação: ${resposta138}`
+);
+
+const resposta139 = String(extrairTexto(dados['139'])).trim();
+
+setText(
+  'DM_139',
+  `O membro informou que possui as seguintes experiências inovadoras e/ou boas práticas, independentemente de estarem registradas institucionalmente, que deseja indicar: ${resposta139}`
+);
+
+const resposta140 = String(extrairTexto(dados['140'])).trim();
+
+setText(
+  'DM_140',
+  `O membro informou as seguintes observações adicionais: ${resposta140}`
+);
+
     // NOME busca registro?.user_id; LOTAÇÃO busca dados['1.1']
     const nome = registro?.user_id || '';
     const lotacao = extrairTexto(dados['1.1']);
@@ -1598,6 +1942,58 @@ setText(
 }
 
 /* ─── Inicialização ────────────────────────────────────────────── */
+// Garante ids únicos para textareas de Proposição e nomes únicos para grupos de radio
+function ensureProposalIds() {
+  const proposals = Array.from(document.querySelectorAll('.proposal'));
+  let fallbackCounter = 1;
+
+  proposals.forEach((proposal, pIndex) => {
+    // tenta extrair número da seção a partir do título (ex: "3.2 – Procedimentos")
+    const titleText = proposal.querySelector('.proposal-title')?.textContent?.trim() || '';
+    const m = titleText.match(/^(\d+(?:\.\d+)*)/);
+    const sec = m ? m[1].replace(/\./g, '_') : `auto${fallbackCounter++}`;
+
+    // encontra o campo de Proposição (label que começa com "Proposição")
+    const field = Array.from(proposal.querySelectorAll('.field')).find(f => {
+      const label = f.querySelector('label');
+      return label && /^proposiç/i.test(label.textContent.trim());
+    });
+
+    if (field) {
+      const textarea = field.querySelector('textarea');
+      if (textarea) {
+        // se não tiver id ou não for do padrão, atribui um id previsível
+        if (!textarea.id || !/^proposicao_/.test(textarea.id)) {
+          textarea.id = `proposicao_${sec}`;
+        } else {
+          // protege contra ids duplicados na página
+          const existing = document.querySelectorAll(`#${CSS.escape(textarea.id)}`);
+          if (existing && existing.length > 1) {
+            textarea.id = `proposicao_${sec}_${pIndex + 1}`;
+          }
+        }
+      }
+    }
+
+    // Normaliza nomes dos radio groups dentro desta proposta para evitar colisões globais
+    const radios = Array.from(proposal.querySelectorAll('input[type="radio"]'));
+    if (radios.length) {
+      const nameMap = new Map();
+      let groupIdx = 1;
+      radios.forEach(radio => {
+        const oldName = radio.name || `unnamed_${groupIdx}`;
+        if (!nameMap.has(oldName)) {
+          nameMap.set(oldName, `prop_${sec}_${nameMap.size + 1}`);
+        }
+        radio.name = nameMap.get(oldName);
+      });
+    }
+  });
+  // reaplica auto-expand para quaisquer textareas que recebam id/nova altura
+  bindAutoExpand();
+  console.debug('[Proposições] ensureProposalIds: concluído', proposals.length);
+}
+
 async function carregarRegistroDoBanco(id) {
     if (typeof carregarRegistroAdmin !== 'function') {
         throw new Error('A função carregarRegistroAdmin não foi encontrada.');
@@ -1630,6 +2026,8 @@ async function init() {
         }
 
         preencherRelatorio(registro);
+        // assegura ids únicos e nomes de radio para todos os campos de Proposição
+        if (typeof ensureProposalIds === 'function') ensureProposalIds();
     } catch (err) {
         console.error(err);
         showError(err?.message || 'Erro ao carregar o relatório.');
@@ -1736,70 +2134,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 textarea.addEventListener('click', () => setActiveTextarea(textarea));
             });
 
-            // ── Fonte dos textos: window.PROPOSICOES_JSON ──────────────────────────
-            // Os textos NÃO estão no DOM (.proposal-text não existe no HTML),
-            // portanto lemos direto do JSON já carregado na página.
-            const proposicoes = Array.isArray(window.PROPOSICOES_JSON)
-                ? window.PROPOSICOES_JSON
-                : [];
-
-            if (!proposicoes.length) {
-                status.textContent = 'Nenhuma proposição disponível.';
-                return;
-            }
-
-            list.innerHTML = '';
-
-            proposicoes.forEach((item) => {
-                if (!item?.texto) return;
-
-                const button = document.createElement('button');
-                button.type      = 'button';
-                button.className = 'sidebar-item';
-
-                const titleEl = document.createElement('strong');
-                // Usa id + título se disponíveis, ex: "4.1 – Residência na comarca"
-                titleEl.textContent = item.id
-                    ? `${item.id}${item.titulo ? ' – ' + item.titulo : ''}`
-                    : (item.titulo || 'Proposição');
-
-                const preview = document.createElement('div');
-                preview.className   = 'sidebar-preview';
-                preview.textContent = item.texto.length > 260
-                    ? item.texto.slice(0, 260) + '…'
-                    : item.texto;
-
-                button.appendChild(titleEl);
-                button.appendChild(preview);
-
-                button.addEventListener('click', () => {
-                    if (!activeTextarea) {
-                        status.textContent = 'Clique primeiro em um campo de Proposição no relatório.';
-                        button.classList.add('sidebar-item--warn');
-                        setTimeout(() => button.classList.remove('sidebar-item--warn'), 1800);
-                        return;
-                    }
-
-                    activeTextarea.value = item.texto;
-                    activeTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    activeTextarea.focus();
-
-                    const proposalTitle =
-                        activeTextarea.closest('.proposal')
-                            ?.querySelector('.proposal-title')
-                            ?.textContent?.trim()
-                        || 'campo selecionado';
-
-                    status.textContent = `✅ Texto ${item.id || ''} aplicado em: ${proposalTitle}`;
-                });
-
-                list.appendChild(button);
-            });
-
-            // Instrução inicial
-            status.textContent = `${proposicoes.length} proposições disponíveis. Clique em um campo de Proposição no relatório para ativar.`;
-
-            // ── Renderiza seção de textos personalizados (localStorage) ──────────
+            // ── Fonte dos textos: banco de dados (Supabase) ─────────────────────
+            // Os textos agora são carregados exclusivamente do banco, sem depender de Proposicao.js.
+            status.textContent = 'Carregando textos salvos do banco…';
             renderizarCustomizados(list, () => setActiveTextarea, () => activeTextarea, status);
 
             // ── Filtro de busca (filtra predefinidos + customizados) ──────────────
@@ -1854,7 +2191,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const labelWrap = document.createElement('div');
                     labelWrap.className = 'sidebar-custom-label';
-                    labelWrap.innerHTML = `<span>⭐ Meus textos (${customizados.length})</span>`;
+                    labelWrap.innerHTML = `<span>🗂️ Textos salvos (${customizados.length})</span>`;
                     secao.appendChild(labelWrap);
 
                     customizados.forEach((item) => {

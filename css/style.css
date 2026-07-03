@@ -168,6 +168,110 @@ body {
   flex-shrink: 0;
 }
 
+/* Topbar similar to home page */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 28px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(215, 227, 235, 0.9);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1C799B, #3aa3cb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(28, 121, 155, 0.22);
+  flex-shrink: 0;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-text .kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #607d8b;
+  margin-bottom: 4px;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 18px;
+  color: #263238;
+  line-height: 1.2;
+}
+
+.brand-text p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #607d8b;
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #dde3e8;
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.user-box .avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1C799B;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.user-info strong {
+  font-size: 13px;
+  color: #263238;
+}
+
+.user-info span {
+  font-size: 12px;
+  color: #607d8b;
+}
+
 .progress-bar {
   height: 4px;
   background: #2c3e50;

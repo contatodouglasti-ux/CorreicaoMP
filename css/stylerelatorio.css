@@ -147,6 +147,10 @@
             white-space: pre-wrap;
         }
 
+        .value + .value {
+            margin-top: 6px;
+        }
+
         .manual-input,
         .manual-textarea {
             width: 100%;

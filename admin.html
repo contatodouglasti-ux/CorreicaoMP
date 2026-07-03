@@ -782,7 +782,7 @@
 <div style="margin-top: 28px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;">
   <button class="btn btn-primary" id="btnTogglePendencias" onclick="togglePendencias()" style="display:flex;align-items:center;gap:8px;">
     <span id="btnPendenciasIcone">👥</span>
-    Gerenciar pendências
+    Gerenciar Correições
     <span id="btnPendenciasChevron" style="font-size:11px;transition:transform 0.25s">▼</span>
   </button>
   <span id="contadorPendenciasAtivas" style="font-size:12px;color:var(--muted);display:none;"></span>
@@ -795,13 +795,13 @@
   transition: max-height 0.35s ease, opacity 0.25s ease;
   pointer-events: none;
 ">
-  <h2 class="section-title" style="margin-top:8px;">Pendências de usuários</h2>
+  <h2 class="section-title" style="margin-top:8px;">Correição de usuários</h2>
   <p class="section-subtitle">
     Cadastre quem pode preencher o formulário e acompanhe quem está liberado para editar.
   </p>
 
   <div class="card">
-    <h2>Cadastrar usuário pendente</h2>
+    <h2>Cadastrar usuário da Correicionado</h2>
     <p>Informe o e-mail, a data de início e a data fim do período de acesso. O usuário só poderá preencher o formulário dentro desse intervalo.</p>
     <div class="inline-form" style="align-items:flex-end;">
       <div style="display:flex;flex-direction:column;flex:1;min-width:260px;">
@@ -817,17 +817,23 @@
           <span class="date-range-label">Data fim</span>
           <input type="date" id="pendenciaDataFim" />
         </div>
+        <div class="date-range-item" style="min-width: 280px; flex: 1;">
+          <span class="date-range-label">Unidade correicionada</span>
+          <select id="pendenciaUnidadeCorreicionada" style="padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; color:var(--text); background:#fff; outline:none;">
+            <option value="">Carregando unidades…</option>
+          </select>
+        </div>
       </div>
-      <button class="btn btn-primary" onclick="adicionarUsuarioPendente()">Adicionar pendência</button>
+      <button class="btn btn-primary" onclick="adicionarUsuarioPendente()">Adicionar Correição</button>
       <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Atualizar lista</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>Pendências ativas cadastradas</h2>
-    <p>Aqui aparecem apenas os usuários com pendência ativa. Se necessário, você pode remover a pendência.</p>
+    <h2>Correições ativas cadastradas</h2>
+    <p>Aqui aparecem apenas os usuários com correição ativa. Se necessário, você pode remover a correição.</p>
     <div class="filtros" style="margin-top:14px; margin-bottom:14px;">
-      <input type="text" id="filtroUsuarioPendencia" placeholder="🔍 Filtrar pendências por e-mail" oninput="carregarPendenciasAtivas()" />
+      <input type="text" id="filtroUsuarioPendencia" placeholder="🔍 Filtrar correições por e-mail" oninput="carregarPendenciasAtivas()" />
       <button class="btn btn-gray" onclick="carregarPendenciasAtivas()">Buscar</button>
     </div>
     <div class="tabela-wrap" id="pendenciasWrap">
@@ -1222,6 +1228,33 @@
     return String(valor || '').trim();
   }
 
+  async function carregarOpcoesUnidadesPendencia() {
+    const select = document.getElementById('pendenciaUnidadeCorreicionada');
+    if (!select) return;
+
+    select.disabled = true;
+    select.innerHTML = '<option value="">Carregando unidades…</option>';
+
+    try {
+      const unidades = await listarUnidadesCorreicionadasAdmin();
+      window._mapaUnidadesPendencia = new Map((unidades || []).map(u => [u.id, u.nome]));
+
+      if (!unidades.length) {
+        select.innerHTML = '<option value="">Nenhuma unidade cadastrada</option>';
+        return;
+      }
+
+      select.innerHTML = '<option value="">Selecione a unidade</option>' + unidades
+        .map(unidade => `<option value="${escapeHtml(unidade.id)}">${escapeHtml(unidade.nome)}</option>`)
+        .join('');
+    } catch (err) {
+      console.error(err);
+      select.innerHTML = '<option value="">Erro ao carregar unidades</option>';
+    } finally {
+      select.disabled = !select.querySelector('option[value]') || select.value === '' && select.querySelectorAll('option').length <= 1;
+    }
+  }
+
   async function carregarPendenciasAtivas() {
     mostrarLoading('Carregando pendências…');
     try {
@@ -1272,6 +1305,11 @@
 
   const linhas = lista.map(p => {
     const userId   = escapeHtml(p.user_id || p.id || '—');
+    const unidadeId = String(p.unidade_correicionada || '').trim();
+    const unidadeNome = unidadeId && window._mapaUnidadesPendencia?.has(unidadeId)
+      ? window._mapaUnidadesPendencia.get(unidadeId)
+      : unidadeId || '—';
+    const unidade  = escapeHtml(unidadeNome);
     const criadoEm = p.criado_em || p.created_at || null;
     const cadastro = criadoEm ? new Date(criadoEm).toLocaleDateString('pt-BR') : '—';
     const inicio   = p.data_inicio || null;
@@ -1291,6 +1329,7 @@
     return `
       <tr>
         <td class="td-email">${userId}</td>
+        <td>${unidade}</td>
         <td><span class="${badgeClass}">${badgeText}</span></td>
         <td style="white-space:nowrap;font-size:13px;">${fmtData(inicio)}</td>
         <td style="white-space:nowrap;font-size:13px;">${fmtData(fim)}</td>
@@ -1308,6 +1347,7 @@
       <thead>
         <tr>
           <th>Identificador</th>
+          <th>Unidade</th>
           <th>Status</th>
           <th>Início</th>
           <th>Fim</th>
@@ -1323,6 +1363,8 @@
     const input      = document.getElementById('novoUsuarioPendente');
     const dataInicio = document.getElementById('pendenciaDataInicio').value;
     const dataFim    = document.getElementById('pendenciaDataFim').value;
+    const selectUnidade = document.getElementById('pendenciaUnidadeCorreicionada');
+    const unidadeId  = selectUnidade?.value?.trim() || '';
     const valor      = normalizarIdOuEmail(input.value);
 
     if (!valor) {
@@ -1336,6 +1378,12 @@
       return;
     }
 
+    if (!unidadeId) {
+      showToast('Selecione a unidade correicionada.', 'erro');
+      selectUnidade?.focus();
+      return;
+    }
+
     if (dataFim < dataInicio) {
       showToast('A data fim não pode ser anterior à data de início.', 'erro');
       return;
@@ -1343,11 +1391,12 @@
 
     mostrarLoading('Adicionando pendência…');
     try {
-      await marcarUsuarioComoPendente(valor, dataInicio, dataFim);
+      await marcarUsuarioComoPendente(valor, dataInicio, dataFim, unidadeId);
       showToast('Usuário marcado como pendente ✅', 'ok');
       input.value = '';
       document.getElementById('pendenciaDataInicio').value = '';
       document.getElementById('pendenciaDataFim').value = '';
+      if (selectUnidade) selectUnidade.value = '';
       await carregarPendenciasAtivas();
     } catch (err) {
       console.error(err);
@@ -1382,6 +1431,7 @@
     try {
       await verificarAdmin();
       initBadge();
+      await carregarOpcoesUnidadesPendencia();
       await buscar();
       } catch (err) {
       // verificarAdmin já redireciona
@@ -1401,6 +1451,7 @@ function togglePendencias() {
     secao.style.opacity       = '1';
     secao.style.pointerEvents = 'auto';
     chevron.style.transform   = 'rotate(180deg)';
+    void carregarOpcoesUnidadesPendencia();
     carregarPendenciasAtivas(); // carrega só quando abre
   } else {
     secao.style.maxHeight     = '0';

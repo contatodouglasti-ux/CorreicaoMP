@@ -249,7 +249,7 @@ async function novaCorreicao() {
 async function init() {
   mostrarLoading('Carregando…');
   try {
-    exibirBadgeUsuario();
+    await exibirBadgeUsuario();
     criarMenu();
     criarForm();
 

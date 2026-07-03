@@ -126,7 +126,7 @@ async function verificarUsuarioPendente(identificador) {
   return dentroDoInicio && dentroDoFim;
 }
 
-async function marcarUsuarioComoPendente(identificador, dataInicio = null, dataFim = null) {
+async function marcarUsuarioComoPendente(identificador, dataInicio = null, dataFim = null, unidadeCorreicionada = null) {
   const id = String(identificador || '').trim();
   if (!id) throw new Error('Identificador inválido');
 
@@ -138,6 +138,7 @@ async function marcarUsuarioComoPendente(identificador, dataInicio = null, dataF
     atualizado_em: agora,
     data_inicio:  dataInicio || null,   // YYYY-MM-DD ou null
     data_fim:     dataFim    || null,   // YYYY-MM-DD ou null
+    unidade_correicionada: unidadeCorreicionada ? String(unidadeCorreicionada).trim() : null,
   };
 
   const { error } = await sbAdmin
@@ -186,7 +187,6 @@ async function listarProposicoesCustomizadas() {
   const { data, error } = await sbAdmin
     .from('proposicoes_customizadas')
     .select('*')
-    .eq('user_id', getEmailUsuario())
     .order('criado_em', { ascending: false });
   if (error) throw error;
   return data || [];
@@ -213,4 +213,20 @@ async function excluirProposicaoCustomizada(id) {
     .eq('id', id)
     .eq('user_id', getEmailUsuario());
   if (error) throw error;
+}
+
+async function listarUnidadesCorreicionadasAdmin() {
+  const { data, error } = await sbAdmin
+    .from('unidades_correicionadas')
+    .select('id, nome')
+    .eq('ativo', true)
+    .order('nome', { ascending: true });
+
+  if (error) throw error;
+  return (data || [])
+    .map(item => ({
+      id: String(item?.id || '').trim(),
+      nome: String(item?.nome || '').trim(),
+    }))
+    .filter(item => item.id && item.nome);
 }
