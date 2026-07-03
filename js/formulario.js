@@ -1375,15 +1375,64 @@ setText(
     : `O membro afirmou que não existe delegacia especializada${resposta95a ? `, informando que ${resposta95a}` : '.'}`
 );
 
+
 const resposta96 = String(extrairTexto(dados['96'])).trim().toUpperCase();
-const resposta96a = extrairTexto(dados['96.a']);
+const resposta96a = String(extrairTexto(dados['96.a'])).trim();
 
 setText(
   'DM_96',
   resposta96 === 'SIM'
-    ? `O membro afirmou que há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher${resposta96a ? `: ${resposta96a}` : '.'}`
-    : 'O membro afirmou que não há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher.'
+    ? `O membro informou que há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher, da seguinte forma: ${resposta96a}`
+    : 'O membro informou que não há monitoramento dos indicadores locais relativos à violência doméstica e familiar contra a mulher.'
 );
+
+const resposta96b = String(extrairTexto(dados['96.b'])).trim().toUpperCase();
+const resposta96c = String(extrairTexto(dados['96.c'])).trim();
+
+setText(
+  'DM_96.b',
+  resposta96b === 'SIM'
+    ? `O membro informou que desenvolve atuação integrada com a Promotoria de Justiça com atribuição em feminicídio a fim de desenvolverem ações preventivas, da seguinte forma: ${resposta96c}`
+    : 'O membro informou que não desenvolve atuação integrada com a Promotoria de Justiça com atribuição em feminicídio a fim de desenvolverem ações preventivas.'
+);
+
+const resposta96d = String(extrairTexto(dados['96.d'])).trim().toUpperCase();
+const resposta96e = String(extrairTexto(dados['96.e'])).trim();
+
+setText(
+  'DM_96.d',
+  resposta96d === 'SIM'
+    ? `O membro informou que realiza atuação integrada com as Promotorias de Justiça com atribuição nos crimes contra crianças e adolescentes a fim de desenvolverem ações preventivas, da seguinte forma: ${resposta96e}`
+    : 'O membro informou que não realiza atuação integrada com as Promotorias de Justiça com atribuição nos crimes contra crianças e adolescentes a fim de desenvolverem ações preventivas.'
+);
+
+const resposta96f = String(extrairTexto(dados['96.f'])).trim().toUpperCase();
+const resposta96g = String(extrairTexto(dados['96.g'])).trim();
+
+setText(
+  'DM_96.f',
+  resposta96f === 'SIM'
+    ? `O membro informou que realiza atuação integrada com as Promotorias de Justiça com atribuição em direito de família para que, nas causas cíveis relacionadas a um contexto de violência doméstica contra a mulher, ocorra a intervenção obrigatória do Ministério Público, em razão da vulnerabilidade presumida da mulher, da seguinte forma: ${resposta96g}`
+    : 'O membro informou que não realiza atuação integrada com as Promotorias de Justiça com atribuição em direito de família para que, nas causas cíveis relacionadas a um contexto de violência doméstica contra a mulher, ocorra a intervenção obrigatória do Ministério Público, em razão da vulnerabilidade presumida da mulher.'
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
