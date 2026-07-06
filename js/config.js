@@ -21,7 +21,7 @@ const CONFIG = {
      redirectUri: ENV.MSAL_REDIRECT_URI || 'https://correicao-mp.vercel.app/login.html',
   },
 
-  // ── Supabase ─────────────────────────────────────────────────
+  // ──asdfasd Supabase ─────────────────────────────────────────────────
   supabase: {
     url:     ENV.SUPABASE_URL      || 'https://dcqxekzenkmietbhqwng.supabase.co',
     anonKey: ENV.SUPABASE_ANON_KEY || 'sb_publishable_6JnCXxZImhhc7ivUuJWkGg_u4mRF_A7',
