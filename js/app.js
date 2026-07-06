@@ -22,7 +22,6 @@ async function atualizarPermissaoUsuario() {
   }
   return usuarioPodePreencher;
 }
-
 function aplicarModoSomenteLeituraForcado(mensagem = 'Você não tem permissão para preencher respostas. Aguarde o administrador marcá-lo como pendente.') {
   registroId = null;
   modoLeitura = true;
