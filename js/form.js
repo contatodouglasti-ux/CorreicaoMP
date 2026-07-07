@@ -1,20 +1,13 @@
 /**
  * form.js
- * Renderização do formulário por seções, validação de campos
- * e navegação entre seções.
+ * Renderização do formulário por seções, validação de campos,
+ * navegação entre seções e cálculos automáticos (bloco 26).
  * Depende de: ui.js, app.js (estado global)
  */
 
-/* ── Helpers de subtópicos ──── */
-
-/**
- * form.js
- * Renderização do formulário + lógica + cálculos automáticos
- */
-
-/* ===========================
+/* ════
    ✅ CÁLCULO AUTOMÁTICO BLOCO 26
-=========================== */
+════ */
 function calcularTotais26(dados) {
   const get = (id) => Number(dados[id] || 0);
 
@@ -67,77 +60,48 @@ function calcularTotais26(dados) {
 }
 
 function atualizarCamposCalculados() {
-  const dados = window._dadosCarregados || {};
+  // Garante que os valores digitados mais recentes entrem no cálculo
+  const coletados = typeof coletar === 'function' ? coletar() : {};
+  const dados = { ...(window._dadosCarregados || {}), ...coletados };
+
   const totais = calcularTotais26(dados);
 
   Object.keys(totais).forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = totais[id];
-    dados[id] = totais[id];
+    dados[id] = String(totais[id]);
   });
 
   window._dadosCarregados = dados;
+   renderizarQuantitativosOrgao(); 
 }
 
-/* ===========================
-   ✅ AUTO SAVE COM CÁLCULO
-=========================== */
-function autoSalvar() {
-  atualizarCamposCalculados();
 
-  try {
-    localStorage.setItem('dados', JSON.stringify(window._dadosCarregados || {}));
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-/* ===========================
-   ✅ RENDER CAMPO
-=========================== */
-function renderCampo(parent, campo) {
-  const wrapper = document.createElement('div');
-  wrapper.dataset.campoId = campo.id;
-
-  const label = document.createElement('label');
-  label.innerText = campo.pergunta;
-  wrapper.appendChild(label);
-
-  const input = document.createElement('input');
-  input.id = campo.id;
-  input.type = campo.tipo === "number" ? "number" : "text";
-
-  /* ✅ BLOQUEAR CAMPOS DO BLOCO 26 */
-  if (campo.id.startsWith("26.")) {
-    input.readOnly = true;
-    input.classList.add("campo-calculado");
-  } else {
-    input.oninput = () => {
-      window._dadosCarregados = window._dadosCarregados || {};
-      window._dadosCarregados[campo.id] = input.value;
-      autoSalvar();
-    };
-  }
-
-  wrapper.appendChild(input);
-  parent.appendChild(wrapper);
-}
-
-/* ===========================
-   ✅ CARREGAR DADOS
-=========================== */
-function carregar() {
-  const dados = JSON.parse(localStorage.getItem('dados') || "{}");
-  window._dadosCarregados = dados;
-
-  Object.keys(dados).forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = dados[id];
+/* ════
+   ✅ TABELA-RESUMO 3.1 — Dados estatísticos gerais do órgão
+════ */
+function renderizarQuantitativosOrgao() {
+  const tbody = document.getElementById('tabela-quantitativos-orgao-body');
+  if (!tbody) return;
+  const secao = form.secoes.find(s =>
+    s.campos && s.campos.some(c => c.id && c.id.startsWith('26.'))
+  );
+  if (!secao) return;
+  const dados = window._dadosCarregados || {};
+  tbody.innerHTML = '';
+  secao.campos.forEach(campo => {
+    const tr = document.createElement('tr');
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = campo.pergunta;
+    const tdValor = document.createElement('td');
+    tdValor.textContent = dados[campo.id] || 0;
+    tr.appendChild(tdLabel);
+    tr.appendChild(tdValor);
+    tbody.appendChild(tr);
   });
-
-  atualizarCamposCalculados();
 }
 
+/* ── Helpers ──── */
 
 function normalizarPrefixo(prefixo) {
   return Array.isArray(prefixo) ? prefixo : [prefixo];
@@ -147,8 +111,10 @@ function temValorPreenchido(valor) {
   return valor !== undefined && valor !== null && String(valor).trim() !== '';
 }
 
+/* ── Unidade correicionada (campo 1.1) ──── */
+
 const UNIDADE_CORREICIONADA_CAMPO_ID = '1.1';
-const UNIDADES_CORREICIONADAS_DATALIST_ID = 'unidades-correicionadas-lista';
+const MEMBRO_CORREICIONADO_CAMPO_ID  = '1.3';
 let _unidadesCorreicionadasCache = null;
 let _unidadesCorreicionadasPromise = null;
 
@@ -162,10 +128,8 @@ function normalizarTextoBusca(valor) {
 }
 
 function obterClienteSupabase() {
-  return  window.sbClient || null;
+  return window.sbClient || null;
 }
-
-
 
 function listarUnidadesCorreicionadas(termo = '') {
   const lista = _unidadesCorreicionadasCache || [];
@@ -186,16 +150,14 @@ function atualizarSugestoesUnidade(input) {
   if (!input) return;
   const wrapper = input.closest('[data-campo-id="1.1"]');
   if (!wrapper) return;
-// NOVO
+
   if (input.disabled || input.readOnly) {
     esconderSugestoesUnidade(input);
     return;
   }
+
   wrapper.style.position = 'relative';
-if (!input) return;
-  if (input.disabled || input.readOnly) { // ← adicione
-    esconderSugestoesUnidade(input);
-    return;}
+
   if (!Array.isArray(_unidadesCorreicionadasCache)) {
     void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(input));
     return;
@@ -259,6 +221,13 @@ if (!input) return;
 function validarCampoUnidadeCorreicionada(input) {
   if (!input) return true;
 
+  // Campo bloqueado (preenchido pela base) — sempre válido
+  if (input.readOnly || input.disabled) {
+    input.setCustomValidity('');
+    input.classList.remove('invalid');
+    return true;
+  }
+
   const valor = String(input.value || '').trim();
   if (!valor) {
     input.setCustomValidity(input.required ? 'Informe a unidade correicionada.' : '');
@@ -279,7 +248,7 @@ function validarCampoUnidadeCorreicionada(input) {
   if (!encontrado) {
     input.setCustomValidity('Selecione uma unidade cadastrada na lista.');
     input.classList.add('invalid');
-    input.reportValidity(); // ← mostra o balão de erro nativo
+    input.reportValidity();
     return false;
   }
 
@@ -296,7 +265,6 @@ async function carregarUnidadesCorreicionadas() {
   const client = obterClienteSupabase();
   if (!client || typeof client.from !== 'function') {
     _unidadesCorreicionadasCache = [];
-   
     return _unidadesCorreicionadasCache;
   }
 
@@ -326,6 +294,7 @@ async function carregarUnidadesCorreicionadas() {
   return lista;
 }
 
+/* ── Subtópicos ──── */
 
 function subtopicoTemDados(sec, sub, dados = window._dadosCarregados || {}) {
   const prefixos = normalizarPrefixo(sub.prefixo);
@@ -481,11 +450,16 @@ function renderCampo(parent, campo) {
     parent.appendChild(wrapper);
   }
 
+  /* ── Campos numéricos e datas ── */
   if (campo.tipo === 'number' || campo.tipo === 'date') {
     wrapper.className = 'campo-numero-row';
 
+    const ehCalculado26 = campo.id.startsWith('26.');
+
     const l = document.createElement('label');
-    l.className = campo.obrigatorio !== false ? 'required campo-numero-label' : 'campo-numero-label';
+    l.className = (campo.obrigatorio !== false && !ehCalculado26)
+      ? 'required campo-numero-label'
+      : 'campo-numero-label';
     l.innerText = campo.pergunta;
     l.htmlFor = campo.id;
     wrapper.appendChild(l);
@@ -493,8 +467,20 @@ function renderCampo(parent, campo) {
     const inp = document.createElement('input');
     inp.type = campo.tipo;
     inp.id = campo.id;
-    inp.required = campo.obrigatorio !== false;
     inp.className = 'campo-numero-input';
+
+    /* ✅ BLOCO 26 — somatório automático, somente leitura */
+    if (ehCalculado26) {
+      inp.readOnly = true;
+      inp.required = false;
+      inp.tabIndex = -1;
+      inp.classList.add('campo-calculado');
+      inp.title = 'Campo calculado automaticamente (somatório)';
+      wrapper.appendChild(inp);
+      return;
+    }
+
+    inp.required = campo.obrigatorio !== false;
 
     if (campo.id === '8.a') {
       inp.placeholder = 'Digite o valor';
@@ -510,6 +496,8 @@ function renderCampo(parent, campo) {
     inp.oninput = function () {
       if (this.disabled || this.readOnly) return;
       autoSalvar();
+      // Recalcula o bloco 26 em tempo real quando campos-fonte mudam
+      atualizarCamposCalculados();
     };
 
     if (campo.tipo === 'date') {
@@ -520,9 +508,9 @@ function renderCampo(parent, campo) {
     return;
   }
 
-
   const obrigatorio = campo.obrigatorio !== false;
 
+  /* ── Campo 1.1 — Unidade correicionada (preenchida pela base, bloqueada) ── */
   if (campo.id === UNIDADE_CORREICIONADA_CAMPO_ID) {
     const l = document.createElement('label');
     l.className = obrigatorio ? 'required' : '';
@@ -535,41 +523,47 @@ function renderCampo(parent, campo) {
     inp.id = campo.id;
     inp.required = obrigatorio;
     inp.autocomplete = 'off';
-   
     inp.setAttribute('aria-autocomplete', 'list');
-    inp.placeholder = 'Digite para filtrar e selecione uma unidade';
     inp.oninput = function () {
+      if (this.disabled || this.readOnly) return;
       void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
       autoSalvar();
     };
     inp.onfocus = function () {
-  if (this.disabled || this.readOnly) return; // ← adicione
-  void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
-};
+      if (this.disabled || this.readOnly) return;
+      void carregarUnidadesCorreicionadas().then(() => atualizarSugestoesUnidade(this));
+    };
     inp.onblur = function () {
-  setTimeout(() => {
-    validarCampoUnidadeCorreicionada(this);
-    esconderSugestoesUnidade(this);
-    // Feedback visual imediato
-    if (this.validationMessage) {
-      this.classList.add('invalid');
-    } else {
-      this.classList.remove('invalid');
-    }
-  }, 150);
-};
+      setTimeout(() => {
+        validarCampoUnidadeCorreicionada(this);
+        esconderSugestoesUnidade(this);
+        if (this.validationMessage) {
+          this.classList.add('invalid');
+        } else {
+          this.classList.remove('invalid');
+        }
+      }, 150);
+    };
     wrapper.appendChild(inp);
+    return;
+  }
 
-    const ajuda = document.createElement('small');
-    ajuda.style.display = 'block';
-    ajuda.style.marginTop = '4px';
-    ajuda.style.fontSize = '12px';
-    ajuda.style.color = '#546E7A';
-    ajuda.textContent = 'Digite parte do nome e escolha uma opção da lista.';
-    wrapper.appendChild(ajuda);
+  /* ── Campo 1.3 — Membro Correicionado (nome do login, bloqueado) ── */
+  if (campo.id === MEMBRO_CORREICIONADO_CAMPO_ID) {
+    const l = document.createElement('label');
+    l.className = obrigatorio ? 'required' : '';
+    l.innerText = campo.pergunta;
+    l.htmlFor = campo.id;
+    wrapper.appendChild(l);
 
-    void carregarUnidadesCorreicionadas();
-    atualizarSugestoesUnidade(inp);
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.id = campo.id;
+    inp.required = obrigatorio;
+    inp.readOnly = true;
+    inp.tabIndex = -1;
+    inp.classList.add('campo-bloqueado');
+    wrapper.appendChild(inp);
     return;
   }
 
@@ -591,20 +585,6 @@ function renderCampo(parent, campo) {
     };
     wrapper.appendChild(t);
   } else if (['text', 'date', 'time'].includes(campo.tipo)) {
-    //aqui coloca os campos lado a lado ( datas )
-    if (campo.id === '1.2.inicio' || campo.id === '1.2.fim') {
-  let grupo = parent.querySelector('.grupo-data-correcao');
-  if (!grupo) {
-    grupo = document.createElement('div');
-    grupo.className = 'grupo-data-correcao';
-    parent.appendChild(grupo);
-  }
-  wrapper.classList.add('data-correcao');
-  grupo.appendChild(wrapper);
-} else {
-  parent.appendChild(wrapper);
-}
-
     const inp = document.createElement('input');
     inp.type = campo.tipo;
     inp.id = campo.id;
@@ -631,11 +611,9 @@ function renderCampo(parent, campo) {
     });
     wrapper.appendChild(dv);
   } else if (campo.tipo === 'date_ranger') {
-    // Renderiza dois inputs de data lado a lado com labels personalizadas
     const rangeWrap = document.createElement('div');
     rangeWrap.className = 'date-range-group';
 
-    // Campo INÍCIO
     const wrapInicio = document.createElement('div');
     wrapInicio.className = 'date-range-item';
 
@@ -649,7 +627,6 @@ function renderCampo(parent, campo) {
     inpInicio.id = campo.id + '.inicio';
     inpInicio.required = obrigatorio;
 
-    // Campo FIM
     const wrapFim = document.createElement('div');
     wrapFim.className = 'date-range-item';
 
@@ -663,7 +640,6 @@ function renderCampo(parent, campo) {
     inpFim.id = campo.id + '.fim';
     inpFim.required = obrigatorio;
 
-    // Validação cruzada: fim não pode ser antes do início
     inpInicio.onchange = function () {
       autoSalvar();
       if (inpFim.value && inpFim.value < this.value) {
@@ -751,11 +727,8 @@ function carregar() {
   Object.keys(dadosSalvos).forEach(k => {
     const valor = dadosSalvos[k];
 
-    // Tenta pelo id primeiro (inputs de texto, textarea, etc.)
     let el = document.getElementById(k);
 
-    // Se não achou pelo id, pode ser um radio — busca sem usar o valor no seletor
-    // para evitar SyntaxError com valores que contenham \n, aspas ou caracteres especiais
     if (!el) {
       el = document.querySelector(`input[name="${k}"]`);
     }
@@ -763,13 +736,11 @@ function carregar() {
     if (!el) return;
 
     if (el.type === 'radio') {
-      // Itera pelos radios do grupo e marca pelo valor, sem seletor CSS com o valor
       document.querySelectorAll(`input[name="${k}"]`).forEach(r => {
         if (r.value === valor) r.checked = true;
       });
     } else {
       el.value = valor;
-      // Re-expande textareas ao carregar dados salvos
       if (el.tagName === 'TEXTAREA') {
         el.style.height = 'auto';
         el.style.height = el.scrollHeight + 'px';

@@ -1,5 +1,88 @@
 console.log('PROPOSICOES_JSON:', window.PROPOSICOES_JSON);
+/* ─── Tabela 3.1 — Dados estatísticos gerais do órgão ─────────── */
+const ROTULOS_26 = {
+  "26.a": "Inquéritos Policiais recebidos",
+  "26.b": "Termos Circunstanciados de Ocorrência recebidos",
+  "26.c": "Procedimentos Investigatórios Criminais instaurados",
+  "26.d": "Processos criminais recebidos",
+  "26.e": "Processos cíveis recebidos",
+  "26.f": "Notícias de Fato (NF) autuadas",
+  "26.g": "Inquéritos Civis (IC) instaurados",
+  "26.h": "Procedimentos Preparatórios (PP) instaurados",
+  "26.i": "Procedimentos Administrativos (PA) instaurados",
+  "26.j": "Recomendações",
+  "26.k": "Termos de Ajustamento de Conduta (TAC)",
+  "26.l": "Acordos de Não Persecução Cível (ANPC)",
+  "26.m": "Acordos de Não Persecução Penal (ANPP)",
+  "26.n": "Reuniões",
+  "26.o": "Audiências públicas",
+  "26.p": "Audiências judiciais",
+  "26.r": "Audiências extrajudiciais",
+  "26.s": "Ações Civis Públicas",
+  "26.t": "Ações de Improbidade",
+  "26.q": "Visitas em instituições de longa permanência e serviços de proteção a idosos",
+  "26.u": "Visitas em instituições de medidas socioeducativas em meio aberto",
+  "26.v": "Visitas em instituições de medidas socioeducativas de internação e semiliberdade",
+  "26.w": "Visitas em estabelecimentos de acolhimento institucional de crianças e adolescentes",
+  "26.x": "Visitas em estabelecimentos prisionais",
+  "26.y": "Visitas em delegacias estaduais, unidades de medicina legal e unidades de perícia criminal",
+  "26.z": "Visitas em estabelecimentos militares",
+  "26.aa": "Outras visitas/inspeções"
+};
 
+function calcularTotais26(dados) {
+  const get = (id) => Number(extrairTexto(dados[id]) || 0);
+
+  return {
+    "26.a": get("28.a") + get("32.a") + get("33.a") + get("35.a") + get("36.a") + get("37.a"),
+    "26.b": get("28.b") + get("32.b") + get("33.b") + get("35.b") + get("36.b") + get("37.b"),
+    "26.c": get("28.d") + get("32.c") + get("33.c") + get("35.c") + get("36.c") + get("37.c"),
+    "26.d": get("28.e") + get("32.d") + get("33.d") + get("35.d") + get("36.d") + get("37.d"),
+    "26.e": get("27.a") + get("29.a") + get("30.e") + get("31.a") + get("32.e") + get("33.e") + get("34.e") + get("35.e") + get("36.e") + get("37.e"),
+    "26.f": get("27.b") + get("28.c") + get("29.b") + get("30.f") + get("31.b") + get("32.f") + get("33.f") + get("34.f") + get("35.f") + get("36.f") + get("37.f"),
+    "26.g": get("27.c") + get("29.c") + get("30.g") + get("31.c") + get("33.g") + get("34.g") + get("35.g") + get("36.g") + get("37.g"),
+    "26.h": get("27.d") + get("29.d") + get("30.h") + get("31.d") + get("32.h") + get("33.h") + get("34.h") + get("35.h") + get("36.h") + get("37.h"),
+    "26.i": get("27.e") + get("29.e") + get("30.i") + get("31.e") + get("32.i") + get("33.i") + get("34.i") + get("35.i") + get("36.i") + get("37.i"),
+    "26.j": get("27.f") + get("29.f") + get("30.j") + get("31.f") + get("32.j") + get("33.j") + get("34.j") + get("35.j") + get("36.j") + get("37.j"),
+    "26.k": get("27.g") + get("29.g") + get("30.k") + get("31.g") + get("32.k") + get("33.k") + get("34.k") + get("35.k") + get("36.k") + get("37.k"),
+    "26.l": get("27.h") + get("29.h") + get("30.l") + get("31.h") + get("34.l") + get("35.l") + get("36.l") + get("37.l"),
+    "26.m": get("28.f") + get("33.m"),
+    "26.n": get("27.i") + get("29.i") + get("30.n") + get("32.m") + get("33.n") + get("34.n") + get("35.m") + get("36.m") + get("37.m"),
+    "26.o": get("27.j") + get("29.j") + get("30.o") + get("32.n") + get("33.o") + get("34.o") + get("35.n") + get("36.n") + get("37.n"),
+    "26.p": get("27.k") + get("28.g") + get("29.k") + get("30.p") + get("31.i") + get("32.o") + get("33.p") + get("34.p") + get("35.o") + get("36.o") + get("37.o"),
+    "26.r": get("27.l") + get("28.h") + get("29.l") + get("30.q") + get("31.j") + get("32.p") + get("33.q") + get("34.q") + get("35.r") + get("36.p") + get("37.p"),
+    "26.s": get("27.m") + get("28.i") + get("29.m") + get("30.r") + get("32.q") + get("33.r") + get("34.r") + get("35.s") + get("36.q") + get("37.q"),
+    "26.t": get("27.n") + get("28.j") + get("29.n") + get("30.s") + get("32.r") + get("33.s") + get("34.s") + get("35.t") + get("36.r") + get("37.r"),
+    "26.q": get("34.t"),
+    "26.u": get("27.p"),
+    "26.v": get("27.q"),
+    "26.w": get("27.o"),
+    "26.x": get("35.u"),
+    "26.y": get("35.v"),
+    "26.z": get("35.w"),
+    "26.aa": get("27.r") + get("28.k") + get("29.o") + get("30.t") + get("31.k") + get("32.s") + get("33.t") + get("34.u") + get("35.x") + get("36.s") + get("37.s")
+  };
+}
+
+function renderizarQuantitativosOrgao(dados) {
+  const tbody = document.getElementById('tabela-quantitativos-orgao-body');
+  if (!tbody) return;
+
+  const totais = calcularTotais26(dados);
+  tbody.innerHTML = '';
+
+  Object.keys(ROTULOS_26).forEach(id => {
+    const tr = document.createElement('tr');
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = ROTULOS_26[id];
+    const tdValor = document.createElement('td');
+    // usa valor salvo (se existir) ou recalcula pela somatória
+    tdValor.textContent = extrairTexto(dados[id]) || totais[id] || 0;
+    tr.appendChild(tdLabel);
+    tr.appendChild(tdValor);
+    tbody.appendChild(tr);
+  });
+}
 
 /* ─── Utilitários ─────────────────────────────────────────────── */
 function setText(id, value) {
@@ -194,7 +277,7 @@ function preencherNomeLotacao(nome, lotacao) {
 /* ─── Preencher relatório ──────────────────────────────────────── */
 function preencherRelatorio(registro) {
     const dados = lerDadosRegistro(registro);
-
+renderizarQuantitativosOrgao(dados);
     // Título / identificação
     const nomeRegistro = registro?.nome || registro?.user_id || 'Registro';
     const criadoEm = registro?.criado_em ? new Date(registro.criado_em).toLocaleString('pt-BR') : '';

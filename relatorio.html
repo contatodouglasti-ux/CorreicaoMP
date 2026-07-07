@@ -347,6 +347,38 @@
     <div class="page">
         <div class="paper">
             <h1>RELATÓRIO DE CORREIÇÃO ORDINÁRIA</h1>
+            <!-- ==== PROMOTORIA DE JUSTIÇA ==== -->
+            
+
+            <h2>1. DADOS GERAIS</h3>
+            <div class="meta-grid">
+                <div class="field">
+                    <label>Órgão correicionado</label>
+                    <span class="inline-value" id="DM_1.1"></span>
+                </div>
+                <div class="field">
+                    <label>Nome do(a) titular</label>
+                    <input class="manual-input inline-value" type="text" id="DM_nome" placeholder="Digite o nome do(a) titular" />
+                </div>
+                <div class="field">
+                    <label>Nome do(a) substituto(a)</label>
+                    <div class="subtle">(caso o membro responsável pelo preenchimento do termo ou entrevistado não seja o titular do órgão correicionado)</div>
+                    <input class="manual-input inline-value" type="text" id="DM_nome_substituto" placeholder="Digite o nome do(a) substituto(a)" />
+                </div>
+                <div class="field">
+                    <label>Órgão(s) jurisdicional(is) perante o(s) qual(is) atua</label>
+                    <span class="inline-value" id="DM_3"></span>
+                </div>
+                <div class="field">
+                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
+                    <span class="inline-value" id="DM_5"></span>
+                </div>
+                 <div class="field">
+                    <label>Afastamentos realizados nos últimos 12(doze) meses: </label>
+                    <span class="inline-value" id="DM_17"></span>
+                </div>
+            </div>
+<h2>PROMOTORIA DE JUSTIÇA</h2>
 
             <div id="errorBox" class="error-box"></div>
 
@@ -361,21 +393,21 @@
                     <input class="manual-input" type="text" id="equipe_apoio" placeholder="Digite o nome da equipe de apoio" />
                 </div>
                <div class="datas-row">
- <div class="field">
-  <label>Data da Correição</label>
+                    <div class="field">
+                    <label>Data da Correição</label>
 
-  <div class="datas-row">
-    <div class="campo">
-      <label>INICIO</label>
-      <input class="manual-input" type="date" id="data_realizacao">
-    </div>
+                    <div class="datas-row">
+                        <div class="campo">
+                        <label>INICIO</label>
+                        <input class="manual-input" type="date" id="data_realizacao">
+                        </div>
 
-    <div class="campo">
-      <label>FIM</label>
-      <input class="manual-input" type="date" id="data_final">
-    </div>
-  </div>
-</div>
+                        <div class="campo">
+                        <label>FIM</label>
+                        <input class="manual-input" type="date" id="data_final">
+                        </div>
+                    </div>
+                    </div>
  
 </div>
                 
@@ -406,38 +438,6 @@
             <div class="section-box">
                 <label style="display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Motivação</label>
                 <div class="value" id="auto_motivacao"></div>
-            </div>
-
-            <!-- ==== PROMOTORIA DE JUSTIÇA ==== -->
-            <h2>PROMOTORIA DE JUSTIÇA</h2>
-
-            <h3>1. DADOS GERAIS</h3>
-            <div class="meta-grid">
-                <div class="field">
-                    <label>Órgão correicionado</label>
-                    <span class="inline-value" id="DM_1.1"></span>
-                </div>
-                <div class="field">
-                    <label>Nome do(a) titular</label>
-                    <input class="manual-input inline-value" type="text" id="DM_nome" placeholder="Digite o nome do(a) titular" />
-                </div>
-                <div class="field">
-                    <label>Nome do(a) substituto(a)</label>
-                    <div class="subtle">(caso o membro responsável pelo preenchimento do termo ou entrevistado não seja o titular do órgão correicionado)</div>
-                    <input class="manual-input inline-value" type="text" id="DM_nome_substituto" placeholder="Digite o nome do(a) substituto(a)" />
-                </div>
-                <div class="field">
-                    <label>Órgão(s) jurisdicional(is) perante o(s) qual(is) atua</label>
-                    <span class="inline-value" id="DM_3"></span>
-                </div>
-                <div class="field">
-                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
-                    <span class="inline-value" id="DM_5"></span>
-                </div>
-                 <div class="field">
-                    <label>Afastamentos realizados nos últimos 12(doze) meses: </label>
-                    <span class="inline-value" id="DM_17"></span>
-                </div>
             </div>
 
         <!-- ==== 2. PROPOSIÇÕES GERAIS ==== -->
@@ -706,7 +706,7 @@
                 </div>
                 <div class=RECOMENDAR ao(à) membro(a) correicionado(a) que efetue atendimento ao público, registrando-o e especificando, inclusive, os encaminhamentos adotados em cada caso.
                 RECOMENDAR ao(à) membro(a) correicionado(a) que avalie a possibilidade de ampliar o horário do atendimento ao público.</div>
-            </div>
+            
 
             <!-- 2.10 -->
             <div class="proposal">
@@ -767,16 +767,33 @@
                 </div>
             </div>
 
-            <!-- 3 --><h2>3 Estatísticas do Órgão</h2>
+           
+                    
+                
+            
+<!-- 3 --><h2>3 ESTATÍSTISTICAS DOS ORGÃOS</h2>
             <div class="proposal">
                 <div class="proposal-title">3.1 Estatísticas Gerais</div>
                 
+                   
+
                     <div class="field">
-                    <label>Observações da equipe</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
+                    <label>Dados estatísticos gerais do órgão</label>
+                    <table id="tabela-quantitativos-orgao" class="tabela-quantitativos">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-quantitativos-orgao-body">
+                            <!-- preenchido dinamicamente por renderizarQuantitativosOrgao() -->
+                        </tbody>
+                    </table>
                     </div>
-                    
                 
+            
+
             
 
             

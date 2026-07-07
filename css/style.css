@@ -279,17 +279,25 @@ body {
   transition: width 0.3s;
 }
 
-/* Banner — agora só aparece no conteúdo */
+.tabela-quantitativos { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.tabela-quantitativos th, .tabela-quantitativos td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; font-size: 14px; }
+.tabela-quantitativos th { background: #f7fafc; font-weight: 600; }
+.tabela-quantitativos td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Banner — fixo no topo do conteúdo */
 .banner {
   width: 100%;
   min-height: 140px;
+  background-color: #EfEfEF;
   background-image: url("../assets/header\ termo_fundo\ transparente.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-
 @media (max-width: 900px) {
   .banner { min-height: 110px; }
 }
@@ -795,4 +803,10 @@ button {
   background: #f1f5f9;
   font-weight: bold;
   color: #2d3748;
+}
+.campo-calculado,
+.campo-bloqueado {
+  background: #eceff1 !important;
+  color: #37474f;
+  cursor: not-allowed;
 }

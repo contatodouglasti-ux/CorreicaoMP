@@ -3,10 +3,11 @@ const form = {
  {
     "nome": "Dados gerais",
     "campos": [
-      /*{"id": "1.1", "pergunta": "Unidade correicionada:.", "tipo": "text"},*/
+      {"id": "1.3", "pergunta": "Membro Correicionado", "tipo": "textarea"},
+      {"id": "1.1", "pergunta": "Unidade Correicionada:", "tipo": "text"},
       {"id": "3", "pergunta": "Órgão(s) jurisdicional(is) perante o(s) qual(is) atua.", "tipo": "textarea"},
      
-      {"id": "1.3", "pergunta": "Membro Correicionado", "tipo": "textarea"},
+      
       {"id": "1.4", "pergunta": "Designação", "tipo": "radio","opcoes":["Titular","Ampliado"]},
       /* {"id": "1", "pergunta": "Ato(s) normativo(s) que fixa(m) as atribuições do órgão correicionado (com indicação dos artigos).", "tipo": "textarea"}//,
      {"id": "2", "pergunta": "Descrição detalhada das atribuições.", "tipo": "textarea"}//,
@@ -24,7 +25,7 @@ const form = {
       {"id": "6.a", "pergunta": "Em caso negativo, informar o ato autorizativo.", "tipo": "textarea", dependeDe: { id: "6", valor: "Não" }},
       {"id": "7", "pergunta": "Com que regularidade comparece à Promotoria de Justiça?", "tipo": "textarea"},
       {"id": "8", "pergunta": "O(a) membro(a) tem autorização para a realização de trabalho remoto?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "8.b", "pergunta": "Em caso positivo, informar o período total autorizado para a realização do trabalho remoto;", "tipo": "date_ranger" , "inicioLabel": "INICIO", "fimLabel": "FIM"},//colocar dias da semana e periodo 
+      {"id": "8.b", "pergunta": "Em caso positivo, informar o período total autorizado para a realização do trabalho remoto:", "tipo": "date_ranger" , "inicioLabel": "INICIO", "fimLabel": "FIM",dependeDe: { id: "8", valor: "Sim" }},//colocar dias da semana e periodo 
       {"id": "8.a", "pergunta": "Em caso positivo, especificar: o ato autorizativo correspondente; e os dias da semana em que o trabalho remoto é permitido, caso a autorização não contemple todos os dias úteis.", "tipo": "textarea", dependeDe: { id: "8", valor: "Sim" }},//colocar dias da semana e periodo 
        {"id": "9.d", "pergunta": "De que forma participa das audiências judiciais?", "tipo": "radio", "opcoes": ["Presencial", "Virtual","Ambas"]},
       

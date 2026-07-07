@@ -22,6 +22,7 @@ async function atualizarPermissaoUsuario() {
   }
   return usuarioPodePreencher;
 }
+
 function aplicarModoSomenteLeituraForcado(mensagem = 'Você não tem permissão para preencher respostas. Aguarde o administrador marcá-lo como pendente.') {
   registroId = null;
   modoLeitura = true;
@@ -46,6 +47,41 @@ function aplicarModoSomenteLeituraForcado(mensagem = 'Você não tem permissão 
   }
 
   showToast(mensagem, 'erro');
+}
+
+/* ── Campos fixos (Unidade 1.1 e Membro 1.3) ──── */
+
+async function preencherCamposFixos() {
+  window._dadosCarregados = window._dadosCarregados || {};
+
+  // Membro Correicionado = nome do login (sempre bloqueado)
+  const inpMembro = document.getElementById('1.3');
+  if (inpMembro) {
+    inpMembro.value = getNomeUsuario();
+    inpMembro.readOnly = true;
+    inpMembro.tabIndex = -1;
+    inpMembro.classList.add('campo-bloqueado');
+    window._dadosCarregados['1.3'] = inpMembro.value;
+  }
+
+  // Unidade correicionada vinda da base (sempre bloqueada)
+  const inpUnidade = document.getElementById('1.1');
+  if (inpUnidade) {
+    try {
+      const unidade = await buscarUnidadeDoUsuario();
+      if (unidade) {
+        inpUnidade.value = unidade;
+        window._dadosCarregados['1.1'] = unidade;
+      }
+    } catch (err) {
+      console.error('Erro ao preencher unidade do usuário:', err);
+    }
+    inpUnidade.readOnly = true;
+    inpUnidade.tabIndex = -1;
+    inpUnidade.placeholder = '';
+    inpUnidade.classList.add('campo-bloqueado');
+    if (typeof esconderSugestoesUnidade === 'function') esconderSugestoesUnidade(inpUnidade);
+  }
 }
 
 /* ── Auto-save (debounce 1,5s) ──── */
@@ -231,6 +267,10 @@ async function novaCorreicao() {
     document.getElementById('enviarTudoWrap').style.display = '';
     const aviso = document.querySelector('.modo-leitura-aviso');
     if (aviso) aviso.remove();
+
+    await preencherCamposFixos();   // ← NOVO: repovoa Unidade e Membro bloqueados
+    atualizarCamposCalculados();    // ← NOVO: zera/recalcula bloco 26
+
     avaliarCondicionais();
     abrirFormulario();
     mostrar(0);
@@ -248,16 +288,17 @@ async function novaCorreicao() {
 async function init() {
   mostrarLoading('Carregando…');
   try {
-    await exibirBadgeUsuario();
+    
     criarMenu();
     criarForm();
 
-    // ← NOVO: carrega a permissão antes de qualquer decisão
+    // Carrega a permissão antes de qualquer decisão
     await atualizarPermissaoUsuario();
 
     if (!usuarioPodePreencher) {
       // Usuário não pendente: carrega só em modo leitura, sem criar registro
       aplicarModoSomenteLeituraForcado();
+      await preencherCamposFixos();   // ← NOVO
       avaliarCondicionais();
       mostrar(0);
       return;
@@ -265,9 +306,10 @@ async function init() {
 
     const reg = await garantirRegistroAberto();
 
-    // ← NOVO: garantirRegistroAberto pode retornar null se não for pendente
+    // garantirRegistroAberto pode retornar null se não for pendente
     if (!reg) {
       aplicarModoSomenteLeituraForcado();
+      await preencherCamposFixos();   // ← NOVO
       avaliarCondicionais();
       mostrar(0);
       return;
@@ -287,6 +329,7 @@ async function init() {
     } catch (_) {}
 
     carregar();
+    await preencherCamposFixos();     // ← NOVO: preenche e bloqueia 1.1 e 1.3
 
     const secoesOk = reg.secoes_ok || {};
     Object.keys(secoesOk).forEach(i => {

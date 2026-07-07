@@ -17,32 +17,9 @@
  *   tabela "pendencias"
  *     user_id      text primary key
  *     ativo        boolean default false
+ *     unidade      text            ← unidade correicionada vinculada ao usuário
  *     criado_em    timestamptz default now()
  *     atualizado_em timestamptz default now()
- *
- * SQL de criação (rode no Supabase SQL Editor):
- * ────
- * create table correicoes (
- *   id            uuid primary key default gen_random_uuid(),
- *   user_id       text not null,
- *   nome          text,
- *   dados         jsonb default '{}'::jsonb,
- *   secoes_ok     jsonb default '{}'::jsonb,
- *   finalizado    boolean default false,
- *   criado_em     timestamptz default now(),
- *   atualizado_em timestamptz default now()
- * );
- *
- * create table pendencias (
- *   user_id       text primary key,
- *   ativo         boolean default false,
- *   criado_em     timestamptz default now(),
- *   atualizado_em timestamptz default now()
- * );
- *
- * alter table correicoes enable row level security;
- * create policy "usuario_proprio" on correicoes
- *   using (user_id = current_setting('request.jwt.claims', true)::json->>'email');
  */
 
 
@@ -101,6 +78,26 @@ window.sbClient = supabase.createClient(
 );
 const sb = window.sbClient;
 
+/* ── Unidade do usuário ──── */
+
+/**
+ * Busca a unidade correicionada vinculada ao usuário logado.
+ * Ajuste a tabela ('pendencias') e a coluna ('unidade') se necessário.
+ */
+async function buscarUnidadeDoUsuario() {
+  const { data, error } = await sb
+    .from('pendencias')
+    .select('unidade_correicionada, unidades_correicionadas ( nome )')
+    .eq('user_id', getEmailUsuario())
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erro ao buscar unidade do usuário:', error);
+    return null;
+  }
+  return data?.unidades_correicionadas?.nome || null;
+}
+
 /* ── CRUD ──── */
 
 /**
@@ -144,14 +141,12 @@ async function garantirRegistroAberto() {
 
 /**
  * Persiste todos os dados do formulário no Supabase.
- * @param {string} id  - UUID do registro
- * @param {object} dados - campos coletados do formulário
  */
 async function persistirDados(id, dados) {
   await exigirUsuarioPendente();
   return sb.from('correicoes').update({
     dados,
-    unidade_correicionada: dados['1.1'] || null,  // ← linha nova
+    unidade_correicionada: dados['1.1'] || null,
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }
@@ -161,8 +156,7 @@ async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
   return sb.from('correicoes').update({
     dados:        dadosMerged,
     secoes_ok:    secoesOk,
-   // tipo_formulario: TIPO_FORMULARIO,
-    unidade_correicionada: dadosMerged['1.1'] || null,  // ← linha nova
+    unidade_correicionada: dadosMerged['1.1'] || null,
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }
@@ -173,7 +167,7 @@ async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
 async function finalizarRegistro(id, dados) {
   return sb.from('correicoes').update({
     dados,
-    unidade_correicionada: dados['1.1'] || null,  // ← linha nova
+    unidade_correicionada: dados['1.1'] || null,
     finalizado:    true,
     finalizado_em: new Date().toISOString(),
     atualizado_em: new Date().toISOString(),
@@ -250,10 +244,10 @@ async function buscarSecoesOk(id) {
     .select('secoes_ok')
     .eq('id', id)
     .single();
-  return data ? (data.secoes_ok || {}) : {};}
+  return data ? (data.secoes_ok || {}) : {};
+}
 
-
-  /**
+/**
  * Carrega os dados pessoais do membro logado.
  */
 async function carregarDadosPessoaisUsuario() {
