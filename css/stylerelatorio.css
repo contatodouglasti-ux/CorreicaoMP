@@ -887,3 +887,17 @@ input[type="text"].auto-expand {
     text-align: center;
     font-style: italic;
 }
+.conclusao-label {
+  display: block;
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.conclusao-textarea {
+  width: 100%;
+  min-height: 70px;
+  resize: vertical;
+}
+.linha-conclusao td {
+  background: #f8f9fb;
+}

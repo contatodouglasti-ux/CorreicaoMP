@@ -772,7 +772,7 @@
                 
             
 <!-- 3 --><h2>3 ESTATÍSTISTICAS DOS ORGÃOS</h2>
-            <div class="proposal">
+           
                 <div class="proposal-title">3.1 Estatísticas Gerais</div>
                 
                    
@@ -798,102 +798,92 @@
 
             
 
-            <h3>3.2 PROCEDIMENTOS ANALISADOS NA CORREIÇÃO</h3>
-            <table id="tabela-processos">
-                <thead>
-                    <tr>
-                    <th style="width:18%">Classe</th>
-                    <th style="width:24%">Nº dos Autos </th>
-                    <th style="width:24%">Objeto</th>
-                    <th style="width:20%">Data da instauração</th>
-                    <th style="width:32%">Situação detectada</th>
-                    <th style="width:6%">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-                    <td><input class="table-input" placeholder="Número" /></td>
-                    <td><input class="table-input" placeholder="Objeto" /></td>
-                    <td><input class="table-input" type="date" /></td>
-                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="actions-row">
-                <button class="btn btn-ok" type="button" onclick="adicionarLinha()">+ Adicionar linha</button>
-                
+           <h3>3.2 PROCEDIMENTOS ANALISADOS NA CORREIÇÃO</h3>
+           <div class="field" style="margin-top:12px;">
+<table id="tabela-processos">
+    <label>3.2.1 PROCESSOS JUDICIAIS ANALISADOS  </label>
+    <thead>
+        
+        <tr>
+        <th style="width:18%">Classe</th>
+        <th style="width:20%">Autos</th>
+        <th style="width:18%">Vista ao MP</th>
+        <th style="width:12%">Prazo</th>
+        <th style="width:18%">Manifestação</th>
+        <th style="width:8%">Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="linha-dados">
+        <td><input class="table-input" placeholder="Ex.: " /></td>
+        <td><input class="table-input" placeholder="Número" /></td>
+        <td><input class="table-input" type="date" /></td>
+        <td><input class="table-input" placeholder="dias"/></td>
+        <td><input class="table-input" type="date" /></td>
+        <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">X</button></td>
+        </tr>
+        <tr class="linha-conclusao">
+        <td colspan="6">
+            <label class="conclusao-label">Conclusão</label>
+            <textarea class="table-textarea conclusao-textarea" placeholder="Digite a conclusão..."></textarea>
+        </td>
+        </tr>
+    </tbody>
+</table>
+<div class="actions-row">
+    <button class="btn btn-ok" type="button" onclick="adicionarLinha()">+ Adicionar linha</button>
+</div>
+          </div>
             </div>
-            <p> </p>
+ 
+   <div class="field" style="margin-top:12px;">
+<label>3.2.2 PROCEDIMENTOS EXTRAJUDICIAIS ANALISADOS</label>
+<table id="tabela-procedimentos-extra" class="tabela-bloco">
+    <tbody>
+        <!-- ===== BLOCO 1 ===== -->
+        <tr class="secao-titulo bloco-inicio">
+            <td colspan="4">DADOS GERAIS DO PROCESSO</td>
+            <td class="col-acao"><button type="button" class="btn btn-danger" onclick="removerLinhaExtra(this)">X</button></td>
+        </tr>
+        <tr>
+            <td style="width:18%"><label class="conclusao-label">Classe:</label><input class="table-input" /></td>
+            <td style="width:20%"><label class="conclusao-label">Processo Nº:</label><input class="table-input" /></td>
+            <td colspan="3"><label class="conclusao-label">Objeto:</label><input class="table-input" /></td>
+        </tr>
+        <tr class="secao-titulo">
+            <td colspan="5">AVALIAÇÃO FORMAL</td>
+        </tr>
+        <tr>
+            <td><label class="conclusao-label">Instauração:</label><input class="table-input" type="date" /></td>
+            <td><label class="conclusao-label">Prorrogação:</label><input class="table-input" type="date" /></td>
+            <td><label class="conclusao-label">Mais de 90 dias sem movimentação?</label>
+                <select class="table-input"><option value=""></option><option>Sim</option><option>Não</option></select></td>
+            <td><label class="conclusao-label">Mais de 3 anos de instauração?</label>
+                <select class="table-input"><option value=""></option><option>Sim</option><option>Não</option></select></td>
+            <td><label class="conclusao-label">Taxonomia correta?</label>
+                <select class="table-input"><option value=""></option><option>Sim</option><option>Não</option></select></td>
+        </tr>
+        <tr class="secao-titulo">
+            <td colspan="5">AVALIAÇÃO MATERIAL</td>
+        </tr>
+        <tr>
+            <td colspan="5"><textarea class="table-textarea conclusao-textarea"></textarea></td>
+        </tr>
+        <tr class="secao-titulo">
+            <td colspan="5">CONCLUSÕES/PROVIMENTOS</td>
+        </tr>
+        <tr>
+            <td colspan="5"><textarea class="table-textarea conclusao-textarea"></textarea></td>
+        </tr>
+    </tbody>
+</table>
+<div class="actions-row">
+    <button class="btn btn-ok" type="button" onclick="adicionarLinhaExtra()">+ Adicionar linha</button>
+</div>
+<p> </p>
+</div>
 
-                    <div class="proposal-fields">
-                    <div class="field">
-                    <label>Observações da equipe</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
-                    </div>
-                    <div class="field">
-                    <label>Necessidade de proposição</label>
-                    <div class="check-row">
-                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
-                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
-                    </div>
-                    </div>
-                    
-                </div>
-             <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
-
-                <div class="field" style="margin-top:12px;">
-                    <label>Proposição</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
-                </div>
-            </div>
- <h3>3.2.2  PROCEDIMENTOS EXTRAJUDICIAIS ANALISADOS</h3>
-            <table id="tabela-procedimentos-extra">
-                <thead>
-                    <tr>
-                    <th style="width:18%">Classe</th>
-                    <th style="width:24%">Nº do procedimento</th>
-                    <th style="width:24%">Data da instauração</th>
-                    <th style="width:32%">Situação detectada</th>
-                    <th style="width:6%">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-                    <td><input class="table-input" placeholder="Número do procedimento" /></td>
-                    <td><input class="table-input" type="date" /></td>
-                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removerLinhaExtra(this)">Apagar</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="actions-row">
-                <button class="btn btn-ok" type="button" onclick="adicionarLinhaExtra()">+ Adicionar linha</button>
-            </div>
-            <p> </p>
-
-                    <div class="proposal-fields">
-                    <div class="field">
-                    <label>Observações da equipe</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
-                    </div>
-                    <div class="field">
-                    <label>Necessidade de proposição</label>
-                    <div class="check-row">
-                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
-                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
-                    </div>
-                    </div>
-                    
-                </div>
-             <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
-
-                <div class="field" style="margin-top:12px;">
-                    <label>Proposição</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
-                </div>
+                 
             </div>
 
  <!-- 3.3 -->
@@ -921,85 +911,6 @@
                 </div>
             </div>
 
-<h3>3.4  EXCESSOS DE PRAZO</h3>
-<div class="field" style="margin-top:12px;">
-    <label>3.4.1 PROCESSOS JUDICIAIS COM EXCESSO DE PRAZO </label>
-            <table id="tabela-excesso-judicial">
-                <thead>
-                    <tr>
-                    <th style="width:13%">Classe</th>
-                    <th style="width:24%">Nº dos Autos</th>
-                    <th style="width:24%">Objeto</th>
-                    <th style="width:24%">Data da instauração</th>
-                    <th style="width:32%">Situação detectada</th>
-                    <th style="width:6%">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td><input class="table-input" placeholder="Ex.: Procedimento judicial" /></td>
-                    <td><input class="table-input" placeholder="Número do processo" /></td>
-                    <td><input class="table-input" placeholder="objeto" /></td>
-                    <td><input class="table-input" type="date" /></td>
-                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoJudicial(this)">Apagar</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="actions-row">
-                <button class="btn btn-ok" type="button" onclick="adicionarLinhaExcessoJudicial()">+ Adicionar linha</button>
-            </div>
-            <p> </p>
-            <label>3.4.2 PROCEDIMENTOS EXTRAJUDICIAIS COM EXCESSO DE PRAZO </label>
-            <table id="tabela-excesso-extra">
-                <thead>
-                    <tr>
-                    <th style="width:13%">Classe</th>
-                    <th style="width:24%">Nº dos Autos</th>
-                    <th style="width:24%">Objeto</th>
-                    <th style="width:24%">Data da instauração</th>
-                    <th style="width:32%">Situação detectada</th>
-                    <th style="width:6%">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-                    <td><input class="table-input" placeholder="Número do procedimento" /></td>
-                    <td><input class="table-input" placeholder="objeto" /></td>
-                    <td><input class="table-input" type="date" /></td>
-                    <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoExtra(this)">Apagar</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="actions-row">
-                <button class="btn btn-ok" type="button" onclick="adicionarLinhaExcessoExtra()">+ Adicionar linha</button>
-            </div>
-            <p> </p>
-
-                    <div class="proposal-fields">
-                    <div class="field">
-                    <label>Observações da equipe</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite as observações da equipe..."></textarea>
-                    </div>
-                    <div class="field">
-                    <label>Necessidade de proposição</label>
-                    <div class="check-row">
-                    <label class="check"><input type="radio" name="prop_48" value="sim" /> Sim</label>
-                    <label class="check"><input type="radio" name="prop_48" value="nao" /> Não</label>
-                    </div>
-                    </div>
-                    
-                </div>
-             <div class="proposal-notice">Obs.: A partir da análise da movimentação processual e extrajudicial, verificar se é caso de propor a reestruturação da unidade e justificar fundamentadamente.</div>
-
-                <div class="field" style="margin-top:12px;">
-                    <label>Proposição</label>
-                    <textarea class="manual-textarea auto-expand" placeholder="Digite a proposição, se necessário..."></textarea>
-                </div>
-            
-</div>
 
 
             <!-- 3.5 -->

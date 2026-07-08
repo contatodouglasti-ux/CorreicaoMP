@@ -158,100 +158,98 @@ function lerDadosRegistro(registro) {
 /* ─── Tabela de processos ──────────────────────────────────────── */
 function adicionarLinha() {
     const tbody = document.querySelector('#tabela-processos tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-        <td><input class="table-input" placeholder="Número" /></td><td><input class="table-input" placeholder="Objeto" /></td>
+
+    const trDados = document.createElement('tr');
+    trDados.className = 'linha-dados';
+    trDados.innerHTML = `
+        <td><input class="table-input" placeholder="Ex.: " /></td>
+        <td><input class="table-input" placeholder="Número" /></td>
         <td><input class="table-input" type="date" /></td>
-        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-        <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">Apagar</button></td>
+        <td><input class="table-input" placeholder="dias" /></td>
+        <td><input class="table-input" type="date" /></td>
+        <td><button type="button" class="btn btn-danger" onclick="removerLinha(this)">X</button></td>
     `;
-    tbody.appendChild(tr);
+
+    const trConclusao = document.createElement('tr');
+    trConclusao.className = 'linha-conclusao';
+    trConclusao.innerHTML = `
+        <td colspan="6">
+            <label class="conclusao-label">Conclusão</label>
+            <textarea class="table-textarea conclusao-textarea" placeholder="Digite a conclusão..."></textarea>
+        </td>
+    `;
+
+    tbody.appendChild(trDados);
+    tbody.appendChild(trConclusao);
 }
 
 function removerLinha(btn) {
     const tbody = document.querySelector('#tabela-processos tbody');
-    const tr = btn.closest('tr');
-    if (!tr) return;
-    if (tbody.querySelectorAll('tr').length <= 1) {
-        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
+    const trDados = btn.closest('tr');
+    if (!trDados) return;
+
+    const trConclusao = trDados.nextElementSibling?.classList.contains('linha-conclusao')
+        ? trDados.nextElementSibling : null;
+
+    // se for o único par, apenas limpa os campos
+    if (tbody.querySelectorAll('tr.linha-dados').length <= 1) {
+        trDados.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        if (trConclusao) trConclusao.querySelector('textarea').value = '';
         return;
     }
-    tr.remove();
-}
 
+    if (trConclusao) trConclusao.remove();
+    trDados.remove();
+}
 function adicionarLinhaExtra() {
     const tbody = document.querySelector('#tabela-procedimentos-extra tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-        <td><input class="table-input" placeholder="Número do procedimento" /></td>
-        <td><input class="table-input" type="date" /></td>
-        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-        <td><button type="button" class="btn btn-danger" onclick="removerLinhaExtra(this)">Apagar</button></td>
+    const selSimNao = `<select class="table-input"><option value=""></option><option>Sim</option><option>Não</option></select>`;
+    const bloco = `
+        <tr class="secao-titulo bloco-inicio">
+            <td colspan="4">DADOS GERAIS DO PROCESSO</td>
+            <td class="col-acao"><button type="button" class="btn btn-danger" onclick="removerLinhaExtra(this)">X</button></td>
+        </tr>
+        <tr>
+            <td><label class="conclusao-label">Classe:</label><input class="table-input" /></td>
+            <td><label class="conclusao-label">Processo Nº:</label><input class="table-input" /></td>
+            <td colspan="3"><label class="conclusao-label">Objeto:</label><input class="table-input" /></td>
+        </tr>
+        <tr class="secao-titulo"><td colspan="5">AVALIAÇÃO FORMAL</td></tr>
+        <tr>
+            <td><label class="conclusao-label">Instauração:</label><input class="table-input" type="date" /></td>
+            <td><label class="conclusao-label">Prorrogação:</label><input class="table-input" type="date" /></td>
+            <td><label class="conclusao-label">Mais de 90 dias sem movimentação?</label>${selSimNao}</td>
+            <td><label class="conclusao-label">Mais de 3 anos de instauração?</label>${selSimNao}</td>
+            <td><label class="conclusao-label">Taxonomia correta?</label>${selSimNao}</td>
+        </tr>
+        <tr class="secao-titulo"><td colspan="5">AVALIAÇÃO MATERIAL</td></tr>
+        <tr><td colspan="5"><textarea class="table-textarea conclusao-textarea"></textarea></td></tr>
+        <tr class="secao-titulo"><td colspan="5">CONCLUSÕES/PROVIMENTOS</td></tr>
+        <tr><td colspan="5"><textarea class="table-textarea conclusao-textarea"></textarea></td></tr>
     `;
-    tbody.appendChild(tr);
+    tbody.insertAdjacentHTML('beforeend', bloco);
 }
 
 function removerLinhaExtra(btn) {
     const tbody = document.querySelector('#tabela-procedimentos-extra tbody');
-    const tr = btn.closest('tr');
-    if (!tr) return;
-    if (tbody.querySelectorAll('tr').length <= 1) {
-        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
+    const inicio = btn.closest('tr');
+    if (!inicio) return;
+
+    // coleta as 8 linhas do bloco (do bloco-inicio até antes do próximo bloco-inicio)
+    const linhas = [inicio];
+    let prox = inicio.nextElementSibling;
+    while (prox && !prox.classList.contains('bloco-inicio')) {
+        linhas.push(prox);
+        prox = prox.nextElementSibling;
+    }
+
+    // se for o único bloco, apenas limpa
+    if (tbody.querySelectorAll('tr.bloco-inicio').length <= 1) {
+        linhas.forEach(tr => tr.querySelectorAll('input, textarea, select').forEach(el => el.value = ''));
         return;
     }
-    tr.remove();
-}
 
-function adicionarLinhaExcessoJudicial() {
-    const tbody = document.querySelector('#tabela-excesso-judicial tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input class="table-input" placeholder="Ex.: Procedimento judicial" /></td>
-        <td><input class="table-input" placeholder="Número do processo" /></td>
-        <td><input class="table-input" placeholder="objeto" /></td>
-        <td><input class="table-input" type="date" /></td>
-        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-        <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoJudicial(this)">Apagar</button></td>
-    `;
-    tbody.appendChild(tr);
-}
-
-function removerLinhaExcessoJudicial(btn) {
-    const tbody = document.querySelector('#tabela-excesso-judicial tbody');
-    const tr = btn.closest('tr');
-    if (!tr) return;
-    if (tbody.querySelectorAll('tr').length <= 1) {
-        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
-        return;
-    }
-    tr.remove();
-}
-
-function adicionarLinhaExcessoExtra() {
-    const tbody = document.querySelector('#tabela-excesso-extra tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input class="table-input" placeholder="Ex.: Procedimento extrajudicial" /></td>
-        <td><input class="table-input" placeholder="Número do procedimento" /></td>
-        <td><input class="table-input" placeholder="objeto" /></td>
-        <td><input class="table-input" type="date" /></td>
-        <td><textarea class="table-textarea" placeholder="Situação detectada"></textarea></td>
-        <td><button type="button" class="btn btn-danger" onclick="removerLinhaExcessoExtra(this)">Apagar</button></td>
-    `;
-    tbody.appendChild(tr);
-}
-
-function removerLinhaExcessoExtra(btn) {
-    const tbody = document.querySelector('#tabela-excesso-extra tbody');
-    const tr = btn.closest('tr');
-    if (!tr) return;
-    if (tbody.querySelectorAll('tr').length <= 1) {
-        tr.querySelectorAll('input, textarea').forEach(el => el.value = '');
-        return;
-    }
-    tr.remove();
+    linhas.forEach(tr => tr.remove());
 }
 
 /* ─── Auto-expand textareas ────────────────────────────────────── */
