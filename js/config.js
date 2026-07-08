@@ -17,11 +17,11 @@ const CONFIG = {
   msal: {
     clientId:    ENV.MSAL_CLIENT_ID    || 'db712dfb-57de-488e-af9f-12bee87fa61c',
     tenantId:    ENV.MSAL_TENANT_ID    || '84a9248e-396f-44df-84a9-4379e11007ab',
-   redirectUri: ENV.MSAL_REDIRECT_URI || 'http://localhost:5501/login.html',
-    // redirectUri: ENV.MSAL_REDIRECT_URI || 'https://correicao-mp.vercel.app/login.html',
+   // redirectUri: ENV.MSAL_REDIRECT_URI || 'http://localhost:5501/login.html',
+    redirectUri: ENV.MSAL_REDIRECT_URI || 'https://correicao-mp.vercel.app/login.html',
   },
 
-  // ──asdfasd Supabase ─────────────────────────────────────────────────
+  //// ──asdfasd Supabase ─────────────────────────────────────────────────
   supabase: {
     url:     ENV.SUPABASE_URL      || 'https://dcqxekzenkmietbhqwng.supabase.co',
     anonKey: ENV.SUPABASE_ANON_KEY || 'sb_publishable_6JnCXxZImhhc7ivUuJWkGg_u4mRF_A7',
