@@ -350,43 +350,28 @@
             <!-- ==== PROMOTORIA DE JUSTIÇA ==== -->
             
 
-            <h2>1. DADOS GERAIS</h3>
-            <div class="meta-grid">
-                <div class="field">
-                    <label>Órgão correicionado</label>
-                    <span class="inline-value" id="DM_1.1"></span>
-                </div>
-                <div class="field">
-                    <label>Nome do(a) titular</label>
-                    <input class="manual-input inline-value" type="text" id="DM_nome" placeholder="Digite o nome do(a) titular" />
-                </div>
-                <div class="field">
-                    <label>Nome do(a) substituto(a)</label>
-                    <div class="subtle">(caso o membro responsável pelo preenchimento do termo ou entrevistado não seja o titular do órgão correicionado)</div>
-                    <input class="manual-input inline-value" type="text" id="DM_nome_substituto" placeholder="Digite o nome do(a) substituto(a)" />
-                </div>
-                <div class="field">
-                    <label>Órgão(s) jurisdicional(is) perante o(s) qual(is) atua</label>
-                    <span class="inline-value" id="DM_3"></span>
-                </div>
-                <div class="field">
-                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
-                    <span class="inline-value" id="DM_5"></span>
-                </div>
-                 <div class="field">
-                    <label>Afastamentos realizados nos últimos 12(doze) meses: </label>
-                    <span class="inline-value" id="DM_17"></span>
-                </div>
-            </div>
-<h2>PROMOTORIA DE JUSTIÇA</h2>
+           
 
             <div id="errorBox" class="error-box"></div>
 
             <!-- CAMPOS PARA O ADMIN PREENCHER -->
             <div class="meta-grid">
+                 <div class="field">
+                <label>Órgão correicionado </label>
+                <span class="inline-value" id="DM_1.1"> </span>
+            </div>
                 <div class="field">
-                    <label>Promotor/Corregedor Auxiliar</label>
-                    <input class="manual-input" type="text" id="promotor_auxiliar" placeholder="Digite o nome do promotor/corregedor auxiliar" />
+                    <label>Promotor Correicionado <span class="inline-value" id="DM_1.4"></span></label>
+                    <span class="inline-value" id="DM_1.3"></span>
+                </div>
+               
+                <div class="field">
+                    <label>Corregedor(a)-Geral</label>
+                    <input class="manual-input" type="text" id="corregedor_geral" placeholder="Digite o nome do(a) Corregedor(a) geral" />
+                </div>
+                <div class="field">
+                    <label>Corregedor(a)-Auxiliar</label>
+                    <input class="manual-input" type="text" id="corregedor_auxiliar" placeholder="Digite o nome do corregedor auxiliar" />
                 </div>
                 <div class="field">
                     <label>Equipe de Apoio</label>
@@ -394,7 +379,7 @@
                 </div>
                <div class="datas-row">
                     <div class="field">
-                    <label>Data da Correição</label>
+                    <label>Data da Correição:</label>
 
                     <div class="datas-row">
                         <div class="campo">
@@ -411,7 +396,23 @@
  
 </div>
                 
+                
+            </div>
+
+            <!-- Motivação -->
+            <div class="section-box">
+                <label style="display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Motivação</label>
+                <div class="value" id="auto_motivacao"></div>
+            </div><p>    </p>
+            <div class="meta-grid">
                 <div class="field">
+                    <label>Tipo de Correição</label>
+                    <div class="check-row">
+                    <label class="check"><input type="radio" name="tipo_correcao" value="Virtual" /> Virtual</label>
+                    <label class="check"><input type="radio" name="tipo_correcao" value="Híbrida" /> Híbrida</label>
+                    </div>
+                </div>
+            <div class="field">
   <label>Período Avaliado</label>
 
   <div class="datas-row">
@@ -425,21 +426,27 @@
       <input class="manual-input" type="date" id="data_final">
     </div>
   </div>
-</div><div class="field">
-                    <label>Tipo de Correição</label>
-                    <div class="check-row">
-                    <label class="check"><input type="radio" name="tipo_correcao" value="Virtual" /> Virtual</label>
-                    <label class="check"><input type="radio" name="tipo_correcao" value="Híbrida" /> Híbrida</label>
-                    </div>
+</div>
+</div>
+
+<h1>PROMOTORIA DE JUSTIÇA</h1>
+ <h2>1. DADOS GERAIS</h3>
+            <div class="meta-grid">
+              
+               
+                <div class="field">
+                    <label>Órgão(s) jurisdicional(is) perante o(s) qual(is) atua</label>
+                    <span class="inline-value" id="DM_3"></span>
+                </div>
+                <div class="field">
+                    <label>Data em que o(a) membro(a) assumiu o órgão correicionado.</label>
+                    <span class="inline-value" id="DM_5"></span>
+                </div>
+                 <div class="field">
+                    <label>Afastamentos realizados nos últimos 12(doze) meses: </label>
+                    <span class="inline-value" id="DM_17"></span>
                 </div>
             </div>
-
-            <!-- Motivação -->
-            <div class="section-box">
-                <label style="display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Motivação</label>
-                <div class="value" id="auto_motivacao"></div>
-            </div>
-
         <!-- ==== 2. PROPOSIÇÕES GERAIS ==== -->
             <h2>2. PROPOSIÇÕES GERAIS</h2>
             <div class="subtle">Preenchimento obrigatório</div>
@@ -2438,45 +2445,108 @@
 
 
             <!-- ===== 16. ENCAMINHAMENTOS ===== -->
-            <h2>16. ENCAMINHAMENTO(S)</h2>
-            <div class="subtle">(Disciplinares, de elogio etc.) Caso seja detectada alguma situação de encaminhamento, relatar resumidamente. Se necessário, devem ser anexados, de forma digital, documentos ao presente relatório.</div>
+            <h2>16. ENCAMINHAMENTO(S)  (DISCIPLINARES, DE ELOGIO ETC.)</h2>
+            <div class="subtle">Caso seja detectada alguma situação de encaminhamento, relatar resumidamente. Se necessário, devem ser anexados, de forma digital, documentos ao presente relatório.</div>
             <div class="field" style="margin-top:12px;">
-                <label>Encaminhamentos</label>
-                <textarea class="manual-textarea auto-expand" placeholder="Descreva os encaminhamentos..."></textarea>
+               
+            <label>16.1. DIAGNÓSTICO DOS SERVIÇOS CORREICIONADOS</label>
+    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo161(this)">
+        <option value="">— Escolher modelo de texto —</option>
+        <option value="modelo1">Modelo 1 – Serviços em ritmo regular/satisfatório</option>
+        <option value="modelo2">Modelo 2 – Serviços com pendências</option>
+    </select>
+    <textarea id="diagnostico-161" class="manual-textarea auto-expand" placeholder="Escolha um modelo acima ou digite o texto..."></textarea>
+
+</div>
+          <div class="field" style="margin-top:12px;">
+               
+            <label>16.2 ASPECTOS POSITIVOS E BOAS PRÁTICAS</label>
+         <div class="subtle">Merece registro elogioso o empenho do(a) Promotor(a) de Justiça Titular e de sua equipe técnica no que tange a:</div>
+  
+    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo162(this)">
+        <option value="">— Escolher modelo de texto —</option>
+        <option value="modelo3">Modelo 1 – Excelente índice </option>
+        <option value="modelo4">Modelo 2 – Organização e constante</option>
+        <option value="modelo5">Modelo 3 – Cordialidade e presteza </option>
+    </select>
+  <textarea id="diagnostico-162" class="manual-textarea auto-expand" placeholder="Escolha um modelo acima ou digite o texto..."></textarea>
+
             </div>
 
-            <!-- ===== 17. OBSERVAÇÕES COMPLEMENTARES ===== -->
-            <h2>17. RECOMENDAÇÕES (NO PRAZO DE 30 DIAS)</h2>
             <div class="field" style="margin-top:12px;">
-                <label>Observações complementares</label>
-                <textarea class="manual-textarea auto-expand" placeholder="Digite observações complementares..."></textarea>
-            </div>
+          <label>16.3 ASPECTOS NEGATIVOS E IRREGULARIDADES DETECTADAS</label>
+                <div class="subtle">Por outro lado, identificaram-se inconformidades pontuais que demandam correção, tais como:</div>
 
-            <!-- ===== 17. OBSERVAÇÕES COMPLEMENTARES ===== -->
+            
+    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo163(this)">
+        <option value="">— Escolher modelo de texto —</option>
+        
+        <option value="modelo6">Modelo 1 – Acúmulo excessivo</option>
+        <option value="modelo7">Modelo 2 – Ausência de alimentação </option>
+    </select>
+    <textarea id="diagnostico-163" class="manual-textarea auto-expand" placeholder="Escolha um modelo acima ou digite o texto..."></textarea>
+
+            </div>
+<!-- ===== 17. DETERMINAÇÕES E RECOMENDAÇÕES ===== -->
+            <h2>17. DETERMINAÇÕES E RECOMENDAÇÕES</h2>
+            <div class="field" style="margin-top:12px;">
+          <label>17.1 DETERMINAÇÕES (Cumprimento Obrigatório) </label>
+                <div class="subtle">Diante das falhas anotadas, DETERMINA-SE ao(à) Promotor(a) de Justiça Titular, sob as penas legais e regimentais, que:</div>
+
+            
+    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo164(this)">
+        <option value="">— Escolher modelo de texto —</option>
+        <option value="modelo8">Modelo 1 – Promova o saneamento </option>
+        <option value="modelo9">Modelo 2 – Regularize o lançamento</option>
+    </select>
+    <textarea id="diagnostico-164" class="manual-textarea auto-expand" placeholder="Escolha um modelo acima ou digite o texto..."></textarea>
+
+            </div>
+             <div class="field" style="margin-top:12px;">
+          <label>17.2 RECOMENDAÇÕES (Melhorias de Gestão)</label>
+                <div class="subtle">Ademais, RECOMENDA-SE à chefia da unidade correicionada que:</div>
+
+            
+    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo165(this)">
+        <option value="">— Escolher modelo de texto —</option>
+        <option value="modelo10">Modelo 1 – Estabeleça um cronograma </option>
+        <option value="modelo11">Modelo 2 – Adote o modelo de fluxograma</option>
+    </select>
+    <textarea id="diagnostico-165" class="manual-textarea auto-expand" placeholder="Escolha um modelo acima ou digite o texto..."></textarea>
+
+            </div>
+            <!-- ===== 18. OBSERVAÇÕES COMPLEMENTARES ===== -->
             <h2>18. OBSERVAÇÕES COMPLEMENTARES</h2>
             <div class="field" style="margin-top:12px;">
                 <label>Observações complementares</label>
                 <textarea class="manual-textarea auto-expand" placeholder="Digite observações complementares..."></textarea>
             </div>
- <div class="meta-grid">
-            <div class="field" style="margin-top:20px;">
-                <label>Local</label>
-                <input class="manual-input" type="text" placeholder="Município/UF" />
+
+
+            <h2>19. OBSERVAÇÕES COMPLEMENTARES</h2>
+ <div class="field" style="margin-top:12px;">
+       
+            
+    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo166(this)">
+        <option value="">— Escolher modelo de texto —</option>
+        <option value="modelo12">Modelo 1 – Considerando que as falhas constatadas </option>
+        <option value="modelo13">Modelo 2 – Comunique-se o teor deste relatório</option>
+        <option value="modelo14">Modelo 3 – Senhor(a) Corregedor(a)-Geral do Ministério Público.</option>
+
+    </select>
+    <textarea id="diagnostico-166" class="manual-textarea auto-expand" placeholder="Escolha um modelo acima ou digite o texto..."></textarea>
+
             </div>
-            <div class="field" style="margin-top:20px;">
-                <label>Data</label>
-                <input class="manual-input" type="text" placeholder="Data das assinaturas eletrônicas" />
-            </div></div>
-            <div class="field" style="margin-top:20px;">
-                <label>Assinatura</label>
-                <input class="manual-input" type="text" placeholder="Nome(s) / assinatura(s)" />
-            </div>
+
+
+
+            
 
           <div class="actions-row" style="margin-top:20px;">
                 <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
             </div>
-        </div>
-    </div>
+        
+    
 
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>

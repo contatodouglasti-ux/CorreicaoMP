@@ -318,6 +318,7 @@ if (campoTitular) {
     }
 
 setText('DM_5', extrairTexto(dados['5']));
+setText('DM_1.3', extrairTexto(dados['1.3']));
 
 
        const resposta6 = String(extrairTexto(dados['6'])).trim().toUpperCase();
@@ -2388,5 +2389,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 
+const MODELOS_161 = {
+    modelo1: `À vista do exame dos livros, registros, autos físicos, procedimentos eletrônicos e demais elementos que compõem os assentamentos da [Número]ª Promotoria de Justiça de [Nome da Comarca], constatou-se que os serviços jurídicos e administrativos desenvolvem-se em ritmo [Regular / Satisfatório / Excelente / Deficitário].`,
 
+    modelo2: `A carga de trabalho encontra-se dentro da média regional, observando-se, em termos gerais, o cumprimento dos prazos legais e das metas institucionais fixadas pela Corregedoria-Geral e pelo Conselho Nacional do Ministério Público (CNMP).`,
+
+    modelo3: `[Exemplo] Excelente índice de resolutividade extrajudicial nas demandas de tutela coletiva.`,
+    modelo4: `[Exemplo] Organização e constante atualização do acervo digital no sistema de processos eletrônicos.`,
+    modelo5: `[Exemplo] Cordialidade e presteza no atendimento direto ao público e às partes.`,
+    modelo6: `[Exemplo] Acúmulo excessivo de procedimentos administrativos de acompanhamento sem movimentação há mais de 180 dias.`,
+    modelo7: `[Exemplo] Ausência de alimentação periódica dos dados de produtividade no painel institucional. `,
+    modelo8: `Promova o saneamento de todos os procedimentos paralisados há mais de 90 dias, conferindo-lhes o devido impulso oficial, no prazo improrrogável de [Ex: 30 ou 60] dias.`,
+    modelo9: `Regularize o lançamento dos atos e manifestações no sistema eletrônico de forma concomitante à sua prática, no prazo de [Ex: 15] dias.`,
+    modelo10: `Estabeleça um cronograma quinzenal de reuniões internas com os assessores e estagiários para revisão de metas. `,
+
+    modelo11: `Adote o modelo de fluxograma sugerido pela Corregedoria para triagem de representações iniciais. `,
+
+ modelo12: `Considerando que as falhas constatadas possuem natureza eminentemente formal e organizadora, deixa-se de propor, por ora, a instauração de procedimento administrativo disciplinar, sem prejuízo de nova avaliação.  `,
+ modelo13: `Comunique-se o teor deste relatório ao(à) Promotor(a) de Justiça interessado(a), fixando o prazo de [Ex: 60] dias para que comprove a este Órgão Corregedor o cumprimento integral das determinações aqui exaradas. `,
+ modelo14: `À consideração do(a) Excelentíssimo(a) Senhor(a) Corregedor(a)-Geral do Ministério Público.`,
+
+};
+
+function aplicarModelo161(sel) {
+    if (!sel.value) return;
+    const ta = document.getElementById('diagnostico-161');
+    if (ta.value.trim() && !confirm('Substituir o texto atual pelo modelo selecionado?')) {
+        sel.value = '';
+        return;
+    }
+    ta.value = MODELOS_161[sel.value];
+   if (typeof autoExpand === 'function') autoExpand(ta);
+}
+function aplicarModelo162(sel) {
+    if (!sel.value) return;
+    const ta = document.getElementById('diagnostico-162');
+    if (ta.value.trim() && !confirm('Substituir o texto atual pelo modelo selecionado?')) {
+        sel.value = '';
+        return;
+    }
+    ta.value = MODELOS_161[sel.value];
+   if (typeof autoExpand === 'function') autoExpand(ta);
+}
+function aplicarModelo163(sel) {
+    if (!sel.value) return;
+    const ta = document.getElementById('diagnostico-163');
+    if (ta.value.trim() && !confirm('Substituir o texto atual pelo modelo selecionado?')) {
+        sel.value = '';
+        return;
+    }
+    ta.value = MODELOS_161[sel.value];
+   if (typeof autoExpand === 'function') autoExpand(ta);
+}
+function aplicarModelo164(sel) {
+    if (!sel.value) return;
+    const ta = document.getElementById('diagnostico-164');
+    if (ta.value.trim() && !confirm('Substituir o texto atual pelo modelo selecionado?')) {
+        sel.value = '';
+        return;
+    }
+    ta.value = MODELOS_161[sel.value];
+   if (typeof autoExpand === 'function') autoExpand(ta);
+}
+function aplicarModelo165(sel) {
+    if (!sel.value) return;
+    const ta = document.getElementById('diagnostico-165');
+    if (ta.value.trim() && !confirm('Substituir o texto atual pelo modelo selecionado?')) {
+        sel.value = '';
+        return;
+    }
+    ta.value = MODELOS_161[sel.value];
+   if (typeof autoExpand === 'function') autoExpand(ta);
+}
+function aplicarModelo166(sel) {
+    if (!sel.value) return;
+    const ta = document.getElementById('diagnostico-166');
+    if (ta.value.trim() && !confirm('Substituir o texto atual pelo modelo selecionado?')) {
+        sel.value = '';
+        return;
+    }
+    ta.value = MODELOS_161[sel.value];
+   if (typeof autoExpand === 'function') autoExpand(ta);
+}
 init();
