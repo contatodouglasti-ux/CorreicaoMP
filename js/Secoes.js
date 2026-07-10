@@ -490,7 +490,6 @@ const form = {
       {"id": "79.a", "pergunta": "Em caso positivo, especificar e informar o número do procedimento/processo.", "tipo": "textarea", dependeDe: { id: "79", valor: "Sim" }},
       {"id": "80", "pergunta": "Foram adotadas medidas voltadas à defesa da gestão democrática do ensino, conforme Meta do Plano Nacional de Educação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "80.a", "pergunta": "Em caso positivo, especificar e informar o número do procedimento/processo.", "tipo": "textarea", dependeDe: { id: "80", valor: "Sim" }},
-      {"id": "81", "pergunta": "Foram adotadas medidas voltadas à valorização dos(as) profissionais da educação, conforme Meta do Plano Nacional de Educação?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "81.a", "pergunta": "Em caso positivo, especificar e informar o número do procedimento/processo.", "tipo": "textarea", dependeDe: { id: "81", valor: "Sim" }},
       {"id": "82", "pergunta": "O(a) membro(a) acompanha as estratégias adotadas pela Secretaria Municipal de Educação e pelo Conselho Tutelar para combater a evasão e o abandono escolar.", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "82.a", "pergunta": "Em caso positivo, especificar e informar o número do procedimento/processo.", "tipo": "textarea", dependeDe: { id: "82", valor: "Sim" }},

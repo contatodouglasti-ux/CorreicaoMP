@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Sistema PIC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/configPIC.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/db-pic.js"></script>
+  <style>
+    :root {
+      --accent: #1C799B;
+      --accent-dark: #145f7a;
+      --bg: #f0f4f6;
+      --card: #fff;
+      --text: #263238;
+      --muted: #546E7A;
+      --ok: #2e7d32;
+      --warn: #ef6c00;
+      --info: #1565c0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: linear-gradient(135deg, var(--accent), #2a9bc4);
+      color: #fff;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .topbar .brand { font-size: 17px; font-weight: 700; }
+    .topbar .brand small { display: block; font-size: 11px; font-weight: 400; opacity: 0.85; }
+
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.12);
+      transition: background 0.15s;
+    }
+    nav a:hover, nav a.ativo { background: rgba(255,255,255,0.28); }
+
+    .user-area { display: flex; align-items: center; gap: 10px; }
+    #userBadge { display: none; align-items: center; gap: 8px; font-size: 13px; }
+    #userAvatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .btn-sair {
+      background: rgba(255,255,255,0.15);
+      border: none; color: #fff; font-size: 12px; font-weight: 600;
+      padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    }
+    .btn-sair:hover { background: rgba(255,255,255,0.3); }
+
+    /* ── Conteúdo ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    h2 { font-size: 20px; margin-bottom: 18px; }
+    h3 { font-size: 15px; margin-bottom: 12px; color: var(--muted); }
+
+    /* Cards de indicadores */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+    .card-ind {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--accent);
+    }
+    .card-ind .valor { font-size: 28px; font-weight: 700; }
+    .card-ind .rotulo { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .card-ind.andamento { border-left-color: var(--info); }
+    .card-ind.arquivado { border-left-color: var(--muted); }
+    .card-ind.denunciado { border-left-color: var(--warn); }
+    .card-ind.vitimas { border-left-color: #c62828; }
+    .card-ind.agentes { border-left-color: var(--ok); }
+
+    /* Painéis lado a lado */
+    .paineis {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 20px;
+    }
+    @media (max-width: 800px) { .paineis { grid-template-columns: 1fr; } }
+
+    .painel {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Lista por comarca */
+    .linha-comarca {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid #eef2f4;
+      font-size: 13px;
+    }
+    .linha-comarca:last-child { border-bottom: none; }
+    .linha-comarca .qtd { font-weight: 700; color: var(--accent); }
+
+    /* Tabela últimos procedimentos */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 8px 10px;
+      color: var(--muted); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.05em; border-bottom: 2px solid #eef2f4;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid #eef2f4; }
+    tr:hover td { background: #f6fafc; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge.em_andamento { background: #e3f2fd; color: var(--info); }
+    .badge.arquivado    { background: #eceff1; color: var(--muted); }
+    .badge.denunciado   { background: #fff3e0; color: var(--warn); }
+
+    .loading { text-align: center; padding: 60px 0; color: var(--muted); }
+    .ring {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 4px solid #d0e8f0; border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      Sistema PIC
+      <small>Procedimentos Investigatórios Criminais — Res. CNMP 310/2025</small>
+    </div>
+    <nav>
+      <a href="/PIC/home.html" class="ativo">Dashboard</a>
+      <a href="/PIC/procedimentos.html">Procedimentos</a>
+      <a href="/PIC/agentes.html">Agentes</a>
+      <a href="/PIC/relatorios.html">Relatórios</a>
+    </nav>
+    <div class="user-area">
+      <div id="userBadge">
+        <div id="userAvatar"></div>
+        <span id="userName"></span>
+      </div>
+      <button class="btn-sair" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="loading" id="loading">
+      <div class="ring"></div>
+      Carregando indicadores…
+    </div>
+
+    <div id="conteudo" style="display:none">
+      <h2>Visão Geral</h2>
+
+      <div class="cards">
+        <div class="card-ind">
+          <div class="valor" id="indTotal">0</div>
+          <div class="rotulo">Total de procedimentos</div>
+        </div>
+        <div class="card-ind andamento">
+          <div class="valor" id="indAndamento">0</div>
+          <div class="rotulo">Em andamento</div>
+        </div>
+        <div class="card-ind arquivado">
+          <div class="valor" id="indArquivados">0</div>
+          <div class="rotulo">Arquivados</div>
+        </div>
+        <div class="card-ind denunciado">
+          <div class="valor" id="indDenunciados">0</div>
+          <div class="rotulo">Com denúncia</div>
+        </div>
+        <div class="card-ind vitimas">
+          <div class="valor" id="indVitimas">0</div>
+          <div class="rotulo">Vítimas cadastradas</div>
+        </div>
+        <div class="card-ind agentes">
+          <div class="valor" id="indAgentes">0</div>
+          <div class="rotulo">Agentes envolvidos</div>
+        </div>
+        <div class="card-ind denunciado">
+          <div class="valor" id="indDenuncias">0</div>
+          <div class="rotulo">Denúncias ofertadas</div>
+        </div>
+      </div>
+
+      <div class="paineis">
+        <div class="painel">
+          <h3>Procedimentos por comarca</h3>
+          <div id="listaComarcas"></div>
+        </div>
+
+        <div class="painel">
+          <h3>Últimos procedimentos cadastrados</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Comarca</th>
+                <th>Instauração</th>
+                <th>Situação</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaUltimos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const ROTULO_SITUACAO = {
+      em_andamento: 'Em andamento',
+      arquivado:    'Arquivado',
+      denunciado:   'Denunciado',
+    };
+
+    function fmtData(d) {
+      if (!d) return '—';
+      const [ano, mes, dia] = String(d).slice(0, 10).split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    async function init() {
+      // Exige login
+      if (getEmailUsuario() === 'desconhecido') {
+        window.location.replace('/login.html');
+        return;
+      }
+
+      await verificarAcesso();
+      exibirBadgeUsuario();
+
+      try {
+        const ind = await carregarIndicadores();
+
+        document.getElementById('indTotal').textContent       = ind.total;
+        document.getElementById('indAndamento').textContent   = ind.emAndamento;
+        document.getElementById('indArquivados').textContent  = ind.arquivados;
+        document.getElementById('indDenunciados').textContent = ind.denunciados;
+        document.getElementById('indVitimas').textContent     = ind.totalVitimas;
+        document.getElementById('indAgentes').textContent     = ind.totalAgentes;
+        document.getElementById('indDenuncias').textContent   = ind.totalDenuncias;
+
+        // Comarcas (ordenadas por quantidade)
+        const listaComarcas = document.getElementById('listaComarcas');
+        const comarcas = Object.entries(ind.porComarca).sort((a, b) => b[1] - a[1]);
+        listaComarcas.innerHTML = comarcas.length
+          ? comarcas.map(([nome, qtd]) =>
+              `<div class="linha-comarca"><span>${nome}</span><span class="qtd">${qtd}</span></div>`
+            ).join('')
+          : '<div class="linha-comarca"><span>Nenhum procedimento cadastrado.</span></div>';
+
+        // Últimos procedimentos
+        const tbody = document.getElementById('tabelaUltimos');
+        tbody.innerHTML = ind.ultimos.length
+          ? ind.ultimos.map(p => `
+              <tr style="cursor:pointer" onclick="location.href='/procedimentos.html?id=${p.id}'">
+                <td><strong>${p.numero}</strong></td>
+                <td>${p.comarca}</td>
+                <td>${fmtData(p.data_instauracao)}</td>
+                <td><span class="badge ${p.situacao}">${ROTULO_SITUACAO[p.situacao] || p.situacao}</span></td>
+              </tr>`).join('')
+          : '<tr><td colspan="4">Nenhum procedimento cadastrado.</td></tr>';
+
+        document.getElementById('loading').style.display  = 'none';
+        document.getElementById('conteudo').style.display = 'block';
+      } catch (e) {
+        console.error(e);
+        document.getElementById('loading').innerHTML =
+          'Erro ao carregar indicadores. Verifique a conexão com o banco.';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

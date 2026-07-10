@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agentes — Sistema PIC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/configPIC.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/db-pic.js"></script>
+  <style>
+    :root {
+      --accent: #1C799B; --accent-dark: #145f7a;
+      --bg: #f0f4f6; --card: #fff; --text: #263238; --muted: #546E7A;
+      --ok: #2e7d32; --warn: #ef6c00; --info: #1565c0; --danger: #c62828;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: linear-gradient(135deg, var(--accent), #2a9bc4);
+      color: #fff; padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .topbar .brand { font-size: 17px; font-weight: 700; }
+    .topbar .brand small { display: block; font-size: 11px; font-weight: 400; opacity: 0.85; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a {
+      color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+      padding: 8px 14px; border-radius: 8px; background: rgba(255,255,255,0.12);
+    }
+    nav a:hover, nav a.ativo { background: rgba(255,255,255,0.28); }
+    .user-area { display: flex; align-items: center; gap: 10px; }
+    #userBadge { display: none; align-items: center; gap: 8px; font-size: 13px; }
+    #userAvatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .btn-sair {
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      font-size: 12px; font-weight: 600; padding: 7px 12px;
+      border-radius: 8px; cursor: pointer;
+    }
+
+    .container { max-width: 1150px; margin: 0 auto; padding: 26px 20px 60px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 15px; margin-bottom: 12px; }
+    h4 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 10px; }
+
+    .painel {
+      background: var(--card); border-radius: 14px; padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+    }
+
+    .grid-form {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 9px 11px; border-radius: 8px;
+      border: 1.5px solid #d7e3eb; font-size: 13px; color: var(--text);
+      background: #f8fbfc; outline: none; font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent); background: #fff;
+      box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    .btn {
+      padding: 9px 16px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn-primario { background: var(--accent); color: #fff; }
+    .btn-neutro   { background: #eceff1; color: var(--text); }
+    .btn-perigo   { background: #fdecea; color: var(--danger); }
+    .btn-mini     { padding: 5px 10px; font-size: 12px; }
+
+    .barra-acoes { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .cabecalho-pagina {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    }
+    .busca-linha { display: flex; gap: 10px; flex-wrap: wrap; }
+    .busca-linha input { max-width: 340px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 8px 10px; color: var(--muted);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 2px solid #eef2f4; white-space: nowrap;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid #eef2f4; }
+    tr:hover td { background: #f6fafc; }
+    .acoes-linha { display: flex; gap: 6px; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge.em_andamento { background: #e3f2fd; color: var(--info); }
+    .badge.arquivado    { background: #eceff1; color: var(--muted); }
+    .badge.denunciado   { background: #fff3e0; color: var(--warn); }
+
+    /* Badge de recalcitrância */
+    .badge.reincidencia-baixa  { background: #e8f5e9; color: var(--ok); }
+    .badge.reincidencia-media  { background: #fff3e0; color: var(--warn); }
+    .badge.reincidencia-alta   { background: #fdecea; color: var(--danger); }
+
+    /* ── Modal ── */
+    .modal-fundo {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,40,50,0.45); z-index: 50;
+      align-items: flex-start; justify-content: center;
+      padding: 30px 16px; overflow-y: auto;
+    }
+    .modal-fundo.aberto { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; width: 100%;
+      max-width: 760px; padding: 26px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.25);
+    }
+    .modal-cabecalho {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px;
+    }
+    .btn-fechar {
+      background: none; border: none; font-size: 22px;
+      color: var(--muted); cursor: pointer; line-height: 1;
+    }
+
+    /* Indicadores no modal de detalhes */
+    .mini-cards {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px; margin-bottom: 6px;
+    }
+    .mini-card {
+      background: #f6fafc; border-radius: 10px; padding: 12px;
+      border-left: 3px solid var(--accent);
+    }
+    .mini-card .valor { font-size: 20px; font-weight: 700; }
+    .mini-card .rotulo { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .sub-lista { border: 1px solid #eef2f4; border-radius: 10px; overflow: hidden; }
+    .vazio { padding: 12px; font-size: 12.5px; color: var(--muted); }
+
+    .loading { text-align: center; padding: 60px 0; color: var(--muted); }
+    .ring {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 4px solid #d0e8f0; border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      Sistema PIC
+      <small>Procedimentos Investigatórios Criminais — Res. CNMP 310/2025</small>
+    </div>
+    <nav>
+      <a href="/PIC/home.html">Dashboard</a>
+      <a href="/PIC/procedimentos.html">Procedimentos</a>
+      <a href="/PIC/agentes.html" class="ativo">Agentes</a>
+      <a href="/PIC/relatorios.html">Relatórios</a>
+    </nav>
+    <div class="user-area">
+      <div id="userBadge"><div id="userAvatar"></div><span id="userName"></span></div>
+      <button class="btn-sair" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="loading" id="loading"><div class="ring"></div>Carregando…</div>
+
+    <div id="conteudo" style="display:none">
+      <div class="cabecalho-pagina">
+        <h2>Agentes do Estado</h2>
+        <button class="btn btn-primario" onclick="abrirNovo()">+ Novo Agente</button>
+      </div>
+
+      <!-- ── Busca ── -->
+      <div class="painel">
+        <div class="busca-linha">
+          <input id="fNome" placeholder="Pesquisar por nome…" onkeydown="if(event.key==='Enter')listar()">
+          <button class="btn btn-primario" onclick="listar()">Pesquisar</button>
+          <button class="btn btn-neutro" onclick="$('fNome').value='';listar()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- ── Listagem ── -->
+      <div class="painel">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Matrícula</th>
+              <th>Órgão</th>
+              <th>Cargo</th>
+              <th>Procedimentos</th>
+              <th>Reincidência</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaAgentes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL: Cadastro / Edição ════ -->
+  <div class="modal-fundo" id="modalCadastro">
+    <div class="modal">
+      <div class="modal-cabecalho">
+        <h3 id="tituloCadastro">Novo Agente</h3>
+        <button class="btn-fechar" onclick="fechar('modalCadastro')">×</button>
+      </div>
+      <div class="grid-form">
+        <div style="grid-column: span 2"><label>Nome *</label><input id="aNome"></div>
+        <div><label>Matrícula</label><input id="aMatricula"></div>
+        <div><label>Órgão</label><input id="aOrgao" placeholder="Ex.: PMAM, PC-AM"></div>
+        <div><label>Cargo</label><input id="aCargo" placeholder="Ex.: Soldado, Delegado"></div>
+        <div style="grid-column: 1 / -1"><label>Observações</label><textarea id="aObs"></textarea></div>
+      </div>
+      <div class="barra-acoes">
+        <button class="btn btn-primario" onclick="salvarAgente()">Salvar</button>
+        <button class="btn btn-neutro" onclick="fechar('modalCadastro')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL: Detalhes / Histórico ════ -->
+  <div class="modal-fundo" id="modalDetalhes">
+    <div class="modal">
+      <div class="modal-cabecalho">
+        <h3 id="tituloDetalhes">Agente</h3>
+        <button class="btn-fechar" onclick="fechar('modalDetalhes')">×</button>
+      </div>
+
+      <div class="mini-cards" id="cardsAgente"></div>
+
+      <h4>Dados cadastrais</h4>
+      <div id="dadosAgente" style="font-size:13px; line-height:1.9"></div>
+
+      <h4>Histórico de participação em procedimentos</h4>
+      <div class="sub-lista" id="listaProcsAgente"></div>
+    </div>
+  </div>
+
+  <script>
+    const ROTULO_SITUACAO = {
+      em_andamento: 'Em andamento',
+      arquivado: 'Arquivado',
+      denunciado: 'Denunciado',
+    };
+
+    let agenteAtual = null;
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    function fmtData(d) {
+      if (!d) return '—';
+      const [ano, mes, dia] = String(d).slice(0, 10).split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function fechar(id) { $(id).classList.remove('aberto'); }
+
+    /* Classificação simples de recalcitrância pela qtd de procedimentos */
+    function nivelReincidencia(qtd) {
+      if (qtd >= 3) return ['reincidencia-alta',  `Alta (${qtd})`];
+      if (qtd === 2) return ['reincidencia-media', `Média (${qtd})`];
+      return ['reincidencia-baixa', qtd === 1 ? 'Única (1)' : 'Nenhuma (0)'];
+    }
+
+    /* ── Listagem ── */
+    async function listar() {
+      try {
+        const agentes = await buscarAgentes($('fNome').value);
+        $('tabelaAgentes').innerHTML = agentes.length
+          ? agentes.map(a => {
+              const [classe, rotulo] = nivelReincidencia(a.qtd_procedimentos);
+              return `
+                <tr>
+                  <td><strong>${esc(a.nome)}</strong></td>
+                  <td>${esc(a.matricula) || '—'}</td>
+                  <td>${esc(a.orgao) || '—'}</td>
+                  <td>${esc(a.cargo) || '—'}</td>
+                  <td>${a.qtd_procedimentos}</td>
+                  <td><span class="badge ${classe}">${rotulo}</span></td>
+                  <td class="acoes-linha">
+                    <button class="btn btn-neutro btn-mini" onclick="abrirDetalhes('${a.id}')">Detalhes</button>
+                    <button class="btn btn-neutro btn-mini" onclick="abrirEdicao('${a.id}')">Editar</button>
+                    <button class="btn btn-perigo btn-mini" onclick="excluir('${a.id}', '${esc(a.nome)}', ${a.qtd_procedimentos})">Excluir</button>
+                  </td>
+                </tr>`;
+            }).join('')
+          : '<tr><td colspan="7">Nenhum agente encontrado.</td></tr>';
+
+        window._agentesCache = agentes;
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao listar agentes.');
+      }
+    }
+
+    /* ── Cadastro / Edição ── */
+    function abrirNovo() {
+      agenteAtual = null;
+      $('tituloCadastro').textContent = 'Novo Agente';
+      ['aNome','aMatricula','aOrgao','aCargo','aObs'].forEach(id => $(id).value = '');
+      $('modalCadastro').classList.add('aberto');
+    }
+
+    function abrirEdicao(id) {
+      agenteAtual = (window._agentesCache || []).find(a => a.id === id);
+      if (!agenteAtual) return;
+      $('tituloCadastro').textContent = `Editar — ${agenteAtual.nome}`;
+      $('aNome').value      = agenteAtual.nome || '';
+      $('aMatricula').value = agenteAtual.matricula || '';
+      $('aOrgao').value     = agenteAtual.orgao || '';
+      $('aCargo').value     = agenteAtual.cargo || '';
+      $('aObs').value       = agenteAtual.observacoes || '';
+      $('modalCadastro').classList.add('aberto');
+    }
+
+    async function salvarAgente() {
+      const dados = {
+        nome:        $('aNome').value,
+        matricula:   $('aMatricula').value,
+        orgao:       $('aOrgao').value,
+        cargo:       $('aCargo').value,
+        observacoes: $('aObs').value,
+      };
+      try {
+        if (agenteAtual) await editarAgente(agenteAtual.id, dados);
+        else             await criarAgente(dados);
+        fechar('modalCadastro');
+        listar();
+      } catch (e) {
+        console.error(e);
+        alert(e.message || 'Erro ao salvar agente. Verifique se a matrícula já não está cadastrada.');
+      }
+    }
+
+    async function excluir(id, nome, qtdProcs) {
+      if (qtdProcs > 0) {
+        alert(`Este agente está vinculado a ${qtdProcs} procedimento(s). Desvincule-o antes de excluir.`);
+        return;
+      }
+      if (!confirm(`Excluir o agente ${nome}?`)) return;
+      try {
+        await excluirAgente(id);
+        listar();
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao excluir agente.');
+      }
+    }
+
+    /* ── Detalhes / Recalcitrância ── */
+    async function abrirDetalhes(id) {
+      const agente = (window._agentesCache || []).find(a => a.id === id);
+      if (!agente) return;
+
+      let procs = [];
+      try {
+        procs = await buscarProcedimentosDoAgente(id);
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao carregar procedimentos do agente.');
+        return;
+      }
+
+      $('tituloDetalhes').textContent = agente.nome;
+
+      const denunciados = procs.filter(p => p.situacao === 'denunciado').length;
+      const andamento   = procs.filter(p => p.situacao === 'em_andamento').length;
+      const arquivados  = procs.filter(p => p.situacao === 'arquivado').length;
+      const [classe, rotulo] = nivelReincidencia(procs.length);
+
+      $('cardsAgente').innerHTML = `
+        <div class="mini-card"><div class="valor">${procs.length}</div><div class="rotulo">Total de procedimentos</div></div>
+        <div class="mini-card"><div class="valor">${andamento}</div><div class="rotulo">Em andamento</div></div>
+        <div class="mini-card"><div class="valor">${arquivados}</div><div class="rotulo">Arquivados</div></div>
+        <div class="mini-card"><div class="valor">${denunciados}</div><div class="rotulo">Denunciados</div></div>
+        <div class="mini-card"><div class="valor"><span class="badge ${classe}">${rotulo}</span></div><div class="rotulo">Indicador de recalcitrância</div></div>
+      `;
+
+      $('dadosAgente').innerHTML = `
+        <strong>Matrícula:</strong> ${esc(agente.matricula) || '—'}<br>
+        <strong>Órgão:</strong> ${esc(agente.orgao) || '—'}<br>
+        <strong>Cargo:</strong> ${esc(agente.cargo) || '—'}<br>
+        <strong>Observações:</strong> ${esc(agente.observacoes) || '—'}
+      `;
+
+      $('listaProcsAgente').innerHTML = procs.length
+        ? `<table>
+            <thead><tr><th>Número</th><th>Comarca</th><th>Instauração</th><th>Situação</th><th>Capitulação</th><th></th></tr></thead>
+            <tbody>${procs
+              .sort((a, b) => new Date(b.data_instauracao) - new Date(a.data_instauracao))
+              .map(p => `
+                <tr>
+                  <td><strong>${esc(p.numero)}</strong></td>
+                  <td>${esc(p.comarca)}</td>
+                  <td>${fmtData(p.data_instauracao)}</td>
+                  <td><span class="badge ${p.situacao}">${ROTULO_SITUACAO[p.situacao] || p.situacao}</span></td>
+                  <td>${esc(p.capitulacao_legal)}</td>
+                  <td><a class="btn btn-neutro btn-mini" style="text-decoration:none"
+                       href="/procedimentos.html?id=${p.id}">Abrir</a></td>
+                </tr>`).join('')}</tbody>
+          </table>`
+        : '<div class="vazio">Nenhum procedimento vinculado a este agente.</div>';
+
+      $('modalDetalhes').classList.add('aberto');
+    }
+
+    /* ── Init ── */
+    async function init() {
+      if (getEmailUsuario() === 'desconhecido') {
+        window.location.replace('/login.html');
+        return;
+      }
+      await verificarAcesso();
+      exibirBadgeUsuario();
+      await listar();
+      $('loading').style.display  = 'none';
+      $('conteudo').style.display = 'block';
+    }
+
+    init();
+  </script>
+</body>
+</html>

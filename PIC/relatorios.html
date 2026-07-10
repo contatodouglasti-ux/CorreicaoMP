@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Relatórios — Sistema PIC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="/js/configPIC.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/db-pic.js"></script>
+  <style>
+    :root {
+      --accent: #1C799B; --accent-dark: #145f7a;
+      --bg: #f0f4f6; --card: #fff; --text: #263238; --muted: #546E7A;
+      --ok: #2e7d32; --warn: #ef6c00; --info: #1565c0; --danger: #c62828;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: linear-gradient(135deg, var(--accent), #2a9bc4);
+      color: #fff; padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .topbar .brand { font-size: 17px; font-weight: 700; }
+    .topbar .brand small { display: block; font-size: 11px; font-weight: 400; opacity: 0.85; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a {
+      color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+      padding: 8px 14px; border-radius: 8px; background: rgba(255,255,255,0.12);
+    }
+    nav a:hover, nav a.ativo { background: rgba(255,255,255,0.28); }
+    .user-area { display: flex; align-items: center; gap: 10px; }
+    #userBadge { display: none; align-items: center; gap: 8px; font-size: 13px; }
+    #userAvatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .btn-sair {
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      font-size: 12px; font-weight: 600; padding: 7px 12px;
+      border-radius: 8px; cursor: pointer;
+    }
+
+    .container { max-width: 1250px; margin: 0 auto; padding: 26px 20px 60px; }
+    h2 { font-size: 20px; margin-bottom: 18px; }
+    h3 { font-size: 15px; margin-bottom: 12px; }
+
+    .painel {
+      background: var(--card); border-radius: 14px; padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+    }
+
+    .grid-form {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+    input, select {
+      width: 100%; padding: 9px 11px; border-radius: 8px;
+      border: 1.5px solid #d7e3eb; font-size: 13px; color: var(--text);
+      background: #f8fbfc; outline: none; font-family: inherit;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent); background: #fff;
+      box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
+    }
+
+    .btn {
+      padding: 9px 16px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn-primario { background: var(--accent); color: #fff; }
+    .btn-neutro   { background: #eceff1; color: var(--text); }
+    .btn-exportar { background: #e8f5e9; color: var(--ok); }
+    .barra-acoes { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+    /* Cards resumo */
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .card {
+      background: var(--card); border-radius: 12px; padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--accent);
+    }
+    .card .valor { font-size: 26px; font-weight: 800; }
+    .card .rotulo { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .card.andamento  { border-left-color: var(--info); }
+    .card.arquivado  { border-left-color: var(--muted); }
+    .card.denunciado { border-left-color: var(--warn); }
+
+    /* Gráficos */
+    .grid-graficos {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    @media (max-width: 800px) { .grid-graficos { grid-template-columns: 1fr; } }
+    .grafico-box { position: relative; height: 280px; }
+
+    /* Tabela */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 8px 10px; color: var(--muted);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 2px solid #eef2f4; white-space: nowrap;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid #eef2f4; }
+    tr:hover td { background: #f6fafc; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge.em_andamento { background: #e3f2fd; color: var(--info); }
+    .badge.arquivado    { background: #eceff1; color: var(--muted); }
+    .badge.denunciado   { background: #fff3e0; color: var(--warn); }
+
+    .vazio { padding: 14px; font-size: 13px; color: var(--muted); }
+
+    .loading { text-align: center; padding: 60px 0; color: var(--muted); }
+    .ring {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 4px solid #d0e8f0; border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      Sistema PIC
+      <small>Procedimentos Investigatórios Criminais — Res. CNMP 310/2025</small>
+    </div>
+    <nav>
+      <a href="/PIC/home.html">Dashboard</a>
+      <a href="/PIC/procedimentos.html">Procedimentos</a>
+      <a href="/PIC/agentes.html">Agentes</a>
+      <a href="/PIC/relatorios.html" class="ativo">Relatórios</a>
+    </nav>
+    <div class="user-area">
+      <div id="userBadge"><div id="userAvatar"></div><span id="userName"></span></div>
+      <button class="btn-sair" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="loading" id="loading"><div class="ring"></div>Carregando…</div>
+
+    <div id="conteudo" style="display:none">
+      <h2>Relatórios</h2>
+
+      <!-- ── Filtros ── -->
+      <div class="painel">
+        <h3>Parâmetros do relatório</h3>
+        <div class="grid-form">
+          <div><label>Comarca</label><input id="fComarca"></div>
+          <div>
+            <label>Situação</label>
+            <select id="fSituacao">
+              <option value="">Todas</option>
+              <option value="em_andamento">Em andamento</option>
+              <option value="arquivado">Arquivado</option>
+              <option value="denunciado">Denunciado</option>
+            </select>
+          </div>
+          <div><label>Capitulação legal</label><input id="fCapitulacao"></div>
+          <div><label>Agente envolvido</label><select id="fAgente"><option value="">Todos</option></select></div>
+          <div><label>Período — de</label><input id="fDataInicio" type="date"></div>
+          <div><label>Período — até</label><input id="fDataFim" type="date"></div>
+        </div>
+        <div class="barra-acoes">
+          <button class="btn btn-primario" onclick="gerar()">Gerar relatório</button>
+          <button class="btn btn-neutro" onclick="limpar()">Limpar</button>
+          <button class="btn btn-exportar" id="btnCSV" onclick="exportar()" disabled>⬇ Exportar CSV</button>
+        </div>
+      </div>
+
+      <!-- ── Resultado ── -->
+      <div id="resultado" style="display:none">
+        <div class="cards" id="cardsResumo"></div>
+
+        <div class="grid-graficos">
+          <div class="painel">
+            <h3>Procedimentos por situação</h3>
+            <div class="grafico-box"><canvas id="graficoSituacao"></canvas></div>
+          </div>
+          <div class="painel">
+            <h3>Procedimentos por comarca</h3>
+            <div class="grafico-box"><canvas id="graficoComarca"></canvas></div>
+          </div>
+        </div>
+
+        <div class="painel">
+          <h3>Registros (<span id="qtdRegistros">0</span>)</h3>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Número</th><th>Comarca</th><th>Instauração</th>
+                  <th>Situação</th><th>Capitulação</th><th>Vítimas</th><th>Agentes</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaRelatorio"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ROTULO_SITUACAO = {
+      em_andamento: 'Em andamento',
+      arquivado: 'Arquivado',
+      denunciado: 'Denunciado',
+    };
+
+    let registrosAtuais = [];
+    let graficoSituacao = null;
+    let graficoComarca = null;
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    function fmtData(d) {
+      if (!d) return '—';
+      const [ano, mes, dia] = String(d).slice(0, 10).split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function lerFiltros() {
+      return {
+        comarca:     $('fComarca').value,
+        situacao:    $('fSituacao').value,
+        capitulacao: $('fCapitulacao').value,
+        agenteId:    $('fAgente').value || undefined,
+        dataInicio:  $('fDataInicio').value || undefined,
+        dataFim:     $('fDataFim').value || undefined,
+      };
+    }
+
+    function limpar() {
+      ['fComarca','fSituacao','fCapitulacao','fAgente','fDataInicio','fDataFim']
+        .forEach(id => $(id).value = '');
+      $('resultado').style.display = 'none';
+      $('btnCSV').disabled = true;
+      registrosAtuais = [];
+    }
+
+    /* ── Gerar relatório ── */
+    async function gerar() {
+      try {
+        const rel = await gerarRelatorio(lerFiltros());
+        registrosAtuais = rel.registros || [];
+        const est = rel.estatisticas || {};
+
+        // Cards resumo
+        $('cardsResumo').innerHTML = `
+          <div class="card"><div class="valor">${registrosAtuais.length}</div><div class="rotulo">Total no período</div></div>
+          <div class="card andamento"><div class="valor">${est.em_andamento ?? contar('em_andamento')}</div><div class="rotulo">Em andamento</div></div>
+          <div class="card arquivado"><div class="valor">${est.arquivados ?? contar('arquivado')}</div><div class="rotulo">Arquivados</div></div>
+          <div class="card denunciado"><div class="valor">${est.denunciados ?? contar('denunciado')}</div><div class="rotulo">Denunciados</div></div>
+          <div class="card"><div class="valor">${est.total_vitimas ?? somaVitimas()}</div><div class="rotulo">Vítimas</div></div>
+        `;
+
+        desenharGraficos();
+
+        // Tabela
+        $('qtdRegistros').textContent = registrosAtuais.length;
+        $('tabelaRelatorio').innerHTML = registrosAtuais.length
+          ? registrosAtuais.map(p => `
+              <tr>
+                <td><strong>${esc(p.numero)}</strong></td>
+                <td>${esc(p.comarca)}</td>
+                <td>${fmtData(p.data_instauracao)}</td>
+                <td><span class="badge ${p.situacao}">${ROTULO_SITUACAO[p.situacao] || p.situacao}</span></td>
+                <td>${esc(p.capitulacao_legal)}</td>
+                <td>${(p.vitimas || []).length}</td>
+                <td>${(p.procedimento_agentes || []).length}</td>
+              </tr>`).join('')
+          : '<tr><td colspan="7" class="vazio">Nenhum registro para os filtros informados.</td></tr>';
+
+        $('resultado').style.display = 'block';
+        $('btnCSV').disabled = registrosAtuais.length === 0;
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao gerar relatório.');
+      }
+    }
+
+    const contar = s => registrosAtuais.filter(p => p.situacao === s).length;
+    const somaVitimas = () => registrosAtuais.reduce((t, p) => t + (p.vitimas || []).length, 0);
+
+    /* ── Gráficos ── */
+    function desenharGraficos() {
+      // Por situação (doughnut)
+      const dadosSit = ['em_andamento', 'arquivado', 'denunciado'].map(contar);
+      graficoSituacao?.destroy();
+      graficoSituacao = new Chart($('graficoSituacao'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Em andamento', 'Arquivados', 'Denunciados'],
+          datasets: [{
+            data: dadosSit,
+            backgroundColor: ['#1565c0', '#90a4ae', '#ef6c00'],
+            borderWidth: 0,
+          }],
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+        },
+      });
+
+      // Por comarca (barras, top 10)
+      const porComarca = {};
+      registrosAtuais.forEach(p => {
+        porComarca[p.comarca] = (porComarca[p.comarca] || 0) + 1;
+      });
+      const top = Object.entries(porComarca).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+      graficoComarca?.destroy();
+      graficoComarca = new Chart($('graficoComarca'), {
+        type: 'bar',
+        data: {
+          labels: top.map(([c]) => c),
+          datasets: [{
+            data: top.map(([, n]) => n),
+            backgroundColor: '#1C799B',
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          indexAxis: 'y',
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { ticks: { precision: 0 } } },
+        },
+      });
+    }
+
+    /* ── Exportação CSV ── */
+    function exportar() {
+      if (!registrosAtuais.length) return;
+      try {
+        const csv = exportarCSV(registrosAtuais);
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `relatorio_pic_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao exportar CSV.');
+      }
+    }
+
+    /* ── Init ── */
+    async function init() {
+      if (getEmailUsuario() === 'desconhecido') {
+        window.location.replace('/login.html');
+        return;
+      }
+      await verificarAcesso();
+      exibirBadgeUsuario();
+
+      // Popular select de agentes
+      try {
+        const agentes = await buscarAgentes();
+        $('fAgente').innerHTML = '<option value="">Todos</option>' +
+          agentes.map(a => `<option value="${a.id}">${esc(a.nome)}</option>`).join('');
+      } catch (e) { console.error(e); }
+
+      $('loading').style.display  = 'none';
+      $('conteudo').style.display = 'block';
+    }
+
+    init();
+  </script>
+</body>
+</html>

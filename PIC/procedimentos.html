@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Procedimentos — Sistema PIC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/configPIC.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/db-pic.js"></script>
+  <style>
+    :root {
+      --accent: #1C799B; --accent-dark: #145f7a;
+      --bg: #f0f4f6; --card: #fff; --text: #263238; --muted: #546E7A;
+      --ok: #2e7d32; --warn: #ef6c00; --info: #1565c0; --danger: #c62828;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: linear-gradient(135deg, var(--accent), #2a9bc4);
+      color: #fff; padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .topbar .brand { font-size: 17px; font-weight: 700; }
+    .topbar .brand small { display: block; font-size: 11px; font-weight: 400; opacity: 0.85; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a {
+      color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+      padding: 8px 14px; border-radius: 8px; background: rgba(255,255,255,0.12);
+    }
+    nav a:hover, nav a.ativo { background: rgba(255,255,255,0.28); }
+    .user-area { display: flex; align-items: center; gap: 10px; }
+    #userBadge { display: none; align-items: center; gap: 8px; font-size: 13px; }
+    #userAvatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .btn-sair {
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      font-size: 12px; font-weight: 600; padding: 7px 12px;
+      border-radius: 8px; cursor: pointer;
+    }
+
+    .container { max-width: 1250px; margin: 0 auto; padding: 26px 20px 60px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 15px; margin-bottom: 12px; }
+    h4 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 10px; }
+
+    .painel {
+      background: var(--card); border-radius: 14px; padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+    }
+
+    /* ── Formulários ── */
+    .grid-form {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 9px 11px; border-radius: 8px;
+      border: 1.5px solid #d7e3eb; font-size: 13px; color: var(--text);
+      background: #f8fbfc; outline: none; font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent); background: #fff;
+      box-shadow: 0 0 0 3px rgba(28,121,155,0.10);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    /* ── Botões ── */
+    .btn {
+      padding: 9px 16px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn-primario { background: var(--accent); color: #fff; }
+    .btn-neutro   { background: #eceff1; color: var(--text); }
+    .btn-perigo   { background: #fdecea; color: var(--danger); }
+    .btn-mini     { padding: 5px 10px; font-size: 12px; }
+
+    .barra-acoes { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .cabecalho-pagina {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    }
+
+    /* ── Tabela ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 8px 10px; color: var(--muted);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 2px solid #eef2f4; cursor: pointer; user-select: none;
+      white-space: nowrap;
+    }
+    th .seta { font-size: 10px; }
+    td { padding: 9px 10px; border-bottom: 1px solid #eef2f4; }
+    tr:hover td { background: #f6fafc; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge.em_andamento { background: #e3f2fd; color: var(--info); }
+    .badge.arquivado    { background: #eceff1; color: var(--muted); }
+    .badge.denunciado   { background: #fff3e0; color: var(--warn); }
+
+    .acoes-linha { display: flex; gap: 6px; }
+
+    /* Paginação */
+    .paginacao {
+      display: flex; gap: 8px; align-items: center;
+      justify-content: flex-end; margin-top: 14px; font-size: 13px;
+    }
+
+    /* ── Modal ── */
+    .modal-fundo {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,40,50,0.45); z-index: 50;
+      align-items: flex-start; justify-content: center;
+      padding: 30px 16px; overflow-y: auto;
+    }
+    .modal-fundo.aberto { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; width: 100%;
+      max-width: 860px; padding: 26px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.25);
+    }
+    .modal-cabecalho {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px;
+    }
+    .btn-fechar {
+      background: none; border: none; font-size: 22px;
+      color: var(--muted); cursor: pointer; line-height: 1;
+    }
+
+    /* Sub-listas dentro do modal */
+    .sub-lista { border: 1px solid #eef2f4; border-radius: 10px; overflow: hidden; }
+    .sub-lista table { font-size: 12.5px; }
+    .vazio { padding: 12px; font-size: 12.5px; color: var(--muted); }
+
+    .bloco-condicional {
+      border: 1.5px dashed #d7e3eb; border-radius: 10px;
+      padding: 14px; margin-top: 8px;
+    }
+
+    .loading { text-align: center; padding: 60px 0; color: var(--muted); }
+    .ring {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 4px solid #d0e8f0; border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hist-item {
+      font-size: 12px; padding: 7px 0; border-bottom: 1px solid #eef2f4;
+      color: var(--muted);
+    }
+    .hist-item strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      Sistema PIC
+      <small>Procedimentos Investigatórios Criminais — Res. CNMP 310/2025</small>
+    </div>
+    <nav>
+      <a href="/PIC/home.html">Dashboard</a>
+      <a href="/PIC/procedimentos.html" class="ativo">Procedimentos</a>
+      <a href="/PIC/agentes.html">Agentes</a>
+      <a href="/PIC/relatorios.html">Relatórios</a>
+    </nav>
+    <div class="user-area">
+      <div id="userBadge"><div id="userAvatar"></div><span id="userName"></span></div>
+      <button class="btn-sair" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="loading" id="loading"><div class="ring"></div>Carregando…</div>
+
+    <div id="conteudo" style="display:none">
+      <div class="cabecalho-pagina">
+        <h2>Procedimentos</h2>
+        <button class="btn btn-primario" onclick="abrirNovo()">+ Novo Procedimento</button>
+      </div>
+
+      <!-- ── Filtros ── -->
+      <div class="painel">
+        <h3>Filtros de pesquisa</h3>
+        <div class="grid-form">
+          <div><label>Número</label><input id="fNumero"></div>
+          <div><label>Comarca</label><input id="fComarca"></div>
+          <div>
+            <label>Situação</label>
+            <select id="fSituacao">
+              <option value="">Todas</option>
+              <option value="em_andamento">Em andamento</option>
+              <option value="arquivado">Arquivado</option>
+              <option value="denunciado">Denunciado</option>
+            </select>
+          </div>
+          <div><label>Capitulação legal</label><input id="fCapitulacao"></div>
+          <div><label>Agente envolvido</label><select id="fAgente"><option value="">Todos</option></select></div>
+          <div><label>Ano</label><input id="fAno" type="number" min="1990" max="2100" placeholder="Ex.: 2026"></div>
+          <div><label>Período — de</label><input id="fDataInicio" type="date"></div>
+          <div><label>Período — até</label><input id="fDataFim" type="date"></div>
+          <div><label>Nº de vítimas</label><input id="fNumVitimas" type="number" min="0"></div>
+        </div>
+        <div class="barra-acoes">
+          <button class="btn btn-primario" onclick="pesquisar(1)">Pesquisar</button>
+          <button class="btn btn-neutro" onclick="limparFiltros()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- ── Listagem ── -->
+      <div class="painel">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="ordenar('numero')">Número <span class="seta" id="s-numero"></span></th>
+              <th onclick="ordenar('comarca')">Comarca <span class="seta" id="s-comarca"></span></th>
+              <th onclick="ordenar('data_instauracao')">Instauração <span class="seta" id="s-data_instauracao"></span></th>
+              <th onclick="ordenar('situacao')">Situação <span class="seta" id="s-situacao"></span></th>
+              <th>Vítimas</th>
+              <th>Agentes</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaProcs"></tbody>
+        </table>
+        <div class="paginacao">
+          <span id="infoPag"></span>
+          <button class="btn btn-neutro btn-mini" id="btnAnt" onclick="pesquisar(paginaAtual - 1)">‹ Anterior</button>
+          <button class="btn btn-neutro btn-mini" id="btnProx" onclick="pesquisar(paginaAtual + 1)">Próxima ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL: Cadastro / Edição / Detalhes ════ -->
+  <div class="modal-fundo" id="modalFundo">
+    <div class="modal">
+      <div class="modal-cabecalho">
+        <h3 id="modalTitulo">Novo Procedimento</h3>
+        <button class="btn-fechar" onclick="fecharModal()">×</button>
+      </div>
+
+      <!-- Dados principais -->
+      <div class="grid-form">
+        <div><label>Número *</label><input id="pNumero"></div>
+        <div><label>Comarca *</label><input id="pComarca"></div>
+        <div><label>Data de instauração *</label><input id="pData" type="date"></div>
+        <div>
+          <label>Situação *</label>
+          <select id="pSituacao" onchange="atualizarBlocosCondicionais()">
+            <option value="em_andamento">Em andamento</option>
+            <option value="arquivado">Arquivado</option>
+            <option value="denunciado">Denunciado</option>
+          </select>
+        </div>
+        <div style="grid-column: 1 / -1"><label>Capitulação legal do crime *</label><input id="pCapitulacao"></div>
+        <div style="grid-column: 1 / -1"><label>Observações</label><textarea id="pObs"></textarea></div>
+      </div>
+
+      <!-- Arquivamento (condicional) -->
+      <div class="bloco-condicional" id="blocoArquivamento" style="display:none">
+        <h4 style="margin-top:0">Informações de arquivamento</h4>
+        <div class="grid-form">
+          <div><label>Data do arquivamento *</label><input id="aData" type="date"></div>
+          <div style="grid-column: span 2"><label>Motivo do arquivamento *</label><input id="aMotivo"></div>
+        </div>
+      </div>
+
+      <!-- Denúncia (condicional) -->
+      <div class="bloco-condicional" id="blocoDenuncia" style="display:none">
+        <h4 style="margin-top:0">Informações da denúncia</h4>
+        <div class="grid-form">
+          <div><label>Número da denúncia *</label><input id="dNumero"></div>
+          <div><label>Data da denúncia *</label><input id="dData" type="date"></div>
+          <div style="grid-column: 1 / -1"><label>Crimes imputados *</label><textarea id="dCrimes"></textarea></div>
+        </div>
+      </div>
+
+      <div class="barra-acoes">
+        <button class="btn btn-primario" onclick="salvarProcedimento()">Salvar</button>
+        <button class="btn btn-neutro" onclick="fecharModal()">Cancelar</button>
+      </div>
+
+      <!-- ── Seções extras: só após salvar ── -->
+      <div id="secoesExtras" style="display:none">
+
+        <h4>Vítimas</h4>
+        <div class="grid-form" style="margin-bottom:10px">
+          <div><label>Idade</label><input id="vIdade" type="number" min="0" max="130"></div>
+          <div>
+            <label>Gênero</label>
+            <select id="vGenero">
+              <option value="">Selecione</option>
+              <option>Masculino</option>
+              <option>Feminino</option>
+              <option>Outro</option>
+              <option>Não informado</option>
+            </select>
+          </div>
+          <div>
+            <label>Raça/Cor</label>
+            <select id="vRaca">
+              <option value="">Selecione</option>
+              <option>Branca</option>
+              <option>Preta</option>
+              <option>Parda</option>
+              <option>Amarela</option>
+              <option>Indígena</option>
+              <option>Não informada</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:flex-end">
+            <button class="btn btn-primario btn-mini" onclick="addVitima()">Adicionar vítima</button>
+          </div>
+        </div>
+        <div class="sub-lista" id="listaVitimas"></div>
+
+        <h4>Agentes do Estado vinculados</h4>
+        <div class="grid-form" style="margin-bottom:10px">
+          <div style="grid-column: span 2">
+            <label>Selecionar agente cadastrado</label>
+            <select id="selAgente"></select>
+          </div>
+          <div style="display:flex; align-items:flex-end; gap:8px">
+            <button class="btn btn-primario btn-mini" onclick="addAgente()">Vincular</button>
+            <a class="btn btn-neutro btn-mini" href="/PIC/agentes.html" style="text-decoration:none">Cadastrar novo</a>
+          </div>
+        </div>
+        <div class="sub-lista" id="listaAgentes"></div>
+
+        <h4>Histórico de alterações</h4>
+        <div id="listaHistorico"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ROTULO_SITUACAO = {
+      em_andamento: 'Em andamento',
+      arquivado: 'Arquivado',
+      denunciado: 'Denunciado',
+    };
+
+    let paginaAtual = 1;
+    let totalPaginas = 1;
+    let ordenarPor = 'criado_em';
+    let ordemAsc = false;
+    let procAtual = null;   // procedimento aberto no modal
+    let agentesCache = [];
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    function fmtData(d) {
+      if (!d) return '—';
+      const [ano, mes, dia] = String(d).slice(0, 10).split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    /* ── Filtros ── */
+    function lerFiltros() {
+      return {
+        numero:      $('fNumero').value,
+        comarca:     $('fComarca').value,
+        situacao:    $('fSituacao').value,
+        capitulacao: $('fCapitulacao').value,
+        agenteId:    $('fAgente').value || undefined,
+        ano:         $('fAno').value || undefined,
+        dataInicio:  $('fDataInicio').value || undefined,
+        dataFim:     $('fDataFim').value || undefined,
+        numVitimas:  $('fNumVitimas').value,
+      };
+    }
+
+    function limparFiltros() {
+      ['fNumero','fComarca','fSituacao','fCapitulacao','fAgente','fAno','fDataInicio','fDataFim','fNumVitimas']
+        .forEach(id => $(id).value = '');
+      pesquisar(1);
+    }
+
+    function ordenar(coluna) {
+      if (ordenarPor === coluna) ordemAsc = !ordemAsc;
+      else { ordenarPor = coluna; ordemAsc = true; }
+      document.querySelectorAll('.seta').forEach(s => s.textContent = '');
+      $('s-' + coluna).textContent = ordemAsc ? '▲' : '▼';
+      pesquisar(1);
+    }
+
+    /* ── Listagem ── */
+    async function pesquisar(pagina = 1) {
+      if (pagina < 1 || (totalPaginas && pagina > totalPaginas && pagina !== 1)) return;
+      paginaAtual = pagina;
+
+      try {
+        const { registros, total, porPagina } = await consultarProcedimentos(
+          lerFiltros(),
+          { pagina, porPagina: 20, ordenarPor, asc: ordemAsc }
+        );
+
+        totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+
+        $('tabelaProcs').innerHTML = registros.length
+          ? registros.map(p => `
+              <tr>
+                <td><strong>${esc(p.numero)}</strong></td>
+                <td>${esc(p.comarca)}</td>
+                <td>${fmtData(p.data_instauracao)}</td>
+                <td><span class="badge ${p.situacao}">${ROTULO_SITUACAO[p.situacao] || p.situacao}</span></td>
+                <td>${(p.vitimas || []).length}</td>
+                <td>${(p.procedimento_agentes || []).length}</td>
+                <td class="acoes-linha">
+                  <button class="btn btn-neutro btn-mini" onclick="abrirDetalhes('${p.id}')">Abrir</button>
+                  <button class="btn btn-perigo btn-mini" onclick="excluir('${p.id}', '${esc(p.numero)}')">Excluir</button>
+                </td>
+              </tr>`).join('')
+          : '<tr><td colspan="7">Nenhum procedimento encontrado.</td></tr>';
+
+        $('infoPag').textContent = `${total} registro(s) — página ${paginaAtual} de ${totalPaginas}`;
+        $('btnAnt').disabled  = paginaAtual <= 1;
+        $('btnProx').disabled = paginaAtual >= totalPaginas;
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao consultar procedimentos.');
+      }
+    }
+
+    async function excluir(id, numero) {
+      if (!confirm(`Excluir o procedimento ${numero}? Esta ação não pode ser desfeita.`)) return;
+      try {
+        await excluirProcedimento(id);
+        pesquisar(paginaAtual);
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao excluir procedimento.');
+      }
+    }
+
+    /* ── Modal ── */
+    function abrirNovo() {
+      procAtual = null;
+      $('modalTitulo').textContent = 'Novo Procedimento';
+      ['pNumero','pComarca','pData','pCapitulacao','pObs','aData','aMotivo','dNumero','dData','dCrimes']
+        .forEach(id => $(id).value = '');
+      $('pSituacao').value = 'em_andamento';
+      atualizarBlocosCondicionais();
+      $('secoesExtras').style.display = 'none';
+      $('modalFundo').classList.add('aberto');
+    }
+
+    async function abrirDetalhes(id) {
+      try {
+        procAtual = await buscarProcedimentoPorId(id);
+      } catch (e) {
+        console.error(e);
+        alert('Erro ao carregar procedimento.');
+        return;
+      }
+
+      $('modalTitulo').textContent = `Procedimento ${procAtual.numero}`;
+      $('pNumero').value      = procAtual.numero;
+      $('pComarca').value     = procAtual.comarca;
+      $('pData').value        = String(procAtual.data_instauracao || '').slice(0, 10);
+      $('pSituacao').value    = procAtual.situacao;
+      $('pCapitulacao').value = procAtual.capitulacao_legal;
+      $('pObs').value         = procAtual.observacoes || '';
+
+      const arq = procAtual.arquivamentos;
+      $('aData').value   = arq ? String(arq.data_arquivamento || '').slice(0, 10) : '';
+      $('aMotivo').value = arq ? (arq.motivo || '') : '';
+
+      const den = procAtual.denuncias;
+      $('dNumero').value = den ? (den.numero_denuncia || '') : '';
+      $('dData').value   = den ? String(den.data_denuncia || '').slice(0, 10) : '';
+      $('dCrimes').value = den ? (den.crimes_imputados || '') : '';
+
+      atualizarBlocosCondicionais();
+      $('secoesExtras').style.display = 'block';
+      renderVitimas();
+      renderAgentesVinculados();
+      renderHistorico();
+      $('modalFundo').classList.add('aberto');
+    }
+
+    function fecharModal() {
+      $('modalFundo').classList.remove('aberto');
+      pesquisar(paginaAtual);
+    }
+
+    function atualizarBlocosCondicionais() {
+      const s = $('pSituacao').value;
+      $('blocoArquivamento').style.display = s === 'arquivado'   ? 'block' : 'none';
+      $('blocoDenuncia').style.display     = s === 'denunciado'  ? 'block' : 'none';
+    }
+
+    /* ── Salvar ── */
+    async function salvarProcedimento() {
+      const dados = {
+        numero:            $('pNumero').value,
+        comarca:           $('pComarca').value,
+        data_instauracao:  $('pData').value,
+        situacao:          $('pSituacao').value,
+        capitulacao_legal: $('pCapitulacao').value,
+        observacoes:       $('pObs').value,
+      };
+
+      try {
+        if (!procAtual) {
+          procAtual = await criarProcedimento(dados);
+          $('modalTitulo').textContent = `Procedimento ${procAtual.numero}`;
+        } else {
+          await atualizarProcedimento(procAtual.id, dados);
+        }
+
+        // Blocos condicionais
+        if (dados.situacao === 'arquivado') {
+          await salvarArquivamento(procAtual.id, $('aData').value, $('aMotivo').value);
+        }
+        if (dados.situacao === 'denunciado') {
+          await salvarDenuncia(procAtual.id, $('dNumero').value, $('dData').value, $('dCrimes').value);
+        }
+
+        procAtual = await buscarProcedimentoPorId(procAtual.id);
+        $('secoesExtras').style.display = 'block';
+        renderVitimas();
+        renderAgentesVinculados();
+        renderHistorico();
+        alert('Procedimento salvo com sucesso.');
+      } catch (e) {
+        console.error(e);
+        alert(e.message || 'Erro ao salvar procedimento.');
+      }
+    }
+
+    /* ── Vítimas ── */
+    function renderVitimas() {
+      const lista = procAtual?.vitimas || [];
+      $('listaVitimas').innerHTML = lista.length
+        ? `<table>
+            <thead><tr><th>Idade</th><th>Gênero</th><th>Raça/Cor</th><th></th></tr></thead>
+            <tbody>${lista.map(v => `
+              <tr>
+                <td>${v.idade ?? '—'}</td>
+                <td>${esc(v.genero) || '—'}</td>
+                <td>${esc(v.raca_cor) || '—'}</td>
+                <td><button class="btn btn-perigo btn-mini" onclick="delVitima('${v.id}')">Remover</button></td>
+              </tr>`).join('')}</tbody>
+          </table>`
+        : '<div class="vazio">Nenhuma vítima cadastrada.</div>';
+    }
+
+    async function addVitima() {
+      if (!procAtual) return alert('Salve o procedimento primeiro.');
+      try {
+        await adicionarVitima(procAtual.id, {
+          idade:    $('vIdade').value ? Number($('vIdade').value) : null,
+          genero:   $('vGenero').value,
+          raca_cor: $('vRaca').value,
+        });
+        $('vIdade').value = ''; $('vGenero').value = ''; $('vRaca').value = '';
+        procAtual = await buscarProcedimentoPorId(procAtual.id);
+        renderVitimas(); renderHistorico();
+      } catch (e) { console.error(e); alert('Erro ao adicionar vítima.'); }
+    }
+
+    async function delVitima(vitimaId) {
+      if (!confirm('Remover esta vítima?')) return;
+      try {
+        await removerVitima(vitimaId, procAtual.id);
+        procAtual = await buscarProcedimentoPorId(procAtual.id);
+        renderVitimas(); renderHistorico();
+      } catch (e) { console.error(e); alert('Erro ao remover vítima.'); }
+    }
+
+    /* ── Agentes ── */
+    async function carregarAgentesSelects() {
+      agentesCache = await buscarAgentes();
+      const opts = agentesCache.map(a =>
+        `<option value="${a.id}">${esc(a.nome)}${a.matricula ? ' — ' + esc(a.matricula) : ''}</option>`).join('');
+      $('selAgente').innerHTML = '<option value="">Selecione</option>' + opts;
+      $('fAgente').innerHTML   = '<option value="">Todos</option>' + opts;
+    }
+
+    function renderAgentesVinculados() {
+      const vinculos = procAtual?.procedimento_agentes || [];
+      $('listaAgentes').innerHTML = vinculos.length
+        ? `<table>
+            <thead><tr><th>Nome</th><th>Matrícula</th><th>Órgão</th><th>Cargo</th><th></th></tr></thead>
+            <tbody>${vinculos.map(v => {
+              const a = v.agentes || {};
+              return `<tr>
+                <td>${esc(a.nome)}</td>
+                <td>${esc(a.matricula) || '—'}</td>
+                <td>${esc(a.orgao) || '—'}</td>
+                <td>${esc(a.cargo) || '—'}</td>
+                <td><button class="btn btn-perigo btn-mini" onclick="delAgente('${a.id}')">Desvincular</button></td>
+              </tr>`;
+            }).join('')}</tbody>
+          </table>`
+        : '<div class="vazio">Nenhum agente vinculado.</div>';
+    }
+
+    async function addAgente() {
+      if (!procAtual) return alert('Salve o procedimento primeiro.');
+      const agenteId = $('selAgente').value;
+      if (!agenteId) return alert('Selecione um agente.');
+      try {
+        await vincularAgente(procAtual.id, agenteId);
+        procAtual = await buscarProcedimentoPorId(procAtual.id);
+        renderAgentesVinculados(); renderHistorico();
+      } catch (e) { console.error(e); alert('Erro ao vincular agente.'); }
+    }
+
+    async function delAgente(agenteId) {
+      if (!confirm('Desvincular este agente do procedimento?')) return;
+      try {
+        await desvincularAgente(procAtual.id, agenteId);
+        procAtual = await buscarProcedimentoPorId(procAtual.id);
+        renderAgentesVinculados(); renderHistorico();
+      } catch (e) { console.error(e); alert('Erro ao desvincular agente.'); }
+    }
+
+    /* ── Histórico ── */
+    async function renderHistorico() {
+      try {
+        const hist = await buscarHistorico(procAtual.id);
+        $('listaHistorico').innerHTML = hist.length
+          ? hist.map(h => `
+              <div class="hist-item">
+                <strong>${esc(h.acao)}</strong> por ${esc(h.usuario)} em
+                ${new Date(h.criado_em).toLocaleString('pt-BR')}
+              </div>`).join('')
+          : '<div class="vazio">Sem registros de histórico.</div>';
+      } catch (e) { console.error(e); }
+    }
+
+    /* ── Init ── */
+    async function init() {
+      if (getEmailUsuario() === 'desconhecido') {
+        window.location.replace('/login.html');
+        return;
+      }
+      await verificarAcesso();
+      exibirBadgeUsuario();
+      await carregarAgentesSelects();
+      await pesquisar(1);
+
+      $('loading').style.display  = 'none';
+      $('conteudo').style.display = 'block';
+
+      // Abre direto um procedimento se veio ?id= na URL (link do dashboard)
+      const id = new URLSearchParams(location.search).get('id');
+      if (id) abrirDetalhes(id);
+    }
+
+    init();
+  </script>
+</body>
+</html>
