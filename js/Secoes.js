@@ -68,8 +68,6 @@ const form = {
 
         {"id": "19", "pergunta": "Quantidade de servidores lotados no órgão correicionado.", "tipo": "number"},
         {"id": "20", "pergunta": "Especifique a quantidade acima relatada (dos servidores acima quantos são estagiários, cedidos, concursados, etc)", "tipo": "textarea"},
-        {"id": "21", "pergunta": "Quantidade de terceirizados lotados no órgão correicionado.", "tipo": "number"},
-        {"id": "22", "pergunta": "Quantidade de estagiários lotados no órgão correicionado.", "tipo": "number"},
         {"id": "23", "pergunta": "Os recursos humanos são adequados (quantidade), de acordo com o padrão de força de trabalho disponibilizada pelo Ministério Público local para órgãos semelhantes?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
         {"id": "23.a", "pergunta": "Em caso negativo, especificar.", "tipo": "textarea", dependeDe: { id: "23", valor: "Não" }},
         {"id": "24", "pergunta": "As instalações físicas são adequadas?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
@@ -611,10 +609,10 @@ const form = {
       {"id": "133.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "133", valor: "Sim" }},
       {"id": "134", "pergunta": "O(a) membro(a) adota medidas preventivas e articuladas para o combate às queimadas e desmatamento?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "134.a", "pergunta": "Em caso positivo, informar o número do processo para exemplificar a atuação.", "tipo": "textarea", dependeDe: { id: "134", valor: "Sim" }},
-      {"id": "135", "pergunta": "O(a) membro(a) correicionado(a) fiscaliza a política de descarte de resíduos sólidos e de lixo hospitalar?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
+      {"id": "135", "pergunta": "O(a) membro(a) fiscaliza a política de descarte de resíduos sólidos e de lixo hospitalar?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "135.a", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "135", valor: "Sim" }},
       {"id": "136", "pergunta": "O Município possui Plano Diretor?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
-      {"id": "136.a", "pergunta": "O(a) membro(a) correicionado(a) fiscaliza a ocupação do solo e o parcelamento urbano para evitar o crescimento desordenado que degrada o ecossistema local?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "136", valor: "Sim" }},
+      {"id": "136.a", "pergunta": "O(a) membro(a) fiscaliza a ocupação do solo e o parcelamento urbano para evitar o crescimento desordenado que degrada o ecossistema local?", "tipo": "radio", "opcoes": ["Sim", "Não"], dependeDe: { id: "136", valor: "Sim" }},
       {"id": "136.b", "pergunta": "Em caso positivo, informar o número do procedimento.", "tipo": "textarea", dependeDe: { id: "136.a", valor: "Sim" }}
     ]
   },
