@@ -20,7 +20,14 @@
             button,
             .btn,
             .actions,
-            .actions-row {
+            .actions-row,
+            .secao-salvar-row,
+            .nao-aplica-row {
+                display: none !important;
+            }
+
+            /* Seções/proposições marcadas como "Não se aplica" não aparecem no impresso */
+            .na-oculta {
                 display: none !important;
             }
 
@@ -347,6 +354,7 @@
     <div class="page">
         <div class="paper">
             <h1>RELATÓRIO DE CORREIÇÃO ORDINÁRIA</h1>
+            <h2></h2>
             <!-- ==== PROMOTORIA DE JUSTIÇA ==== -->
             
 
@@ -418,19 +426,19 @@
   <div class="datas-row">
     <div class="campo">
       <label>INICIO</label>
-      <input class="manual-input" type="date" id="data_realizacao">
+      <input class="manual-input" type="date" id="periodo_avaliado_inicio">
     </div>
 
     <div class="campo">
       <label>FIM</label>
-      <input class="manual-input" type="date" id="data_final">
+      <input class="manual-input" type="date" id="periodo_avaliado_fim">
     </div>
   </div>
 </div>
 </div>
 
 <h1>PROMOTORIA DE JUSTIÇA</h1>
- <h2>1. DADOS GERAIS</h3>
+ <h2>1. DADOS GERAIS</h2>
             <div class="meta-grid">
               
                
@@ -1634,7 +1642,7 @@
             <!-- ==== 7. FAMÍLIA ==== -->
             <h2>7. PROPOSIÇÕES ESPECÍFICAS — FAMÍLIA</h2>
             <div class="nao-aplica-row">
-                <label class="check"><input type="checkbox" id="na_7" /> Não se aplica</label>
+                <label class="check"><input type="checkbox" id="na_7f" /> Não se aplica</label>
             </div>
 
             <!-- 7.1 -->
@@ -2317,7 +2325,7 @@
             <!-- ===== MEIO AMBIENTE ===== -->
             <h2>14. PROPOSIÇÕES ESPECÍFICAS MEIO AMBIENTE </h2>
             <div class="nao-aplica-row">
-                <label class="check"><input type="checkbox" id="na_ma" /> Não se aplica</label>
+                <label class="check"><input type="checkbox" id="na_ma2" /> Não se aplica</label>
             </div>
 
             <div class="proposal">

@@ -80,6 +80,64 @@ async function reabrirRegistroAdmin(id) {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Respostas do relatório (relatorio.html)
+   Salva o estado completo dos campos preenchidos manualmente no
+   relatório (observações, proposições, "não se aplica", tabelas
+   dinâmicas etc.) na própria linha de "correicoes", vinculado
+   pelo id do relatório.
+
+   Requer as colunas em "correicoes":
+     - respostas                jsonb
+     - salvo_por                text
+     - respostas_atualizado_em  timestamptz
+───────────────────────────────────────────────────────────── */
+
+async function salvarRespostasRegistro(id, respostas) {
+  if (!id) throw new Error('ID do relatório não informado.');
+
+  // Usa RPC (security definer) para contornar a RLS de "correicoes",
+  // no mesmo padrão de reabrir_registro / buscar_registro_por_id.
+  // Requer a função SQL "salvar_respostas_registro" (ver instruções).
+  const { data, error } = await sbAdmin.rpc('salvar_respostas_registro', {
+    registro_id: id,
+    respostas_json: respostas,
+    usuario_email: getEmailUsuario(),
+  });
+
+  console.log('[admin] salvar respostas:', { id, data, error });
+
+  if (error) throw error;
+}
+
+/**
+ * Alternativa sem RPC, para diagnóstico: tenta update direto e avisa
+ * explicitamente se a RLS bloqueou a escrita (0 linhas afetadas).
+ * Não é usada por padrão — mantida aqui apenas como referência/debug.
+ */
+async function salvarRespostasRegistroDireto(id, respostas) {
+  if (!id) throw new Error('ID do relatório não informado.');
+
+  const { data, error } = await sbAdmin
+    .from('correicoes')
+    .update({
+      respostas,
+      salvo_por: getEmailUsuario(),
+      respostas_atualizado_em: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select('id');
+
+  if (error) throw error;
+
+  if (!data || data.length === 0) {
+    throw new Error(
+      'Nenhuma linha foi atualizada. Provável bloqueio de RLS na tabela "correicoes" ' +
+      '(ou colunas "respostas"/"salvo_por"/"respostas_atualizado_em" inexistentes).'
+    );
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
    Pendências de usuários
    Campos esperados na tabela pendencias:
    - user_id

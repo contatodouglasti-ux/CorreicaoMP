@@ -2110,6 +2110,14 @@ async function init() {
         preencherRelatorio(registro);
         // assegura ids únicos e nomes de radio para todos os campos de Proposição
         if (typeof ensureProposalIds === 'function') ensureProposalIds();
+
+        // ─ Respostas manuais do relatório (observações, proposições, tabelas, "não se aplica") ─
+        __idRelatorioAtual = id;
+        prepararIndicesProposal();
+        configurarNaoAplica();
+        criarBotoesSalvarPorSecao();
+        carregarRespostasSalvas(registro);
+        bindAutoExpand();
     } catch (err) {
         console.error(err);
         showError(err?.message || 'Erro ao carregar o relatório.');
@@ -2471,4 +2479,352 @@ function aplicarModelo166(sel) {
     ta.value = MODELOS_161[sel.value];
    if (typeof autoExpand === 'function') autoExpand(ta);
 }
+/* ════════════════════════════════════════════════════════════════
+   RESPOSTAS DO RELATÓRIO
+   Salva e recarrega, na tabela "correicoes" (campo "respostas"),
+   tudo o que a equipe correicional preenche manualmente neste
+   relatório: observações, proposições, campos livres, tabelas
+   dinâmicas (3.2.1 e 3.2.2) e os checkboxes "Não se aplica".
+
+   Não usa localStorage — tudo é persistido apenas no banco.
+   ════════════════════════════════════════════════════════════════ */
+
+let __idRelatorioAtual = null;
+
+function obterIdRelatorioDaURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+}
+
+/* ── Índices estáveis por proposta (para gerar chaves determinísticas) ── */
+function prepararIndicesProposal() {
+    document.querySelectorAll('.proposal').forEach((proposal, idx) => {
+        proposal.dataset.respIndex = String(idx);
+    });
+}
+
+function ehCampoDeTabelaDinamica(el) {
+    return !!el.closest('#tabela-processos') || !!el.closest('#tabela-procedimentos-extra');
+}
+
+/* Calcula uma chave estável para um campo:
+   - usa o id, se existir
+   - senão, se estiver dentro de uma .proposal, usa índice da proposta + tag + ordem
+   - senão (campo avulso sem id), usa uma posição sequencial
+   A MESMA lógica é usada para coletar e para reaplicar, garantindo consistência. */
+function calcularChaveCampoResposta(el, contadores) {
+    if (el.id) return `id:${el.id}`;
+
+    const proposal = el.closest('.proposal');
+    if (proposal) {
+        const idx = proposal.dataset.respIndex ?? 'x';
+        const tag = el.tagName.toLowerCase();
+        const mapaKey = `prop:${idx}`;
+        if (!contadores.proposal[mapaKey]) contadores.proposal[mapaKey] = {};
+        const n = contadores.proposal[mapaKey][tag] || 0;
+        contadores.proposal[mapaKey][tag] = n + 1;
+        return `prop:${idx}:${tag}:${n}`;
+    }
+
+    const n = contadores.pos || 0;
+    contadores.pos = n + 1;
+    return `pos:${n}`;
+}
+
+/* ── Coleta o estado atual de todo o formulário do relatório ── */
+function coletarEstadoFormulario() {
+    const paper = document.querySelector('.paper');
+    const estado = { campos: {}, radios: {}, naoAplica: {}, tabelas: {} };
+    if (!paper) return estado;
+
+    const contadores = { proposal: {}, pos: 0 };
+    const radiosProcessados = new Set();
+
+    paper.querySelectorAll('input, textarea, select').forEach((el) => {
+        if (ehCampoDeTabelaDinamica(el)) return;
+        if (el.tagName === 'BUTTON' || el.type === 'button' || el.type === 'submit') return;
+
+        if (el.type === 'radio') {
+            const nome = el.name;
+            if (!nome || radiosProcessados.has(nome)) return;
+            radiosProcessados.add(nome);
+            const marcado = paper.querySelector(`input[type="radio"][name="${CSS.escape(nome)}"]:checked`);
+            estado.radios[nome] = marcado ? marcado.value : null;
+            return;
+        }
+
+        if (el.closest('.nao-aplica-row')) {
+            if (el.id) estado.naoAplica[el.id] = !!el.checked;
+            return;
+        }
+
+        const chave = calcularChaveCampoResposta(el, contadores);
+        estado.campos[chave] = (el.type === 'checkbox') ? !!el.checked : el.value;
+    });
+
+    estado.tabelas.processos = coletarTabelaProcessos();
+    estado.tabelas.procedimentosExtra = coletarBlocosTabelaExtra();
+
+    return estado;
+}
+
+/* ── Reaplica um estado salvo aos campos do formulário ── */
+function aplicarEstadoFormulario(estado) {
+    if (!estado || typeof estado !== 'object') return;
+    const paper = document.querySelector('.paper');
+    if (!paper) return;
+
+    // garante que as tabelas dinâmicas tenham linhas suficientes ANTES de
+    // percorrer os campos, para não perder a numeração dos demais campos
+    aplicarTabelaProcessos(estado.tabelas?.processos);
+    aplicarBlocosTabelaExtra(estado.tabelas?.procedimentosExtra);
+
+    const contadores = { proposal: {}, pos: 0 };
+    const radiosAplicados = new Set();
+
+    paper.querySelectorAll('input, textarea, select').forEach((el) => {
+        if (ehCampoDeTabelaDinamica(el)) return;
+        if (el.tagName === 'BUTTON' || el.type === 'button' || el.type === 'submit') return;
+
+        if (el.type === 'radio') {
+            const nome = el.name;
+            if (!nome || radiosAplicados.has(nome)) return;
+            radiosAplicados.add(nome);
+            const valor = estado.radios ? estado.radios[nome] : undefined;
+            if (valor) {
+                const radio = paper.querySelector(`input[type="radio"][name="${CSS.escape(nome)}"][value="${CSS.escape(valor)}"]`);
+                if (radio) radio.checked = true;
+            }
+            return;
+        }
+
+        if (el.closest('.nao-aplica-row')) {
+            if (el.id && estado.naoAplica && Object.prototype.hasOwnProperty.call(estado.naoAplica, el.id)) {
+                el.checked = !!estado.naoAplica[el.id];
+                if (typeof el.__aplicarNaoAplica === 'function') el.__aplicarNaoAplica();
+            }
+            return;
+        }
+
+        const chave = calcularChaveCampoResposta(el, contadores);
+        if (!estado.campos || !Object.prototype.hasOwnProperty.call(estado.campos, chave)) return;
+        const valor = estado.campos[chave];
+        if (el.type === 'checkbox') el.checked = !!valor;
+        else el.value = valor ?? '';
+    });
+
+    bindAutoExpand();
+}
+
+/* ── Tabela 3.2.1 — Processos judiciais (pares linha-dados / linha-conclusao) ── */
+function coletarTabelaProcessos() {
+    const tbody = document.querySelector('#tabela-processos tbody');
+    if (!tbody) return [];
+    const linhasDados = Array.from(tbody.querySelectorAll('tr.linha-dados'));
+    return linhasDados.map((trDados) => {
+        const valores = Array.from(trDados.querySelectorAll('input')).map(i => i.value);
+        const trConclusao = trDados.nextElementSibling?.classList.contains('linha-conclusao')
+            ? trDados.nextElementSibling : null;
+        const conclusao = trConclusao ? (trConclusao.querySelector('textarea')?.value || '') : '';
+        return { valores, conclusao };
+    });
+}
+
+function aplicarTabelaProcessos(linhasSalvas) {
+    if (!Array.isArray(linhasSalvas) || linhasSalvas.length === 0) return;
+    const tbody = document.querySelector('#tabela-processos tbody');
+    if (!tbody || typeof adicionarLinha !== 'function') return;
+
+    let atuais = tbody.querySelectorAll('tr.linha-dados').length;
+    while (atuais < linhasSalvas.length) {
+        adicionarLinha();
+        atuais++;
+    }
+
+    const linhasDados = Array.from(tbody.querySelectorAll('tr.linha-dados'));
+    linhasSalvas.forEach((linha, i) => {
+        const trDados = linhasDados[i];
+        if (!trDados) return;
+        const inputs = Array.from(trDados.querySelectorAll('input'));
+        (linha.valores || []).forEach((v, j) => { if (inputs[j]) inputs[j].value = v; });
+        const trConclusao = trDados.nextElementSibling?.classList.contains('linha-conclusao')
+            ? trDados.nextElementSibling : null;
+        if (trConclusao) {
+            const ta = trConclusao.querySelector('textarea');
+            if (ta) ta.value = linha.conclusao || '';
+        }
+    });
+}
+
+/* ── Tabela 3.2.2 — Procedimentos extrajudiciais (blocos de várias linhas) ── */
+function coletarBlocosTabelaExtra() {
+    const tbody = document.querySelector('#tabela-procedimentos-extra tbody');
+    if (!tbody) return [];
+    const inicios = Array.from(tbody.querySelectorAll('tr.bloco-inicio'));
+    return inicios.map((inicio) => {
+        const linhas = [inicio];
+        let prox = inicio.nextElementSibling;
+        while (prox && !prox.classList.contains('bloco-inicio')) {
+            linhas.push(prox);
+            prox = prox.nextElementSibling;
+        }
+        const campos = [];
+        linhas.forEach(tr => tr.querySelectorAll('input, select, textarea').forEach(el => campos.push(el.value)));
+        return campos;
+    });
+}
+
+function aplicarBlocosTabelaExtra(blocosSalvos) {
+    if (!Array.isArray(blocosSalvos) || blocosSalvos.length === 0) return;
+    const tbody = document.querySelector('#tabela-procedimentos-extra tbody');
+    if (!tbody || typeof adicionarLinhaExtra !== 'function') return;
+
+    let atuais = tbody.querySelectorAll('tr.bloco-inicio').length;
+    while (atuais < blocosSalvos.length) {
+        adicionarLinhaExtra();
+        atuais++;
+    }
+
+    const inicios = Array.from(tbody.querySelectorAll('tr.bloco-inicio'));
+    blocosSalvos.forEach((campos, i) => {
+        const inicio = inicios[i];
+        if (!inicio) return;
+        const linhas = [inicio];
+        let prox = inicio.nextElementSibling;
+        while (prox && !prox.classList.contains('bloco-inicio')) {
+            linhas.push(prox);
+            prox = prox.nextElementSibling;
+        }
+        const elementos = [];
+        linhas.forEach(tr => tr.querySelectorAll('input, select, textarea').forEach(el => elementos.push(el)));
+        campos.forEach((v, j) => { if (elementos[j]) elementos[j].value = v; });
+    });
+}
+
+/* ── "Não se aplica": esconde da impressão as proposições relacionadas ── */
+function configurarNaoAplica() {
+    const paper = document.querySelector('.paper');
+    if (!paper) return;
+
+    const checkboxes = paper.querySelectorAll('.nao-aplica-row input[type="checkbox"][id]');
+    checkboxes.forEach((cb) => {
+        const row = cb.closest('.nao-aplica-row');
+        if (!row) return;
+
+        const membros = [];
+        let el = row.nextElementSibling;
+        while (el && el.tagName !== 'H2') {
+            membros.push(el);
+            el = el.nextElementSibling;
+        }
+
+        const aplicar = () => {
+            membros.forEach(m => m.classList.toggle('na-oculta', cb.checked));
+        };
+
+        cb.__aplicarNaoAplica = aplicar;
+        cb.addEventListener('change', aplicar);
+        aplicar();
+    });
+}
+
+/* ── Botão "Salvar resposta" em cada tópico do relatório ── */
+/* Cria um botão "Salvar resposta" (+ status) e o insere na posição indicada.
+   alvo/posicao seguem o padrão de insertAdjacentElement, exceto quando
+   comoFilho=true, caso em que o botão é anexado como último filho de alvo. */
+function inserirBotaoSalvar(alvo, posicao, comoFilho) {
+    const wrap = document.createElement('div');
+    wrap.className = 'secao-salvar-row no-print';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary btn-salvar-secao';
+    btn.textContent = '💾 Salvar resposta';
+
+    const status = document.createElement('span');
+    status.className = 'secao-salvar-status';
+
+    wrap.appendChild(btn);
+    wrap.appendChild(status);
+
+    if (comoFilho) {
+        alvo.appendChild(wrap);
+    } else {
+        alvo.insertAdjacentElement(posicao, wrap);
+    }
+
+    btn.addEventListener('click', () => salvarRespostasNoBanco(btn, status));
+}
+
+/* Retorna o último elemento pertencente à seção do h2 informado,
+   ou seja, o irmão imediatamente anterior ao próximo <h2> (ou o
+   último filho de .paper, se for a última seção). */
+function encontrarFimDaSecao(h2) {
+    let ultimo = h2;
+    let prox = h2.nextElementSibling;
+    while (prox && prox.tagName !== 'H2') {
+        ultimo = prox;
+        prox = prox.nextElementSibling;
+    }
+    return ultimo;
+}
+
+function criarBotoesSalvarPorSecao() {
+    const paper = document.querySelector('.paper');
+    if (!paper) return;
+
+    // Um botão ao final de cada seção (do <h2> até o próximo <h2>)
+    paper.querySelectorAll('h2').forEach((h2) => {
+        const fimDaSecao = encontrarFimDaSecao(h2);
+        inserirBotaoSalvar(fimDaSecao, 'afterend', false);
+    });
+
+    // Um botão ao final de cada subtópico/proposta (blocos .proposal,
+    // identificados pela .proposal-title dentro deles)
+    paper.querySelectorAll('.proposal').forEach((proposal) => {
+        if (!proposal.querySelector('.proposal-title')) return;
+        inserirBotaoSalvar(proposal, null, true);
+    });
+}
+
+/* ── Salva o estado completo do relatório no banco (correicoes.respostas) ── */
+async function salvarRespostasNoBanco(btn, status) {
+    const id = __idRelatorioAtual || obterIdRelatorioDaURL();
+
+    if (!id) {
+        if (status) { status.textContent = 'Erro: ID do relatório não encontrado na URL.'; status.classList.add('erro'); }
+        return;
+    }
+    if (typeof salvarRespostasRegistro !== 'function') {
+        if (status) { status.textContent = 'Erro: função de salvamento indisponível.'; status.classList.add('erro'); }
+        return;
+    }
+
+    const textoOriginal = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+    if (status) { status.textContent = ''; status.classList.remove('erro'); }
+
+    try {
+        const estado = coletarEstadoFormulario();
+        await salvarRespostasRegistro(id, estado);
+        if (status) status.textContent = `✔ Salvo às ${new Date().toLocaleTimeString('pt-BR')}`;
+    } catch (err) {
+        console.error('[respostas] erro ao salvar:', err);
+        if (status) { status.textContent = 'Erro ao salvar. Tente novamente.'; status.classList.add('erro'); }
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+    }
+}
+
+/* ── Carrega as respostas já salvas (se houver) e aplica aos campos ── */
+function carregarRespostasSalvas(registro) {
+    let respostas = registro?.respostas;
+    if (typeof respostas === 'string') {
+        try { respostas = JSON.parse(respostas); } catch (e) { respostas = null; }
+    }
+    if (respostas && typeof respostas === 'object') {
+        aplicarEstadoFormulario(respostas);
+    }
+}
+
 init();
