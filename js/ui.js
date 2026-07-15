@@ -30,14 +30,18 @@ function showToast(msg, tipo) {
 /* ── Sidebar — mobile toggle ──── */
 
 function toggleMenu() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (!sidebar || !overlay) return;
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
 }
 
 /* ── Sidebar — renderização ──── */
 
 function criarMenu() {
   const scroll = document.getElementById('sidebarScroll');
+  if (!scroll) return;
   scroll.innerHTML = '';
 
   // Título da seção de navegação

@@ -2115,7 +2115,6 @@ async function init() {
         __idRelatorioAtual = id;
         prepararIndicesProposal();
         configurarNaoAplica();
-        criarBotoesSalvarPorSecao();
         carregarRespostasSalvas(registro);
         bindAutoExpand();
     } catch (err) {
@@ -2728,91 +2727,52 @@ function configurarNaoAplica() {
     });
 }
 
-/* ── Botão "Salvar resposta" em cada tópico do relatório ── */
-/* Cria um botão "Salvar resposta" (+ status) e o insere na posição indicada.
-   alvo/posicao seguem o padrão de insertAdjacentElement, exceto quando
-   comoFilho=true, caso em que o botão é anexado como último filho de alvo. */
-function inserirBotaoSalvar(alvo, posicao, comoFilho) {
-    const wrap = document.createElement('div');
-    wrap.className = 'secao-salvar-row no-print';
+/* ── Botão "Salvar resposta" ──────────────────────────────────────
+   Não há mais posicionamento automático de botões. Basta colocar,
+   em qualquer lugar do relatorio.html, algo como:
 
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn btn-primary btn-salvar-secao';
-    btn.textContent = '💾 Salvar resposta';
+     <button type="button" class="btn btn-primary no-print"
+             onclick="salvarRespostasNoBanco(this)">
+       💾 Salvar resposta
+     </button>
 
-    const status = document.createElement('span');
-    status.className = 'secao-salvar-status';
-
-    wrap.appendChild(btn);
-    wrap.appendChild(status);
-
-    if (comoFilho) {
-        alvo.appendChild(wrap);
-    } else {
-        alvo.insertAdjacentElement(posicao, wrap);
-    }
-
-    btn.addEventListener('click', () => salvarRespostasNoBanco(btn, status));
-}
-
-/* Retorna o último elemento pertencente à seção do h2 informado,
-   ou seja, o irmão imediatamente anterior ao próximo <h2> (ou o
-   último filho de .paper, se for a última seção). */
-function encontrarFimDaSecao(h2) {
-    let ultimo = h2;
-    let prox = h2.nextElementSibling;
-    while (prox && prox.tagName !== 'H2') {
-        ultimo = prox;
-        prox = prox.nextElementSibling;
-    }
-    return ultimo;
-}
-
-function criarBotoesSalvarPorSecao() {
-    const paper = document.querySelector('.paper');
-    if (!paper) return;
-
-    // Um botão ao final de cada seção (do <h2> até o próximo <h2>)
-    paper.querySelectorAll('h2').forEach((h2) => {
-        const fimDaSecao = encontrarFimDaSecao(h2);
-        inserirBotaoSalvar(fimDaSecao, 'afterend', false);
-    });
-
-    // Um botão ao final de cada subtópico/proposta (blocos .proposal,
-    // identificados pela .proposal-title dentro deles)
-    paper.querySelectorAll('.proposal').forEach((proposal) => {
-        if (!proposal.querySelector('.proposal-title')) return;
-        inserirBotaoSalvar(proposal, null, true);
-    });
-}
-
-/* ── Salva o estado completo do relatório no banco (correicoes.respostas) ── */
-async function salvarRespostasNoBanco(btn, status) {
+   O botão pode ser repetido quantas vezes quiser, em qualquer seção
+   ou tópico — cada clique salva o formulário inteiro (todas as
+   seções, incluindo as tabelas dinâmicas), então não importa onde
+   fisicamente ele esteja no HTML.
+   ─────────────────────────────────────────────────────────────── */
+async function salvarRespostasNoBanco(botao) {
     const id = __idRelatorioAtual || obterIdRelatorioDaURL();
+    const textoOriginal = botao ? botao.textContent : '';
+
+    const mostrarTemporario = (texto) => {
+        if (!botao) return;
+        botao.textContent = texto;
+        setTimeout(() => { botao.textContent = textoOriginal; }, 2500);
+    };
 
     if (!id) {
-        if (status) { status.textContent = 'Erro: ID do relatório não encontrado na URL.'; status.classList.add('erro'); }
+        console.error('[respostas] ID do relatório não encontrado na URL.');
+        mostrarTemporario('Erro: ID não encontrado');
         return;
     }
     if (typeof salvarRespostasRegistro !== 'function') {
-        if (status) { status.textContent = 'Erro: função de salvamento indisponível.'; status.classList.add('erro'); }
+        console.error('[respostas] salvarRespostasRegistro não está definida (verifique db-admin.js).');
+        mostrarTemporario('Erro: função indisponível');
         return;
     }
 
-    const textoOriginal = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
-    if (status) { status.textContent = ''; status.classList.remove('erro'); }
+    if (botao) { botao.disabled = true; botao.textContent = 'Salvando…'; }
 
     try {
         const estado = coletarEstadoFormulario();
         await salvarRespostasRegistro(id, estado);
-        if (status) status.textContent = `✔ Salvo às ${new Date().toLocaleTimeString('pt-BR')}`;
+        mostrarTemporario('✔ Salvo!');
     } catch (err) {
         console.error('[respostas] erro ao salvar:', err);
-        if (status) { status.textContent = 'Erro ao salvar. Tente novamente.'; status.classList.add('erro'); }
+        mostrarTemporario('Erro ao salvar');
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+        if (botao) botao.disabled = false;
     }
 }
 

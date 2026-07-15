@@ -337,6 +337,12 @@
         <div class="actions">
             <button class="btn btn-secondary" type="button" onclick="voltarAoAdmin()">Voltar ao admin</button>
             <button class="btn btn-secondary" type="button" onclick="toggleProposalSidebar()">☰ Textos predefinidos</button>
+            <!--
+                Exemplo de botão "Salvar resposta". Pode ser copiado e colado
+                em qualquer lugar do relatório (dentro de .paper), quantas
+                vezes quiser — cada clique salva o formulário inteiro.
+            -->
+            <button class="btn btn-primary" type="button" onclick="salvarRespostasNoBanco(this)">💾 Salvar resposta</button>
             <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
         </div>
     </header>
@@ -354,7 +360,6 @@
     <div class="page">
         <div class="paper">
             <h1>RELATÓRIO DE CORREIÇÃO ORDINÁRIA</h1>
-            <h2></h2>
             <!-- ==== PROMOTORIA DE JUSTIÇA ==== -->
             
 
@@ -434,11 +439,14 @@
       <input class="manual-input" type="date" id="periodo_avaliado_fim">
     </div>
   </div>
-</div>
+  
 </div>
 
+</div>
+<button class="btn btn-primary" type="button" onclick="salvarRespostasNoBanco(this)">💾 Salvar resposta</button>
+
 <h1>PROMOTORIA DE JUSTIÇA</h1>
- <h2>1. DADOS GERAIS</h2>
+ <h2>1. DADOS GERAIS</h3>
             <div class="meta-grid">
               
                

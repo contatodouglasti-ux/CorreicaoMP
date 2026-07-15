@@ -84,7 +84,7 @@ async function preencherCamposFixos() {
   }
 }
 
-/* ── Auto-save (debounce 1,5s) ──── */
+/* ── Auto-save (somente estado em memória) ──── */
 
 let _autoSalvarTimer = null;
 
@@ -94,9 +94,10 @@ function autoSalvar() {
     if (registroId) {
       const dados = coletar();
       window._dadosCarregados = { ...window._dadosCarregados, ...dados };
-      try {
-        localStorage.setItem('rascunho_' + registroId, JSON.stringify(window._dadosCarregados));
-      } catch (_) {}
+
+      if (typeof atualizarCamposCalculados === 'function') atualizarCamposCalculados();
+      if (typeof avaliarCondicionais === 'function') avaliarCondicionais();
+      if (typeof atualizarEstadoSubtopicos === 'function') atualizarEstadoSubtopicos();
     }
   }, 1500);
 }
@@ -142,16 +143,20 @@ async function salvarSecao(i) {
     const dadosSecao  = coletar(i);
     const dadosAtuais = window._dadosCarregados || {};
     const dadosMerged = Object.assign({}, dadosAtuais, dadosSecao);
-    window._dadosCarregados = dadosMerged;
 
     const secoesOk = await buscarSecoesOk(registroId);
-    secoesOk[i] = 'true';
+    const secoesParaSalvar = Object.assign({}, secoesOk, { [i]: 'true' });
 
-    await salvarSecaoNoBanco(registroId, dadosMerged, secoesOk);
-    try { localStorage.removeItem('rascunho_' + registroId); } catch (_) {}
+    await salvarSecaoNoBanco(registroId, dadosMerged, secoesParaSalvar);
 
+    const secoesConfirmadas = await buscarSecoesOk(registroId);
+    if (!secoesConfirmadas || String(secoesConfirmadas[i]) !== 'true') {
+      throw new Error('Falha ao confirmar o salvamento no banco');
+    }
+
+    window._dadosCarregados = dadosMerged;
     bloquearSecao(i);
-    atualizarMenuBadge(i);
+    atualizarMenuBadge(i, true);
     showToast(`Seção "${form.secoes[i].nome}" salva ✅`, 'ok');
   } catch (err) {
     console.error(err);
@@ -192,6 +197,11 @@ async function enviarTudo() {
 
     // 1. Finaliza no Supabase
     await finalizarRegistro(registroId, dadosCampos);
+
+    const regConfirmado = await carregarRegistroPorId(registroId);
+    if (!regConfirmado || regConfirmado.finalizado !== true) {
+      throw new Error('Falha ao confirmar a finalização no banco');
+    }
 
     // 2. Envia payload reduzido ao Power Automate
     const payload = { registro_id: registroId, email, nome, data_envio: dataEnvio };
@@ -268,8 +278,8 @@ async function novaCorreicao() {
     const aviso = document.querySelector('.modo-leitura-aviso');
     if (aviso) aviso.remove();
 
-    await preencherCamposFixos();   // ← NOVO: repovoa Unidade e Membro bloqueados
-    atualizarCamposCalculados();    // ← NOVO: zera/recalcula bloco 26
+    await preencherCamposFixos();
+    atualizarCamposCalculados();
 
     avaliarCondicionais();
     abrirFormulario();
@@ -288,7 +298,6 @@ async function novaCorreicao() {
 async function init() {
   mostrarLoading('Carregando…');
   try {
-    
     criarMenu();
     criarForm();
 
@@ -298,7 +307,7 @@ async function init() {
     if (!usuarioPodePreencher) {
       // Usuário não pendente: carrega só em modo leitura, sem criar registro
       aplicarModoSomenteLeituraForcado();
-      await preencherCamposFixos();   // ← NOVO
+      await preencherCamposFixos();
       avaliarCondicionais();
       mostrar(0);
       return;
@@ -309,7 +318,7 @@ async function init() {
     // garantirRegistroAberto pode retornar null se não for pendente
     if (!reg) {
       aplicarModoSomenteLeituraForcado();
-      await preencherCamposFixos();   // ← NOVO
+      await preencherCamposFixos();
       avaliarCondicionais();
       mostrar(0);
       return;
@@ -319,17 +328,8 @@ async function init() {
     modoLeitura = reg.finalizado;
     window._dadosCarregados = reg.dados || {};
 
-    // Recupera rascunho local se houver (dados mais recentes que o banco)
-    try {
-      const rascunho = localStorage.getItem('rascunho_' + registroId);
-      if (rascunho) {
-        window._dadosCarregados = { ...window._dadosCarregados, ...JSON.parse(rascunho) };
-        showToast('Rascunho local recuperado 💾', 'ok');
-      }
-    } catch (_) {}
-
     carregar();
-    await preencherCamposFixos();     // ← NOVO: preenche e bloqueia 1.1 e 1.3
+    await preencherCamposFixos();
 
     const secoesOk = reg.secoes_ok || {};
     Object.keys(secoesOk).forEach(i => {
@@ -354,3 +354,5 @@ async function init() {
 }
 
 init();
+
+
