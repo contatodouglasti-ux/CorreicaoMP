@@ -17,6 +17,9 @@
  */
 
 const ModalViewer = (() => {
+  /* ─── Estado do registro atualmente aberto (fonte única para tela e impressão) ─── */
+  let _estadoAtual = null; // { titulo, sub, dados, secoes }
+
   /* ─── IDs dos elementos ─── */
   const IDS = {
     overlay    : 'mvOverlay',
@@ -347,11 +350,19 @@ const ModalViewer = (() => {
     return div;
   }
 
-  /* ─── Preenche a área de impressão ─── */
+  /* ─── Preenche a área de impressão ───
+   * IMPORTANTE: monta o HTML direto a partir de `_estadoAtual.dados`
+   * (os dados vindos do banco, os mesmos passados para abrir()), e não
+   * a partir do que está renderizado na tela (mv-body). Isso garante que
+   * a impressão sempre reflita fielmente as respostas salvas, mesmo que
+   * algum campo não tenha sido exibido corretamente no modal.
+   */
   function _buildPrintArea() {
-    const titulo = document.getElementById(IDS.titulo)?.textContent || 'Registro';
-    const sub    = document.getElementById(IDS.sub)?.textContent    || '';
-    const bodyEl = document.getElementById(IDS.body);
+    const estado = _estadoAtual || {};
+    const titulo = estado.titulo || document.getElementById(IDS.titulo)?.textContent || 'Registro';
+    const sub    = estado.sub    || document.getElementById(IDS.sub)?.textContent    || '';
+    const dados  = estado.dados  || {};
+    const secoes = estado.secoes || [];
     const pa     = document.getElementById(IDS.printArea);
 
     let html = `
@@ -363,31 +374,49 @@ const ModalViewer = (() => {
         ${_esc(sub)}
       </div>`;
 
-    bodyEl.querySelectorAll('.mv-secao').forEach(secEl => {
-      const secTitulo = secEl.querySelector('h3')?.textContent || '';
-      html += `<div class="print-secao"><h3>${_esc(secTitulo)}</h3>`;
+    secoes.forEach(sec => {
+      let secHtml = `<div class="print-secao"><h3>${_esc(sec.nome)}</h3>`;
+      let secTemConteudo = false;
 
-      secEl.childNodes.forEach(node => {
-        if (node.nodeType !== 1) return;
-        if (node.tagName === 'H3') return;
+      if (sec.subtopicos) {
+        sec.subtopicos.forEach(sub => {
+          const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+          const frag = [];
 
-        if (node.classList.contains('mv-subtitulo')) {
-          html += `<div class="print-subtitulo">${_esc(node.textContent)}</div>`;
-          return;
-        }
+          camposDaSub.forEach(campo => {
+            const valor = dados[campo.id];
+            if (valor === undefined || valor === null || valor === '') return;
+            frag.push({ pergunta: campo.pergunta, valor });
+          });
 
-        if (node.classList.contains('mv-campo')) {
-          const perg = node.querySelector('.mv-pergunta')?.textContent || '';
-          const val  = node.querySelector('.mv-valor')?.textContent   || '';
-          html += `
+          if (frag.length === 0) return;
+
+          secHtml += `<div class="print-subtitulo">${_esc(sub.nome)}</div>`;
+          frag.forEach(({ pergunta, valor }) => {
+            secHtml += `
+              <div class="print-campo">
+                <div class="print-pergunta">${_esc(pergunta)}</div>
+                <div class="print-valor">${_esc(valor)}</div>
+              </div>`;
+          });
+
+          secTemConteudo = true;
+        });
+      } else {
+        sec.campos.forEach(campo => {
+          const valor = dados[campo.id];
+          if (valor === undefined || valor === null || valor === '') return;
+          secHtml += `
             <div class="print-campo">
-              <div class="print-pergunta">${_esc(perg)}</div>
-              <div class="print-valor">${_esc(val)}</div>
+              <div class="print-pergunta">${_esc(campo.pergunta)}</div>
+              <div class="print-valor">${_esc(valor)}</div>
             </div>`;
-        }
-      });
+          secTemConteudo = true;
+        });
+      }
 
-      html += '</div>';
+      secHtml += '</div>';
+      if (secTemConteudo) html += secHtml;
     });
 
     html += `
@@ -412,6 +441,10 @@ const ModalViewer = (() => {
    */
   function abrir({ titulo, sub, dados, secoes }) {
     _ensureDOM();
+
+    // Guarda a fonte de dados original (vinda do banco) — é ela que será
+    // usada tanto para renderizar a tela quanto para montar a impressão.
+    _estadoAtual = { titulo, sub, dados, secoes };
 
     document.getElementById(IDS.titulo).textContent = titulo;
     document.getElementById(IDS.sub).textContent    = sub;

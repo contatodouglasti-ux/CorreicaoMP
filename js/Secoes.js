@@ -86,7 +86,15 @@ const form = {
       {"id": "38", "pergunta": "O(a) membro(a) executa projetos pautados por objetivos estratégicos?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "38.a", "pergunta": "O(a) membro(a) possui projetos de iniciativa própria institucionalizados?", "tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "38.b", "pergunta": "Em caso positivo, indicar o(s) projeto(s) executado(s) e o(s) respectivo(s) número(s) do(s) procedimento(s).", "tipo": "textarea", dependeDe: { id: "38.a", valor: "Sim" }},
-      {"id": "38.c", "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?", "tipo": "textarea"},
+   {
+  "id": "38.c",
+  "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?",
+  "tipo": "textarea",
+  "dependeDe": [
+    { "id": "38", "valor": "Sim" },
+    { "id": "38.a", "valor": "Sim" }
+  ]
+},
       {"id": "38.d", "pergunta": "O(a) membro(a) aderiu a algum projeto institucional?","tipo": "radio", "opcoes": ["Sim", "Não"]},
       {"id": "38.e", "pergunta": "Em caso positivo, indicar o(s) projeto(s) executado(s) e o(s) respectivo(s) número(s) do(s) procedimento(s).", "tipo": "textarea", dependeDe: { id: "38.d", valor: "Sim" }},
       {"id": "38.f", "pergunta": "Dos projetos acima, quais os resultados concretos obtidos?", "tipo": "textarea", dependeDe: { id: "38.d", valor: "Sim" }},

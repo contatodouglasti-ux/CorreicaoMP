@@ -431,9 +431,10 @@ function renderCampo(parent, campo) {
   wrapper.dataset.campoId = campo.id;
 
   if (campo.dependeDe) {
-    wrapper.dataset.dependeDeId = campo.dependeDe.id;
-    wrapper.dataset.dependeDeValor = campo.dependeDe.valor;
-  }
+  wrapper.dataset.dependeDe = JSON.stringify(
+    Array.isArray(campo.dependeDe) ? campo.dependeDe : [campo.dependeDe]
+  );
+}
 
   const ehDataCorrecao = campo.id === '1.2.inicio' || campo.id === '1.2.fim';
 
@@ -671,13 +672,27 @@ function renderCampo(parent, campo) {
 /* ── Condicionais ──── */
 
 function avaliarCondicionais() {
-  document.querySelectorAll('[data-depende-de-id]').forEach(wrapper => {
-    const controlId = wrapper.dataset.dependeDeId;
-    const valorEsperado = wrapper.dataset.dependeDeValor;
-    const controlEl = document.querySelector(`input[name="${controlId}"]:checked`);
-    const valorAtual = controlEl ? controlEl.value : null;
-    const obrigatorio = valorAtual === valorEsperado;
-    wrapper.querySelectorAll('input, textarea, select').forEach(el => el.required = obrigatorio);
+  document.querySelectorAll('[data-depende-de]').forEach(wrapper => {
+    let dependencias = [];
+
+    try {
+      const bruto = JSON.parse(wrapper.dataset.dependeDe || '[]');
+      dependencias = Array.isArray(bruto) ? bruto : [bruto];
+    } catch (e) {
+      console.error('dependeDe inválido:', e);
+      dependencias = [];
+    }
+
+    const obrigatorio = dependencias.every(dep => {
+      const controlEl = document.querySelector(`input[name="${dep.id}"]:checked`);
+      const valorAtual = controlEl ? controlEl.value : null;
+      return valorAtual === dep.valor;
+    });
+
+    wrapper.querySelectorAll('input, textarea, select').forEach(el => {
+      el.required = obrigatorio;
+    });
+
     const lbl = wrapper.querySelector('label');
     if (lbl) lbl.className = obrigatorio ? 'required' : '';
   });
