@@ -920,6 +920,70 @@
     return String(registro?.unidade_correicionada || registro?.dados?.['1.1'] || '').trim();
   }
 
+
+  function valorRegistroPreenchido(valor) {
+    return valor !== undefined && valor !== null && String(valor).trim() !== '';
+  }
+
+  function campoPertenceAoSubtopico(campoId, prefixo) {
+    const prefixos = Array.isArray(prefixo) ? prefixo : [prefixo];
+    return prefixos.some(p => campoId === p || campoId.startsWith(p + '.'));
+  }
+
+  function criarCampoDetalheHtml(pergunta, valor) {
+    return `
+      <div class="detalhe-campo">
+        <div class="detalhe-pergunta">${escapeHtml(pergunta)}</div>
+        <div class="detalhe-valor">${escapeHtml(valor)}</div>
+      </div>`;
+  }
+
+  function montarDetalhesRegistroHtml(dados, secoes) {
+    let html = '';
+    let temConteudo = false;
+
+    (secoes || []).forEach(sec => {
+      let secHtml = `<div class="detalhe-secao"><h3>${escapeHtml(sec.nome || '')}</h3>`;
+      let secTemConteudo = false;
+
+      if (sec.subtopicos) {
+        sec.subtopicos.forEach(sub => {
+          const camposDaSub = (sec.campos || []).filter(c => campoPertenceAoSubtopico(c.id, sub.prefixo));
+          const fragSub = [];
+
+          camposDaSub.forEach(campo => {
+            const valor = dados?.[campo.id];
+            if (!valorRegistroPreenchido(valor)) return;
+            fragSub.push({ pergunta: campo.pergunta, valor });
+          });
+
+          if (fragSub.length === 0) return;
+
+          secHtml += `<div class="detalhe-subtitulo">${escapeHtml(sub.titulo || sub.nome || '')}</div>`;
+          fragSub.forEach(({ pergunta, valor }) => {
+            secHtml += criarCampoDetalheHtml(pergunta, valor);
+          });
+
+          secTemConteudo = true;
+        });
+      } else {
+        (sec.campos || []).forEach(campo => {
+          const valor = dados?.[campo.id];
+          if (!valorRegistroPreenchido(valor)) return;
+          secHtml += criarCampoDetalheHtml(campo.pergunta, valor);
+          secTemConteudo = true;
+        });
+      }
+
+      secHtml += '</div>';
+      if (secTemConteudo) {
+        html += secHtml;
+        temConteudo = true;
+      }
+    });
+
+    return { html, temConteudo };
+  }
   function initBadge() {
     const nome = getNomeUsuario();
     const iniciais = nome
@@ -1052,67 +1116,16 @@
     try {
       const reg = await carregarRegistroAdmin(id);
       const dados = reg.dados || {};
+      const secoes = form?.secoes || [];
 
       document.getElementById('modalTitulo').textContent = `${reg.nome || reg.user_id || 'Registro'}`;
       document.getElementById('modalSub').textContent = `${reg.user_id || '—'} · ${reg.criado_em ? new Date(reg.criado_em).toLocaleString('pt-BR') : ''}`;
 
       const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-
-      let temConteudo = false;
-
-      (form?.secoes || []).forEach(sec => {
-        const secDiv = document.createElement('div');
-        secDiv.className = 'detalhe-secao';
-
-        const h3 = document.createElement('h3');
-        h3.textContent = sec.nome;
-        secDiv.appendChild(h3);
-
-        let secTemConteudo = false;
-
-        if (sec.subtopicos) {
-          sec.subtopicos.forEach(sub => {
-            const camposDaSub = (sec.campos || []).filter(c => c.id.startsWith(sub.prefixo + '.'));
-            const fragSub = [];
-
-            camposDaSub.forEach(campo => {
-              const valor = dados[campo.id];
-              if (!valor) return;
-              fragSub.push({ pergunta: campo.pergunta, valor });
-            });
-
-            if (fragSub.length === 0) return;
-
-            const subDiv = document.createElement('div');
-            subDiv.className = 'detalhe-subtitulo';
-            subDiv.textContent = sub.nome;
-            secDiv.appendChild(subDiv);
-
-            fragSub.forEach(({ pergunta, valor }) => {
-              secDiv.appendChild(criarCampoDetalhe(pergunta, valor));
-            });
-
-            secTemConteudo = true;
-          });
-        } else {
-          (sec.campos || []).forEach(campo => {
-            const valor = dados[campo.id];
-            if (!valor) return;
-            secDiv.appendChild(criarCampoDetalhe(campo.pergunta, valor));
-            secTemConteudo = true;
-          });
-        }
-
-        if (secTemConteudo) {
-          body.appendChild(secDiv);
-          temConteudo = true;
-        }
-      });
-
-      if (!temConteudo) {
-        body.innerHTML = '<p class="sem-dados">Este registro não possui campos preenchidos.</p>';
-      }
+      const conteudo = montarDetalhesRegistroHtml(dados, secoes);
+      body.innerHTML = conteudo.temConteudo
+        ? conteudo.html
+        : '<p class="sem-dados">Este registro não possui campos preenchidos.</p>';
 
       document.getElementById('modalOverlay').classList.add('open');
     } catch (err) {

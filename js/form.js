@@ -332,7 +332,6 @@ function atualizarEstadoSubtopicos() {
 }
 
 /* ── Renderização ──── */
-
 function criarForm() {
   const c = document.getElementById('formContainer');
 
@@ -346,11 +345,13 @@ function criarForm() {
     d.appendChild(h);
 
     if (sec.subtopicos) {
-      const chipBar   = document.createElement('div');
+      const chipBar = document.createElement('div');
       chipBar.className = 'chip-bar';
-      const camposWrap  = document.createElement('div');
-      camposWrap.id   = 'campos-especificos';
-      const ativos    = new Set();
+
+      const camposWrap = document.createElement('div');
+      camposWrap.id = 'campos-especificos';
+
+      const ativos = new Set();
 
       function atualizarCampos() {
         camposWrap.innerHTML = '';
@@ -385,14 +386,14 @@ function criarForm() {
 
       sec.subtopicos.forEach(sub => {
         const chip = document.createElement('button');
-        chip.type      = 'button';
+        chip.type = 'button';
         chip.className = 'chip';
         chip.innerText = sub.nome;
 
         const chaveAtivo = Array.isArray(sub.prefixo) ? sub.prefixo.join(',') : sub.prefixo;
         chip.dataset.prefixo = chaveAtivo;
 
-        chip.onclick   = () => {
+        chip.onclick = () => {
           if (ativos.has(chaveAtivo)) {
             ativos.delete(chaveAtivo);
             chip.classList.remove('chip-ativo');
@@ -416,9 +417,19 @@ function criarForm() {
 
     const nav = document.createElement('div');
     nav.className = 'nav';
-    if (i > 0) nav.appendChild(btn('Voltar', 'btn-gray', () => mostrar(i - 1)));
-    nav.appendChild(btn('Próximo', 'btn-primary', () => mostrar(i + 1)));
+
+    if (i > 0) {
+      nav.appendChild(btn('Voltar', 'btn-gray', () => mostrar(i - 1)));
+    }
+
+    if (i < form.secoes.length - 1) {
+      nav.appendChild(btn('Próximo', 'btn-primary', () => mostrar(i + 1)));
+    } else {
+      nav.appendChild(btn('Finalizar', 'btn-primary', () => enviarTudo()));
+    }
+
     nav.appendChild(btn('Salvar seção', 'btn-green', () => salvarSecao(i)));
+
     d.appendChild(nav);
     c.appendChild(d);
   });

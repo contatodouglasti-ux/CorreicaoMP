@@ -274,6 +274,15 @@ const ModalViewer = (() => {
   }
 
   /* ─── Utilitários ─── */
+
+  // sub.prefixo pode ser uma string única ("54") ou um array de prefixos
+  // (["54","55","56"]). Aqui normalizamos para sempre trabalhar com array
+  // e checamos se o id do campo bate com QUALQUER um dos prefixos.
+  function _campoPertenceAoSubtopico(campoId, prefixo) {
+    const prefixos = Array.isArray(prefixo) ? prefixo : [prefixo];
+    return prefixos.some(p => campoId === p || campoId.startsWith(p + '.'));
+  }
+
   function _esc(s) {
     return String(s ?? '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -299,7 +308,7 @@ const ModalViewer = (() => {
 
       if (sec.subtopicos) {
         sec.subtopicos.forEach(sub => {
-          const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+          const camposDaSub = sec.campos.filter(c => _campoPertenceAoSubtopico(c.id, sub.prefixo));
           const frag = [];
 
           camposDaSub.forEach(campo => {
@@ -380,7 +389,7 @@ const ModalViewer = (() => {
 
       if (sec.subtopicos) {
         sec.subtopicos.forEach(sub => {
-          const camposDaSub = sec.campos.filter(c => c.id.startsWith(sub.prefixo + '.'));
+          const camposDaSub = sec.campos.filter(c => _campoPertenceAoSubtopico(c.id, sub.prefixo));
           const frag = [];
 
           camposDaSub.forEach(campo => {
@@ -478,4 +487,4 @@ const ModalViewer = (() => {
 
   return { abrir, fechar, imprimir };
 })();
-window.ModalViewer = ModalViewer;
+window.ModalViewer = ModalViewer; 
