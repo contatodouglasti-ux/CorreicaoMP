@@ -23,6 +23,52 @@
  */
 
 
+/* ── Utilitários de data ──── */
+
+function converterDataParaBR(valor) {
+  if (valor === null || valor === undefined || valor === '') return valor;
+
+  if (typeof valor === 'string') {
+    // Aceita YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss...
+    const iso = valor.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ].*)?$/);
+    if (iso) {
+      const [, ano, mes, dia] = iso;
+      return `${dia}-${mes}-${ano}`;
+    }
+
+    // Se já estiver em formato BR, mantém
+    if (/^\d{2}-\d{2}-\d{4}$/.test(valor)) {
+      return valor;
+    }
+  }
+
+  if (valor instanceof Date && !isNaN(valor.getTime())) {
+    const dia = String(valor.getDate()).padStart(2, '0');
+    const mes = String(valor.getMonth() + 1).padStart(2, '0');
+    const ano = valor.getFullYear();
+    return `${dia}-${mes}-${ano}`;
+  }
+
+  return valor;
+}
+
+function normalizarDadosParaSalvar(valor) {
+  if (Array.isArray(valor)) {
+    return valor.map(normalizarDadosParaSalvar);
+  }
+
+  if (valor && typeof valor === 'object' && !(valor instanceof Date)) {
+    const novo = {};
+    for (const [chave, v] of Object.entries(valor)) {
+      novo[chave] = normalizarDadosParaSalvar(v);
+    }
+    return novo;
+  }
+
+  return converterDataParaBR(valor);
+}
+
+
 /* ── Permissões ──── */
 
 // Verifica se o usuário está pendente E dentro do período de acesso permitido
@@ -141,33 +187,45 @@ async function garantirRegistroAberto() {
 
 /**
  * Persiste todos os dados do formulário no Supabase.
+ * Datas dentro de "dados" são convertidas para DD-MM-YYYY antes de salvar.
  */
 async function persistirDados(id, dados) {
   await exigirUsuarioPendente();
+  const dadosBR = normalizarDadosParaSalvar(dados);
+
   return sb.from('correicoes').update({
-    dados,
-    unidade_correicionada: dados['1.1'] || null,
+    dados: dadosBR,
+    unidade_correicionada: dadosBR['1.1'] || null,
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }
 
+/**
+ * Salva uma seção no banco.
+ * Datas dentro de "dadosMerged" são convertidas para DD-MM-YYYY antes de salvar.
+ */
 async function salvarSecaoNoBanco(id, dadosMerged, secoesOk) {
   await exigirUsuarioPendente();
+  const dadosBR = normalizarDadosParaSalvar(dadosMerged);
+
   return sb.from('correicoes').update({
-    dados:        dadosMerged,
+    dados:        dadosBR,
     secoes_ok:    secoesOk,
-    unidade_correicionada: dadosMerged['1.1'] || null,
+    unidade_correicionada: dadosBR['1.1'] || null,
     atualizado_em: new Date().toISOString(),
   }).eq('id', id);
 }
 
 /**
  * Finaliza o registro e persiste dados completos.
+ * Datas dentro de "dados" são convertidas para DD-MM-YYYY antes de salvar.
  */
 async function finalizarRegistro(id, dados) {
+  const dadosBR = normalizarDadosParaSalvar(dados);
+
   return sb.from('correicoes').update({
-    dados,
-    unidade_correicionada: dados['1.1'] || null,
+    dados: dadosBR,
+    unidade_correicionada: dadosBR['1.1'] || null,
     finalizado:    true,
     finalizado_em: new Date().toISOString(),
     atualizado_em: new Date().toISOString(),
