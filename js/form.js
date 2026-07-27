@@ -747,9 +747,21 @@ function coletar(sec = null) {
   });
   return d;
 }
+function converterBRparaISO(valor) {
+  if (!valor || typeof valor !== 'string') return valor;
+
+  const m = valor.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (m) {
+    const [, dia, mes, ano] = m;
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  return valor;
+}
 
 function carregar() {
   const dadosSalvos = window._dadosCarregados || {};
+
   Object.keys(dadosSalvos).forEach(k => {
     const valor = dadosSalvos[k];
 
@@ -765,14 +777,18 @@ function carregar() {
       document.querySelectorAll(`input[name="${k}"]`).forEach(r => {
         if (r.value === valor) r.checked = true;
       });
+    } else if (el.type === 'date') {
+      el.value = converterBRparaISO(valor);
     } else {
       el.value = valor;
+
       if (el.tagName === 'TEXTAREA') {
         el.style.height = 'auto';
         el.style.height = el.scrollHeight + 'px';
       }
     }
   });
+
 
   avaliarCondicionais();
   atualizarEstadoSubtopicos();
