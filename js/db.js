@@ -252,6 +252,28 @@ async function criarNovoRegistro() {
 }
 
 /**
+ * Substitui um rascunho pelas respostas reaproveitadas e libera todas as seções
+ * para uma nova revisão.
+ */
+async function substituirRascunhoPorReaproveitamento(id, dados) {
+  await exigirUsuarioPendente();
+  const dadosBR = normalizarDadosParaSalvar(dados);
+
+  const { error } = await sb
+    .from('correicoes')
+    .update({
+      dados: dadosBR,
+      secoes_ok: {},
+      unidade_correicionada: dadosBR['1.1'] || null,
+      atualizado_em: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('finalizado', false);
+
+  if (error) throw error;
+}
+
+/**
  * Carrega um registro específico pelo ID.
  */
 async function carregarRegistroPorId(id) {

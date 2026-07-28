@@ -101,16 +101,7 @@ function renderHistorico(registros, container, podePreencher = true) {
     if (btnRea) btnRea.onclick = () => _confirmarReaproveitamento(reg.id);
 
     if (btnExcluir) {
-      const temSecao = reg.secoes_ok && Object.keys(reg.secoes_ok).length > 0;
-
-      if (!temSecao) {
-        btnExcluir.disabled = true;
-        btnExcluir.style.opacity = '0.5';
-        btnExcluir.style.cursor = 'not-allowed';
-        btnExcluir.title = 'Envie ao menos uma seção antes de excluir';
-      } else {
-        btnExcluir.onclick = () => _confirmarExclusao(reg.id);
-      }
+      btnExcluir.onclick = () => _confirmarExclusao(reg.id);
     }
 
     container.appendChild(card);
@@ -119,6 +110,18 @@ function renderHistorico(registros, container, podePreencher = true) {
 
 /* ── Garante o preenchimento dos campos fixos ao abrir pelo histórico ── */
 function aplicarCamposFixosHistorico(reg) {
+  const dados = obterDadosHistorico(reg);
+
+  window._dadosCarregados = dados;
+
+  const unidade = document.getElementById('1.1');
+  if (unidade) unidade.value = dados['1.1'];
+
+  const membro = document.getElementById('1.3');
+  if (membro) membro.value = dados['1.3'];
+}
+
+function obterDadosHistorico(reg) {
   const dados = { ...(reg?.dados || {}) };
 
   // Registros antigos podem não ter a coluna auxiliar preenchida. Nesse caso,
@@ -128,13 +131,7 @@ function aplicarCamposFixosHistorico(reg) {
   // O nome do registro é a fonte de fallback para formulários antigos.
   if (!dados['1.3']) dados['1.3'] = reg?.nome || '';
 
-  window._dadosCarregados = dados;
-
-  const unidade = document.getElementById('1.1');
-  if (unidade) unidade.value = dados['1.1'];
-
-  const membro = document.getElementById('1.3');
-  if (membro) membro.value = dados['1.3'];
+  return dados;
 }
 
 /* ── Abre o ModalViewer compartilhado para um registro do histórico ── */
@@ -147,7 +144,7 @@ async function _abrirViewer(id) {
     ModalViewer.abrir({
       titulo: reg.nome || reg.user_id || 'Registro',
       sub: `${reg.user_id || '—'} · ${data}`,
-      dados: reg.dados || {},
+      dados: obterDadosHistorico(reg),
       secoes: form.secoes,
     });
   } catch (err) {
@@ -178,8 +175,10 @@ async function _confirmarExclusao(id) {
 /* ── Confirmação e execução do reaproveitamento ── */
 async function _confirmarReaproveitamento(id) {
   if (!confirm(
-    'Deseja criar uma nova correição usando as respostas deste registro como ponto de partida?\n\n' +
-    'Um novo registro será aberto com os campos pré-preenchidos. Você poderá editar antes de finalizar.'
+    'Deseja reaproveitar as respostas desta correição?\n\n' +
+    'A correição atualmente em andamento será substituída e todas as respostas já preenchidas nela serão descartadas. ' +
+    'A correição finalizada escolhida permanecerá preservada.\n\n' +
+    'Você poderá revisar e editar as respostas antes de finalizar.'
   )) return;
 
   mostrarLoading('Carregando respostas para reaproveitamento…');
@@ -192,13 +191,20 @@ async function _confirmarReaproveitamento(id) {
       return;
     }
 
-    // Reutiliza o registro em aberto (criado pelo garantirRegistroAberto ao entrar
-    // no formulário) em vez de criar um duplicado. Só cria novo se não houver nenhum.
+    // Reutiliza o rascunho aberto, substituindo seus dados e liberando todas as
+    // seções para revisão. A correição finalizada de origem não é alterada.
     const regAberto = await garantirRegistroAberto();
+    const dadosReaproveitados = obterDadosHistorico(reg);
+    const unidadeAtual = await buscarUnidadeDoUsuario();
+
+    if (getNomeUsuario()) dadosReaproveitados['1.3'] = getNomeUsuario();
+    if (unidadeAtual) dadosReaproveitados['1.1'] = unidadeAtual;
+
+    await substituirRascunhoPorReaproveitamento(regAberto.id, dadosReaproveitados);
 
     registroId = regAberto.id;
     modoLeitura = false;
-    aplicarCamposFixosHistorico(reg);
+    window._dadosCarregados = dadosReaproveitados;
 
     // Limpa campos e remove bloqueios antigos
     document.querySelectorAll('#formContainer input, #formContainer textarea').forEach(el => {
