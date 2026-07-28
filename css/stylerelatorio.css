@@ -813,7 +813,8 @@ input[type="text"].auto-expand {
         white-space: pre-wrap;
     }
 
-    textarea.is-active-proposition {
+    textarea.is-active-proposition,
+    .is-active-text-field {
         outline: 2px solid #2f80ed;
         outline-offset: 2px;
         border-color: #2f80ed !important;
@@ -940,4 +941,62 @@ input[type="text"].auto-expand {
 }
 .linha-conclusao td {
   background: #f8f9fb;
+}
+
+.relatorio-salvar-flutuante {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(18, 75, 95, .28);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.relatorio-salvar-flutuante:hover {
+    background: #0d3c4c;
+    box-shadow: 0 12px 28px rgba(18, 75, 95, .35);
+    transform: translateY(-2px);
+}
+
+.relatorio-salvar-flutuante:focus-visible {
+    outline: 3px solid #89c7df;
+    outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+    .relatorio-salvar-flutuante {
+        right: 16px;
+        bottom: 16px;
+        width: 48px;
+        height: 48px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .relatorio-salvar-flutuante span:last-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+}
+
+@media print {
+    .relatorio-salvar-flutuante {
+        display: none !important;
+    }
 }

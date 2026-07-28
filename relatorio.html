@@ -266,6 +266,135 @@
             color: #5b9bd5;
             font-size: 10px;
         }
+
+        /* ── Impressão A4 ─────────────────────────────────────────── */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 11mm 10mm 13mm;
+            }
+
+            html, body {
+                width: auto !important;
+                min-width: 0 !important;
+                font-size: 10pt !important;
+                line-height: 1.35 !important;
+            }
+
+            .page,
+            .paper {
+                width: 100% !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .na-oculta,
+            .na-oculta * {
+                display: none !important;
+            }
+
+            h1, h2, h3,
+            .proposal-title,
+            .section-header {
+                break-after: avoid-page;
+                page-break-after: avoid;
+            }
+
+            h1 {
+                font-size: 16pt !important;
+                margin: 0 0 10pt !important;
+            }
+
+            h2 {
+                font-size: 12pt !important;
+                margin: 16pt 0 7pt !important;
+                padding-left: 7pt !important;
+            }
+
+            h3,
+            .proposal-title {
+                font-size: 10.5pt !important;
+                margin: 10pt 0 5pt !important;
+            }
+
+            .field,
+            .section-box,
+            .doc-block,
+            .proposal,
+            .proposal-notice {
+                min-width: 0 !important;
+                margin-top: 7pt !important;
+                padding: 8pt !important;
+                break-inside: avoid-page;
+                page-break-inside: avoid;
+            }
+
+            .meta-grid,
+            .proposal-fields,
+            .two-col {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 7pt !important;
+                margin-bottom: 8pt !important;
+            }
+
+            table {
+                width: 100% !important;
+                max-width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                font-size: 8.5pt !important;
+                break-inside: auto !important;
+                page-break-inside: auto !important;
+            }
+
+            thead { display: table-header-group !important; }
+            tfoot { display: table-footer-group !important; }
+
+            tr {
+                break-inside: avoid-page !important;
+                page-break-inside: avoid !important;
+            }
+
+            th, td {
+                min-width: 0 !important;
+                padding: 4pt !important;
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+                vertical-align: top !important;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            textarea,
+            select,
+            .table-input,
+            .table-textarea {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                height: auto !important;
+                min-height: 0 !important;
+                padding: 4pt 5pt !important;
+                font-size: 8.5pt !important;
+                line-height: 1.3 !important;
+                overflow: visible !important;
+                white-space: pre-wrap !important;
+            }
+
+            textarea {
+                resize: none !important;
+            }
+
+            .subtle,
+            .proposal-notice,
+            .value,
+            .proposal-text {
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+            }
+        }
     </style>
 
     <script>
@@ -288,7 +417,7 @@
     <aside id="proposalSidebar" class="proposal-sidebar no-print hidden">
         <h2>Textos predefinidos</h2>
         <div class="sidebar-hint">
-            Clique em um campo de <strong>Proposição</strong> no relatório e, em seguida, escolha um texto nesta lateral.
+            Clique em qualquer <strong>campo de texto</strong> editável no relatório e, em seguida, escolha um texto nesta lateral.
         </div>
         <div class="sidebar-search-wrap">
             <input
@@ -337,12 +466,6 @@
         <div class="actions">
             <button class="btn btn-secondary" type="button" onclick="voltarAoAdmin()">Voltar ao admin</button>
             <button class="btn btn-secondary" type="button" onclick="toggleProposalSidebar()">☰ Textos predefinidos</button>
-            <!--
-                Exemplo de botão "Salvar resposta". Pode ser copiado e colado
-                em qualquer lugar do relatório (dentro de .paper), quantas
-                vezes quiser — cada clique salva o formulário inteiro.
-            -->
-            <button class="btn btn-primary" type="button" onclick="salvarRespostasNoBanco(this)">💾 Salvar resposta</button>
             <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
         </div>
     </header>
@@ -443,8 +566,6 @@
 </div>
 
 </div>
-<button class="btn btn-primary" type="button" onclick="salvarRespostasNoBanco(this)">💾 Salvar resposta</button>
-
 <h1>PROMOTORIA DE JUSTIÇA</h1>
  <h2>1. DADOS GERAIS</h3>
             <div class="meta-grid">
@@ -2563,6 +2684,15 @@
             </div>
         
     
+
+    <button
+        class="relatorio-salvar-flutuante no-print"
+        type="button"
+        onclick="salvarRespostasNoBanco(this)"
+        aria-label="Salvar relatório">
+        <span aria-hidden="true">💾</span>
+        <span>Salvar relatório</span>
+    </button>
 
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>

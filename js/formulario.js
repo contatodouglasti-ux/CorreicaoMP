@@ -2182,51 +2182,48 @@ document.addEventListener('DOMContentLoaded', () => {
             const status = document.getElementById('proposalSidebarStatus');
             if (!list || !status) return;
 
-            // ── Campos de proposição no relatório (textareas dentro de .proposal) ──
-            // Seleciona apenas os que têm label começando com "Proposição"
-            const proposalFields = Array.from(
-                document.querySelectorAll('.proposal > .field')
-            ).map(field => {
-                const label    = field.querySelector('label');
-                const textarea = field.querySelector('textarea');
-                if (!label || !textarea) return null;
-                if (!/^proposiç/i.test(label.textContent.trim())) return null;
-                return textarea;
-            }).filter(Boolean);
+            // Textos predefinidos podem ser aplicados a qualquer campo textual
+            // editável do relatório, não apenas às proposições.
+            const textFieldSelector =
+                '.paper textarea:not([readonly]):not([disabled]), ' +
+                '.paper input[type="text"]:not([readonly]):not([disabled])';
 
-            let activeTextarea = null;
+            let activeTextField = null;
 
             function clearActive() {
-                proposalFields.forEach(el => el.classList.remove('is-active-proposition'));
+                document.querySelectorAll(textFieldSelector)
+                    .forEach(el => el.classList.remove('is-active-text-field'));
             }
 
-            function setActiveTextarea(textarea) {
+            function setActiveTextField(campo) {
                 clearActive();
-                activeTextarea = textarea || null;
+                activeTextField = campo || null;
 
-                if (!activeTextarea) {
+                if (!activeTextField) {
                     status.textContent = 'Nenhum campo selecionado ainda.';
                     return;
                 }
 
-                activeTextarea.classList.add('is-active-proposition');
-                const title =
-                    activeTextarea.closest('.proposal')
-                        ?.querySelector('.proposal-title')
-                        ?.textContent?.trim()
-                    || 'Campo de proposição';
+                activeTextField.classList.add('is-active-text-field');
+                const title = activeTextField.closest('.field')
+                    ?.querySelector('label')
+                    ?.textContent?.trim()
+                    || activeTextField.placeholder
+                    || 'Campo de texto';
                 status.textContent = `Campo selecionado: ${title}`;
             }
 
-            proposalFields.forEach(textarea => {
-                textarea.addEventListener('focus', () => setActiveTextarea(textarea));
-                textarea.addEventListener('click', () => setActiveTextarea(textarea));
+            document.addEventListener('focusin', event => {
+                if (event.target.matches(textFieldSelector)) setActiveTextField(event.target);
+            });
+            document.addEventListener('click', event => {
+                if (event.target.matches(textFieldSelector)) setActiveTextField(event.target);
             });
 
             // ── Fonte dos textos: banco de dados (Supabase) ─────────────────────
             // Os textos agora são carregados exclusivamente do banco, sem depender de Proposicao.js.
             status.textContent = 'Carregando textos salvos do banco…';
-            renderizarCustomizados(list, () => setActiveTextarea, () => activeTextarea, status);
+            renderizarCustomizados(list, () => setActiveTextField, () => activeTextField, status);
 
             // ── Filtro de busca (filtra predefinidos + customizados) ──────────────
             const filterInput = document.getElementById('proposalSidebarFilter');
@@ -2254,9 +2251,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Expõe referência ao activeTextarea para funções globais
-            window._sidebarGetActive   = () => activeTextarea;
-            window._sidebarSetActive   = setActiveTextarea;
+            // Expõe o campo textual ativo para as ações da lateral.
+            window._sidebarGetActive   = () => activeTextField;
+            window._sidebarSetActive   = setActiveTextField;
             window._sidebarList        = list;
             window._sidebarStatus      = status;
         }
@@ -2304,17 +2301,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         button.appendChild(preview);
 
                         button.addEventListener('click', () => {
-                            const activeTextarea = window._sidebarGetActive();
-                            if (!activeTextarea) {
+                            const activeTextField = window._sidebarGetActive();
+                            if (!activeTextField) {
                                 if (window._sidebarStatus)
-                                    window._sidebarStatus.textContent = 'Clique primeiro em um campo de Proposição no relatório.';
+                                    window._sidebarStatus.textContent = 'Clique primeiro em um campo de texto editável no relatório.';
                                 button.classList.add('sidebar-item--warn');
                                 setTimeout(() => button.classList.remove('sidebar-item--warn'), 1800);
                                 return;
                             }
-                            activeTextarea.value = item.texto;
-                            activeTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                            activeTextarea.focus();
+                            activeTextField.value = item.texto;
+                            activeTextField.dispatchEvent(new Event('input', { bubbles: true }));
+                            activeTextField.focus();
                             if (window._sidebarStatus)
                                 window._sidebarStatus.textContent = '✅ Texto personalizado aplicado.';
                         });
@@ -2711,6 +2708,9 @@ function configurarNaoAplica() {
         if (!row) return;
 
         const membros = [];
+        const tituloSecao = row.previousElementSibling;
+        if (tituloSecao?.tagName === 'H2') membros.push(tituloSecao);
+
         let el = row.nextElementSibling;
         while (el && el.tagName !== 'H2') {
             membros.push(el);
