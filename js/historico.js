@@ -8,18 +8,18 @@
  */
 
 function abrirFormulario() {
-  document.getElementById('formContainer').style.display      = '';
+  document.getElementById('formContainer').style.display = '';
   document.getElementById('historicoContainer').style.display = 'none';
   if (!modoLeitura) document.getElementById('enviarTudoWrap').style.display = '';
 }
 
 async function abrirHistorico() {
-  document.getElementById('formContainer').style.display    = 'none';
-  document.getElementById('enviarTudoWrap').style.display   = 'none';
+  document.getElementById('formContainer').style.display = 'none';
+  document.getElementById('enviarTudoWrap').style.display = 'none';
 
   const hc = document.getElementById('historicoContainer');
   hc.style.display = '';
-  hc.innerHTML     = '<p style="color:#546E7A;padding:20px">Carregando histórico…</p>';
+  hc.innerHTML = '<p style="color:#546E7A;padding:20px">Carregando histórico…</p>';
 
   try {
     const podePreencher = await usuarioEstaPendente();
@@ -40,7 +40,7 @@ function renderHistorico(registros, container, podePreencher = true) {
   container.innerHTML = '';
 
   const titulo = document.createElement('h2');
-  titulo.innerText     = '📋 Histórico de Correições';
+  titulo.innerText = '📋 Histórico de Correições';
   titulo.style.cssText = 'color:#2c3e50;margin-bottom:20px;';
   container.appendChild(titulo);
 
@@ -65,10 +65,10 @@ function renderHistorico(registros, container, podePreencher = true) {
       display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
     `;
 
-    const data     = new Date(reg.criado_em);
-    const dataStr  = isNaN(data) ? reg.criado_em : data.toLocaleString('pt-BR');
+    const data = new Date(reg.criado_em);
+    const dataStr = isNaN(data) ? reg.criado_em : data.toLocaleString('pt-BR');
     const secoesOk = Object.keys(reg.secoes_ok || {}).length;
-    const status   = reg.finalizado
+    const status = reg.finalizado
       ? '<span style="color:#27ae60;font-weight:700">✅ Finalizado</span>'
       : `<span style="color:#f39c12;font-weight:700">⏳ Em andamento (${secoesOk}/${form.secoes.length} seções)</span>`;
 
@@ -87,9 +87,9 @@ function renderHistorico(registros, container, podePreencher = true) {
       </div>
     `;
 
-    const btnAbrir   = card.querySelector('.btn-primary');
-    const btnVer     = card.querySelector('.btn-gray');
-    const btnRea     = card.querySelector('.btn-reaproveitar');
+    const btnAbrir = card.querySelector('.btn-primary');
+    const btnVer = card.querySelector('.btn-gray');
+    const btnRea = card.querySelector('.btn-reaproveitar');
     const btnExcluir = card.querySelector('.btn-danger');
 
     btnAbrir.onclick = () => carregarRegistro(reg.id, reg.finalizado);
@@ -104,10 +104,10 @@ function renderHistorico(registros, container, podePreencher = true) {
       const temSecao = reg.secoes_ok && Object.keys(reg.secoes_ok).length > 0;
 
       if (!temSecao) {
-        btnExcluir.disabled      = true;
+        btnExcluir.disabled = true;
         btnExcluir.style.opacity = '0.5';
-        btnExcluir.style.cursor  = 'not-allowed';
-        btnExcluir.title         = 'Envie ao menos uma seção antes de excluir';
+        btnExcluir.style.cursor = 'not-allowed';
+        btnExcluir.title = 'Envie ao menos uma seção antes de excluir';
       } else {
         btnExcluir.onclick = () => _confirmarExclusao(reg.id);
       }
@@ -117,18 +117,38 @@ function renderHistorico(registros, container, podePreencher = true) {
   });
 }
 
+/* ── Garante o preenchimento dos campos fixos ao abrir pelo histórico ── */
+function aplicarCamposFixosHistorico(reg) {
+  const dados = { ...(reg?.dados || {}) };
+
+  // Registros antigos podem não ter a coluna auxiliar preenchida. Nesse caso,
+  // preserva o valor originalmente salvo dentro de "dados".
+  dados['1.1'] = dados['1.1'] || reg?.unidade_correicionada || '';
+
+  // O nome do registro é a fonte de fallback para formulários antigos.
+  if (!dados['1.3']) dados['1.3'] = reg?.nome || '';
+
+  window._dadosCarregados = dados;
+
+  const unidade = document.getElementById('1.1');
+  if (unidade) unidade.value = dados['1.1'];
+
+  const membro = document.getElementById('1.3');
+  if (membro) membro.value = dados['1.3'];
+}
+
 /* ── Abre o ModalViewer compartilhado para um registro do histórico ── */
 async function _abrirViewer(id) {
   mostrarLoading('Carregando detalhes…');
   try {
-    const reg  = await carregarRegistroPorId(id);
+    const reg = await carregarRegistroPorId(id);
     const data = new Date(reg.criado_em).toLocaleString('pt-BR');
 
     ModalViewer.abrir({
-      titulo : reg.nome || reg.user_id || 'Registro',
-      sub    : `${reg.user_id || '—'} · ${data}`,
-      dados  : reg.dados || {},
-      secoes : form.secoes,
+      titulo: reg.nome || reg.user_id || 'Registro',
+      sub: `${reg.user_id || '—'} · ${data}`,
+      dados: reg.dados || {},
+      secoes: form.secoes,
     });
   } catch (err) {
     console.error(err);
@@ -176,9 +196,9 @@ async function _confirmarReaproveitamento(id) {
     // no formulário) em vez de criar um duplicado. Só cria novo se não houver nenhum.
     const regAberto = await garantirRegistroAberto();
 
-    registroId  = regAberto.id;
+    registroId = regAberto.id;
     modoLeitura = false;
-    window._dadosCarregados = reg.dados || {};
+    aplicarCamposFixosHistorico(reg);
 
     // Limpa campos e remove bloqueios antigos
     document.querySelectorAll('#formContainer input, #formContainer textarea').forEach(el => {
@@ -189,6 +209,7 @@ async function _confirmarReaproveitamento(id) {
 
     // Pré-preenche os campos com os dados reaproveitados
     carregar();
+    await preencherCamposFixos();
 
     // Nenhuma seção é marcada como enviada — tudo fica editável
     document.getElementById('enviarTudoWrap').style.display = '';
@@ -222,9 +243,9 @@ async function carregarRegistro(id) {
       return;
     }
 
-    registroId  = reg.id;
+    registroId = reg.id;
     modoLeitura = reg.finalizado || !podePreencher;
-    window._dadosCarregados = reg.dados || {};
+    aplicarCamposFixosHistorico(reg);
 
     // Limpa campos e remove bloqueios antigos
     document.querySelectorAll('#formContainer input, #formContainer textarea').forEach(el => {
@@ -234,6 +255,7 @@ async function carregarRegistro(id) {
     form.secoes.forEach((_, i) => { desbloquearSecao(i); atualizarMenuBadge(i, false); });
 
     carregar();
+    await preencherCamposFixos();
 
     const secoesOk = reg.secoes_ok || {};
     Object.keys(secoesOk).forEach(i => {
