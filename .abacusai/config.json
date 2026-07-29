@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell *)",
+      "Bash(findstr /I /N \"specific\" js\\Secoes.js)",
+      "Bash(del *)",
+      "Bash(findstr /S /I /N \"_dadosCarregados\" js\\app.js js\\form.js js\\historico.js js\\ui.js 2>nul)"
+    ]
+  }
+}

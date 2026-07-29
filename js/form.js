@@ -309,6 +309,7 @@ function subtopicoTemDados(sec, sub, dados = window._dadosCarregados || {}) {
 
 function atualizarEstadoSubtopicos() {
   const dados = window._dadosCarregados || {};
+  const abrirAutomaticamente = [];
 
   document.querySelectorAll('.section').forEach((sectionEl, idx) => {
     const sec = form.secoes[idx];
@@ -327,8 +328,17 @@ function atualizarEstadoSubtopicos() {
       chip.title = enviado
         ? 'Subtópico já possui dados salvos'
         : 'Subtópico sem dados salvos';
+
+      if (enviado) {
+        if (!chip.dataset.autoAberto && !chip.classList.contains('chip-ativo')) {
+          abrirAutomaticamente.push(chip);
+        }
+        chip.dataset.autoAberto = '1';
+      }
     });
   });
+
+  abrirAutomaticamente.forEach(chip => chip.click());
 }
 
 /* ── Renderização ──── */

@@ -212,6 +212,7 @@ async function _confirmarReaproveitamento(id) {
       else el.value = '';
     });
     form.secoes.forEach((_, i) => { desbloquearSecao(i); atualizarMenuBadge(i, false); });
+    document.querySelectorAll('#formContainer .chip').forEach(ch => { delete ch.dataset.autoAberto; });
 
     // Pré-preenche os campos com os dados reaproveitados
     carregar();
