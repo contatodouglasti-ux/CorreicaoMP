@@ -169,8 +169,8 @@ function mostrarAvisoLeitura() {
   if (document.querySelector('.modo-leitura-aviso')) return;
   const aviso = document.createElement('div');
   aviso.className = 'modo-leitura-aviso';
-  aviso.innerHTML = '🔒 <b>Correição finalizada.</b> Este registro está em modo somente leitura. Use "➕ Nova correição" no menu para iniciar um novo.';
-  document.getElementById('formContainer').prepend(aviso);
+  aviso.innerHTML = '🔒 <b>Correição finalizada.</b> Este registro encontra-se finalizado e disponível apenas para consulta. Caso seja necessária alguma alteração, entre em contato com a Corregedoria.';
+  document.getElementById('formContainer').prepend(aviso); 
 }
 
 /* ── Utilitários ──── */

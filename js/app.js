@@ -64,17 +64,23 @@ async function preencherCamposFixos() {
     window._dadosCarregados['1.3'] = inpMembro.value;
   }
 
-  // Unidade correicionada vinda da base (sempre bloqueada)
+  // Unidade correicionada (sempre bloqueada):
+  // prioriza o valor já salvo no registro; só busca na base se não houver.
   const inpUnidade = document.getElementById('1.1');
   if (inpUnidade) {
-    try {
-      const unidade = await buscarUnidadeDoUsuario();
-      if (unidade) {
-        inpUnidade.value = unidade;
-        window._dadosCarregados['1.1'] = unidade;
+    const unidadeSalva = String(window._dadosCarregados['1.1'] || '').trim();
+    if (unidadeSalva) {
+      inpUnidade.value = unidadeSalva;
+    } else {
+      try {
+        const unidade = await buscarUnidadeDoUsuario();
+        if (unidade) {
+          inpUnidade.value = unidade;
+          window._dadosCarregados['1.1'] = unidade;
+        }
+      } catch (err) {
+        console.error('Erro ao preencher unidade do usuário:', err);
       }
-    } catch (err) {
-      console.error('Erro ao preencher unidade do usuário:', err);
     }
     inpUnidade.readOnly = true;
     inpUnidade.tabIndex = -1;
