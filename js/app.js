@@ -209,6 +209,14 @@ async function enviarTudo() {
       throw new Error('Falha ao confirmar a finalização no banco');
     }
 
+    // 1b. Marca o usuário como NÃO pendente no admin
+    try {
+      await desativarPendenciaUsuario(email);
+      usuarioPodePreencher = false;
+    } catch (errPend) {
+      console.error('Erro ao remover pendência do usuário:', errPend);
+    }
+
     // 2. Envia payload reduzido ao Power Automate
     const payload = { registro_id: registroId, email, nome, data_envio: dataEnvio };
 

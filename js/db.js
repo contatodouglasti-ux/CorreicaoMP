@@ -110,6 +110,20 @@ async function exigirUsuarioPendente() {
   }
 }
 
+// Marca o usuário como NÃO pendente (ativo = false) após finalizar o formulário
+async function desativarPendenciaUsuario(userId = getEmailUsuario()) {
+  const { error } = await sb
+    .from('pendencias')
+    .update({
+      ativo: false,
+      atualizado_em: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  _pendenciaCache = false;
+}
+
 // Inicializa o cliente com o email do usuário no header customizado
 window.sbClient = supabase.createClient(
   CONFIG.supabase.url,
