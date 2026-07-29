@@ -1220,17 +1220,56 @@
   }
 
   async function reabrirRegistro(id) {
+  mostrarLoading('Verificando registros do usuário…');
+  let reg;
+  try {
+    reg = await carregarRegistroAdmin(id);
+
+    // Só é permitido reabrir se TODOS os registros deste usuário
+    // estiverem finalizados. Se houver algum em andamento, bloqueia.
+    const todosRegistros = await buscarTodosRegistros('');
+    const registrosDoUsuario = todosRegistros.filter(r => r.user_id === reg.user_id);
+    const temRegistroEmAndamento = registrosDoUsuario.some(
+      r => r.id !== reg.id && r.finalizado === false
+    );
+
+    if (temRegistroEmAndamento) {
+      showToast(
+        'Não é possível reabrir: este usuário possui outro registro em andamento. Finalize-o antes de reabrir qualquer registro.',
+        'erro'
+      );
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Erro ao verificar registros do usuário.', 'erro');
+    return;
+  } finally {
+    esconderLoading();
+  }
+
   if (!confirm('Deseja reabrir este registro?\n\nO status voltará para "Em andamento" e o usuário poderá editá-lo novamente.')) return;
 
   mostrarLoading('Reabrindo registro…');
   try {
-    const reg = await carregarRegistroAdmin(id);
-
     await reabrirRegistroAdmin(id);
-    await marcarUsuarioComoPendente(reg.user_id);
+
+    // Período de acesso: hoje até hoje + 3 dias
+    const hoje = new Date();
+    const dataInicio = hoje.toISOString().slice(0, 10);
+    const dataFimObj = new Date(hoje);
+    dataFimObj.setDate(dataFimObj.getDate() + 3);
+    const dataFim = dataFimObj.toISOString().slice(0, 10);
+
+    // Unidade correicionada: a mesma informada na Resposta 1.1 do registro
+    const nomeUnidadeRegistro = obterUnidadeCorreicionadaRegistro(reg);
+    const unidadeId = await resolverIdUnidadeCorreicionada(nomeUnidadeRegistro);
+
+    await marcarUsuarioComoPendente(reg.user_id, dataInicio, dataFim, unidadeId);
 
     showToast('Registro reaberto e usuário marcado como pendente ✅', 'ok');
     await buscar();
+    await carregarPendenciasAtivas();
   } catch (err) {
     console.error(err);
     showToast('Erro ao reabrir registro.', 'erro');
@@ -1238,6 +1277,34 @@
     esconderLoading();
   }
 }
+
+  /**
+   * Resolve o ID da unidade correicionada (tabela unidades_correicionadas)
+   * a partir do valor gravado no registro (Resposta 1.1), que pode já ser
+   * o próprio ID ou o nome/texto da unidade.
+   */
+  async function resolverIdUnidadeCorreicionada(valorRegistro) {
+    const valor = String(valorRegistro || '').trim();
+    if (!valor) return null;
+
+    if (!window._mapaUnidadesPendencia || window._mapaUnidadesPendencia.size === 0) {
+      await carregarOpcoesUnidadesPendencia();
+    }
+
+    const mapa = window._mapaUnidadesPendencia || new Map();
+
+    // 1) Já é o ID de uma unidade cadastrada?
+    if (mapa.has(valor)) return valor;
+
+    // 2) Corresponde ao nome de alguma unidade (ignorando acentos/maiúsculas)?
+    const alvo = normalizarTextoFiltro(valor);
+    for (const [unidadeId, nomeUnidade] of mapa) {
+      if (normalizarTextoFiltro(nomeUnidade) === alvo) return unidadeId;
+    }
+
+    // 3) Não encontrada: mantém o valor original como fallback
+    return valor;
+  }
 
   function normalizarIdOuEmail(valor) {
     return String(valor || '').trim();
