@@ -81,8 +81,8 @@
             }
 
             .proposal {
-                break-inside: avoid;
-                page-break-inside: avoid;
+                break-inside: auto;
+                page-break-inside: auto;
             }
         }
 
@@ -331,6 +331,20 @@
                 page-break-inside: avoid;
             }
 
+            /* O bloco ".proposal" (título + resposta + observações + proposição)
+               pode ficar mais alto que uma página inteira agora que as textareas
+               são expandidas para mostrar o texto completo. Se ele continuar
+               "preso" (avoid-page) feito no bloco acima, o navegador empurra o
+               bloco inteiro pra próxima página sempre que ele não couber no
+               espaço restante — deixando um vão em branco enorme na página
+               anterior, como reportado. Por isso aqui ele volta a poder quebrar
+               normalmente entre páginas; os campos internos (.field) continuam
+               "presos" para não separar o rótulo do conteúdo dele. */
+            .proposal {
+                break-inside: auto !important;
+                page-break-inside: auto !important;
+            }
+
             .meta-grid,
             .proposal-fields,
             .two-col {
@@ -393,6 +407,38 @@
             .proposal-text {
                 overflow-wrap: anywhere !important;
                 word-break: break-word !important;
+            }
+
+            /* ── Garantia extra: NADA pode ficar escondido/cortado na impressão ──
+             * Reseta overflow/max-height/line-clamp em tudo que estiver dentro do
+             * relatório, independente do que a folha de estilos externa
+             * (stylerelatorio.css) definir. Não mexe em white-space/word-break
+             * (isso já é tratado nas regras específicas acima/abaixo). */
+            .paper * {
+                overflow: visible !important;
+                max-height: none !important;
+                text-overflow: clip !important;
+                -webkit-line-clamp: unset !important;
+            }
+
+            /* ── Evita título/subtítulo "sozinho" no fim/início de página ──
+             * Mantém o cabeçalho grudado no conteúdo seguinte; se o bloco
+             * inteiro não couber, o navegador empurra cabeçalho + início do
+             * conteúdo juntos para a próxima página. */
+            h1, h2, h3,
+            .proposal-title,
+            .section-header {
+                break-after: avoid-page !important;
+                break-inside: avoid-page !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Evita que uma linha isolada de parágrafo/observação fique
+               sozinha no topo ou no fim da página (órfã/viúva). */
+            p, .value, .proposal-text, .subtle {
+                orphans: 3;
+                widows: 3;
             }
         }
     </style>
@@ -2699,5 +2745,43 @@
     <script src="js/auth.js"></script>
     <script src="js/db-admin.js"></script>
     <script src="js/formulario.js"></script>
+
+    <!-- ── Garante que NENHUM texto fique cortado na impressão ──
+         O CSS de impressão usa fonte/largura diferentes da tela, então o
+         texto de cada <textarea> "quebra linha" de outro jeito — mas a
+         altura em pixels fica com o valor calculado pra tela. Aqui a gente
+         recalcula a altura de TODAS as textareas (não só as .auto-expand)
+         no momento exato da impressão, já com o layout impresso aplicado. -->
+    <script>
+        function _expandirTextareasParaImpressao() {
+            document.querySelectorAll('textarea').forEach(function (ta) {
+                // Usa setProperty(..., 'important') porque o CSS de impressão
+                // define "height: auto !important" nas textareas — um estilo
+                // inline comum (ta.style.height = ...) NÃO consegue sobrepor
+                // um !important da folha de estilos. Só outro !important
+                // (aplicado assim, via setProperty) tem prioridade maior.
+                ta.style.setProperty('height', 'auto', 'important');
+                ta.style.setProperty('height', ta.scrollHeight + 'px', 'important');
+            });
+        }
+
+        window.addEventListener('beforeprint', function () {
+            // Roda duas vezes com requestAnimationFrame pra garantir que o
+            // navegador já terminou de aplicar o layout de impressão antes
+            // de medir o scrollHeight (evita medir com o layout de tela).
+            _expandirTextareasParaImpressao();
+            requestAnimationFrame(function () {
+                requestAnimationFrame(_expandirTextareasParaImpressao);
+            });
+        });
+
+        // Restaura a altura automática depois de imprimir/cancelar, pra não
+        // deixar a tela normal com textareas gigantes.
+        window.addEventListener('afterprint', function () {
+            document.querySelectorAll('textarea.auto-expand, textarea.table-textarea').forEach(function (ta) {
+                if (typeof autoExpand === 'function') autoExpand(ta);
+            });
+        });
+    </script>
 </body>
 </html>
