@@ -114,7 +114,7 @@ const form = {
       {"id": "45.a", "pergunta": "Em caso afirmativo, especificar.", "tipo": "textarea", dependeDe: { id: "45", valor: "Sim" }}
       
     ]
-  },
+  },/* 
    
   {
     "nome": "Dados específicos",
@@ -351,30 +351,20 @@ const form = {
         { "id": "37.s", "pergunta": "Inspeções/Visitas", "tipo": "number" }
 
     ]
-  },
+  },*/
  {
-    "nome": "Dados estatísticos gerais do órgão",
+    "nome": "Dados Extrajudiciais",
 
     "campos": [
-        {"id": "26.a", "pergunta": "Inquéritos Policiais recebidos", "tipo": "number","obrigatorio": false},
-        {"id": "26.b", "pergunta": "Termos Circunstanciados de Ocorrência recebidos", "tipo": "number"},
-        {"id": "26.c", "pergunta": "Procedimentos Investigatórios Criminais instaurados", "tipo": "number"},
-        {"id": "26.d", "pergunta": "Processos criminais recebidos", "tipo": "number"},
-        {"id": "26.e", "pergunta": "Processos cíveis recebidos", "tipo": "number"},
         {"id": "26.f", "pergunta": "Notícias de Fato (NF) autuadas", "tipo": "number"},
         {"id": "26.g", "pergunta": "Inquéritos Civis (IC) instaurados", "tipo": "number"},
         {"id": "26.h", "pergunta": "Procedimentos Preparatórios (PP) instaurados", "tipo": "number"},
         {"id": "26.i", "pergunta": "Procedimentos Administrativos (PA) instaurados", "tipo": "number"},
         {"id": "26.j", "pergunta": "Recomendações", "tipo": "number"},
         {"id": "26.k", "pergunta": "Termos de Ajustamento de Conduta (TAC)", "tipo": "number"},
-        {"id": "26.l", "pergunta": "Acordos de Não Persecução Cível (ANPC)", "tipo": "number"},
-        {"id": "26.m", "pergunta": "Acordos de Não Persecução Penal (ANPP)", "tipo": "number"},
         {"id": "26.n", "pergunta": "Reuniões", "tipo": "number"},
         {"id": "26.o", "pergunta": "Audiências públicas", "tipo": "number"},
-        {"id": "26.p", "pergunta": "Audiências judiciais", "tipo": "number" },
         {"id": "26.r", "pergunta": "Audiências extrajudiciais", "tipo": "number" },
-        {"id": "26.s", "pergunta": "Ações Civis Públicas", "tipo": "number" },
-        {"id": "26.t", "pergunta": "Ações de Improbidade", "tipo": "number" },
         {"id": "26.q", "pergunta": "Visitas em instituições de longa permanência e serviços de proteção a idosos", "tipo": "number" },
         {"id": "26.u", "pergunta": "Visitas em instituições de medidas socioeducativas em meio aberto", "tipo": "number" },
         {"id": "26.v", "pergunta": "Visitas em instituições de medidas socioeducativas de internação e semiliberdade", "tipo": "number" },
@@ -386,7 +376,25 @@ const form = {
 
       ]
   },
+{
+    "nome": "Dados Judiciais",
 
+    "campos": [
+        {"id": "26.a", "pergunta": "Inquéritos Policiais recebidos", "tipo": "number","obrigatorio": false},
+        {"id": "26.b", "pergunta": "Termos Circunstanciados de Ocorrência recebidos", "tipo": "number"},
+        {"id": "26.c", "pergunta": "Procedimentos Investigatórios Criminais instaurados", "tipo": "number"},
+        {"id": "26.d", "pergunta": "Processos criminais na fila (Total atual na data do preenchimento)", "tipo": "number"},
+        {"id": "26.d.obs", "pergunta": "Total atual na data do preenchimento", "tipo": "note"},
+        {"id": "26.e", "pergunta": "Processos cíveis na fila", "tipo": "number"},
+        {"id": "26.l", "pergunta": "Acordos de Não Persecução Cível (ANPC)", "tipo": "number"},
+        {"id": "26.m", "pergunta": "Acordos de Não Persecução Penal (ANPP)", "tipo": "number"},
+        {"id": "26.p", "pergunta": "Audiências judiciais", "tipo": "number" },
+        {"id": "26.s", "pergunta": "Ações Civis Públicas", "tipo": "number" },
+        {"id": "26.t", "pergunta": "Ações de Improbidade", "tipo": "number" }
+
+
+      ]
+  },
   
   {
     "nome": "Resolutiva e de relevância social",

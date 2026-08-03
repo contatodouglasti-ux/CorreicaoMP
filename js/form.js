@@ -1,105 +1,9 @@
 /**
  * form.js
  * Renderização do formulário por seções, validação de campos,
- * navegação entre seções e cálculos automáticos (bloco 26).
+ * navegação entre seções e cálculos automáticos.
  * Depende de: ui.js, app.js (estado global)
  */
-
-/* ════
-   ✅ CÁLCULO AUTOMÁTICO BLOCO 26
-════ */
-function calcularTotais26(dados) {
-  const get = (id) => Number(dados[id] || 0);
-
-  return {
-    "26.a": get("28.a") + get("32.a") + get("33.a") + get("35.a") + get("36.a") + get("37.a"),
-    "26.b": get("28.b") + get("32.b") + get("33.b") + get("35.b") + get("36.b") + get("37.b"),
-    "26.c": get("28.d") + get("32.c") + get("33.c") + get("35.c") + get("36.c") + get("37.c"),
-    "26.d": get("28.e") + get("32.d") + get("33.d") + get("35.d") + get("36.d") + get("37.d"),
-
-    "26.e": get("27.a") + get("29.a") + get("30.e") + get("31.a") + get("32.e") + get("33.e") + get("34.e") + get("35.e") + get("36.e") + get("37.e"),
-
-    "26.f": get("27.b") + get("28.c") + get("29.b") + get("30.f") + get("31.b") + get("32.f") + get("33.f") + get("34.f") + get("35.f") + get("36.f") + get("37.f"),
-
-    "26.g": get("27.c") + get("29.c") + get("30.g") + get("31.c") + get("33.g") + get("34.g") + get("35.g") + get("36.g") + get("37.g"),
-
-    "26.h": get("27.d") + get("29.d") + get("30.h") + get("31.d") + get("32.h") + get("33.h") + get("34.h") + get("35.h") + get("36.h") + get("37.h"),
-
-    "26.i": get("27.e") + get("29.e") + get("30.i") + get("31.e") + get("32.i") + get("33.i") + get("34.i") + get("35.i") + get("36.i") + get("37.i"),
-
-    "26.j": get("27.f") + get("29.f") + get("30.j") + get("31.f") + get("32.j") + get("33.j") + get("34.j") + get("35.j") + get("36.j") + get("37.j"),
-
-    "26.k": get("27.g") + get("29.g") + get("30.k") + get("31.g") + get("32.k") + get("33.k") + get("34.k") + get("35.k") + get("36.k") + get("37.k"),
-
-    "26.l": get("27.h") + get("29.h") + get("30.l") + get("31.h") + get("34.l") + get("35.l") + get("36.l") + get("37.l"),
-
-    "26.m": get("28.f") + get("33.m"),
-
-    "26.n": get("27.i") + get("29.i") + get("30.n") + get("32.m") + get("33.n") + get("34.n") + get("35.m") + get("36.m") + get("37.m"),
-
-    "26.o": get("27.j") + get("29.j") + get("30.o") + get("32.n") + get("33.o") + get("34.o") + get("35.n") + get("36.n") + get("37.n"),
-
-    "26.p": get("27.k") + get("28.g") + get("29.k") + get("30.p") + get("31.i") + get("32.o") + get("33.p") + get("34.p") + get("35.o") + get("36.o") + get("37.o"),
-
-    "26.r": get("27.l") + get("28.h") + get("29.l") + get("30.q") + get("31.j") + get("32.p") + get("33.q") + get("34.q") + get("35.r") + get("36.p") + get("37.p"),
-
-    "26.s": get("27.m") + get("28.i") + get("29.m") + get("30.r") + get("32.q") + get("33.r") + get("34.r") + get("35.s") + get("36.q") + get("37.q"),
-
-    "26.t": get("27.n") + get("28.j") + get("29.n") + get("30.s") + get("32.r") + get("33.s") + get("34.s") + get("35.t") + get("36.r") + get("37.r"),
-
-    "26.q": get("34.t"),
-    "26.u": get("27.p"),
-    "26.v": get("27.q"),
-    "26.w": get("27.o"),
-    "26.x": get("35.u"),
-    "26.y": get("35.v"),
-    "26.z": get("35.w"),
-
-    "26.aa": get("27.r") + get("28.k") + get("29.o") + get("30.t") + get("31.k") + get("32.s") + get("33.t") + get("34.u") + get("35.x") + get("36.s") + get("37.s")
-  };
-}
-
-function atualizarCamposCalculados() {
-  // Garante que os valores digitados mais recentes entrem no cálculo
-  const coletados = typeof coletar === 'function' ? coletar() : {};
-  const dados = { ...(window._dadosCarregados || {}), ...coletados };
-
-  const totais = calcularTotais26(dados);
-
-  Object.keys(totais).forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = totais[id];
-    dados[id] = String(totais[id]);
-  });
-
-  window._dadosCarregados = dados;
-   renderizarQuantitativosOrgao(); 
-}
-
-
-/* ════
-   ✅ TABELA-RESUMO 3.1 — Dados estatísticos gerais do órgão
-════ */
-function renderizarQuantitativosOrgao() {
-  const tbody = document.getElementById('tabela-quantitativos-orgao-body');
-  if (!tbody) return;
-  const secao = form.secoes.find(s =>
-    s.campos && s.campos.some(c => c.id && c.id.startsWith('26.'))
-  );
-  if (!secao) return;
-  const dados = window._dadosCarregados || {};
-  tbody.innerHTML = '';
-  secao.campos.forEach(campo => {
-    const tr = document.createElement('tr');
-    const tdLabel = document.createElement('td');
-    tdLabel.textContent = campo.pergunta;
-    const tdValor = document.createElement('td');
-    tdValor.textContent = dados[campo.id] || 0;
-    tr.appendChild(tdLabel);
-    tr.appendChild(tdValor);
-    tbody.appendChild(tr);
-  });
-}
 
 /* ── Helpers ──── */
 
@@ -478,6 +382,7 @@ function renderCampo(parent, campo) {
 
     const ehCalculado26 = campo.id.startsWith('26.');
 
+
     const l = document.createElement('label');
     l.className = (campo.obrigatorio !== false && !ehCalculado26)
       ? 'required campo-numero-label'
@@ -491,7 +396,7 @@ function renderCampo(parent, campo) {
     inp.id = campo.id;
     inp.className = 'campo-numero-input';
 
-    /* ✅ BLOCO 26 — somatório automático, somente leitura */
+    /* ✅ BLOCO 26 — somatório automático, somente leitura 
     if (ehCalculado26) {
       inp.readOnly = true;
       inp.required = false;
@@ -500,7 +405,7 @@ function renderCampo(parent, campo) {
       inp.title = 'Campo calculado automaticamente (somatório)';
       wrapper.appendChild(inp);
       return;
-    }
+    }*/
 
     inp.required = campo.obrigatorio !== false;
 
@@ -518,8 +423,6 @@ function renderCampo(parent, campo) {
     inp.oninput = function () {
       if (this.disabled || this.readOnly) return;
       autoSalvar();
-      // Recalcula o bloco 26 em tempo real quando campos-fonte mudam
-      atualizarCamposCalculados();
     };
 
     if (campo.tipo === 'date') {
@@ -593,6 +496,15 @@ function renderCampo(parent, campo) {
   l.className = obrigatorio ? 'required' : '';
   l.innerText = campo.pergunta;
   wrapper.appendChild(l);
+
+  if (campo.tipo === 'note' || campo.tipo === 'info') {
+    const note = document.createElement('div');
+    note.className = 'campo-nota';
+    note.innerText = campo.pergunta;
+    wrapper.innerHTML = '';
+    wrapper.appendChild(note);
+    return;
+  }
 
   if (campo.tipo === 'textarea') {
     const t = document.createElement('textarea');
@@ -730,11 +642,6 @@ function mostrar(i) {
   atualizarBarra();
   destacarItemAtivo(i);
   document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-  // Recalcula totais do bloco 26 sempre que essa seção for exibida
-  if (form.secoes[i] && form.secoes[i].campos &&
-      form.secoes[i].campos.some(c => c.id && c.id.startsWith('26.'))) {
-    atualizarCamposCalculados();
-  }
 }
 
 function atualizarBarra() {
@@ -802,8 +709,6 @@ function carregar() {
 
   avaliarCondicionais();
   atualizarEstadoSubtopicos();
-  // Recalcula os totais do bloco 26 com os dados já em _dadosCarregados
-  atualizarCamposCalculados();
 }
 
 /* ── Validação ──── */

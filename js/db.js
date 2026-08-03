@@ -145,17 +145,34 @@ const sb = window.sbClient;
  * Ajuste a tabela ('pendencias') e a coluna ('unidade') se necessário.
  */
 async function buscarUnidadeDoUsuario() {
-  const { data, error } = await sb
-    .from('pendencias')
-    .select('unidade_correicionada, unidades_correicionadas ( nome )')
-    .eq('user_id', getEmailUsuario())
-    .maybeSingle();
+  const userId = getEmailUsuario();
+  if (!userId || userId === 'desconhecido') return null;
 
-  if (error) {
-    console.error('Erro ao buscar unidade do usuário:', error);
+  try {
+    const { data: pendencia, error: errorPendencia } = await sb
+      .from('pendencias')
+      .select('unidade_correicionada')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (errorPendencia) throw errorPendencia;
+
+    const unidadeId = String(pendencia?.unidade_correicionada || '').trim();
+    if (!unidadeId) return null;
+
+    const { data: unidade, error: errorUnidade } = await sb
+      .from('unidades_correicionadas')
+      .select('nome')
+      .eq('id', unidadeId)
+      .maybeSingle();
+
+    if (errorUnidade) throw errorUnidade;
+
+    return String(unidade?.nome || '').trim();
+  } catch (err) {
+    console.error('Erro ao buscar unidade do usuário:', err);
     return null;
   }
-  return data?.unidades_correicionadas?.nome || null;
 }
 
 /* ── CRUD ──── */

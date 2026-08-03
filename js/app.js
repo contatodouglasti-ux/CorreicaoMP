@@ -51,37 +51,60 @@ function aplicarModoSomenteLeituraForcado(mensagem = 'Você não tem permissão 
 
 /* ── Campos fixos (Unidade 1.1 e Membro 1.3) ──── */
 
-async function preencherCamposFixos() {
+async function preencherCamposFixos(registroContext = null) {
   window._dadosCarregados = window._dadosCarregados || {};
+
+  const dadosContexto = registroContext?.dados || {};
+  const membroSalvo = String(
+    window._dadosCarregados['1.3'] ||
+    dadosContexto['1.3'] ||
+    registroContext?.nome || ''
+  ).trim();
+
+  const unidadeSalva = String(
+    window._dadosCarregados['1.1'] ||
+    dadosContexto['1.1'] ||
+    registroContext?.unidade_correicionada || ''
+  ).trim();
 
   // Membro Correicionado = nome do login (sempre bloqueado)
   const inpMembro = document.getElementById('1.3');
   if (inpMembro) {
-    inpMembro.value = getNomeUsuario();
+    const nomeFinal = membroSalvo || getNomeUsuario() || getEmailUsuario() || 'desconhecido';
+    inpMembro.value = nomeFinal;
     inpMembro.readOnly = true;
     inpMembro.tabIndex = -1;
     inpMembro.classList.add('campo-bloqueado');
-    window._dadosCarregados['1.3'] = inpMembro.value;
+    window._dadosCarregados['1.3'] = nomeFinal;
   }
 
   // Unidade correicionada (sempre bloqueada):
-  // prioriza o valor já salvo no registro; só busca na base se não houver.
+  // prioriza o valor já salvo no registro; depois usa a unidade vinculada ao usuário.
   const inpUnidade = document.getElementById('1.1');
   if (inpUnidade) {
-    const unidadeSalva = String(window._dadosCarregados['1.1'] || '').trim();
-    if (unidadeSalva) {
-      inpUnidade.value = unidadeSalva;
-    } else {
+    let unidadeFinal = unidadeSalva;
+
+    if (!unidadeFinal) {
       try {
-        const unidade = await buscarUnidadeDoUsuario();
-        if (unidade) {
-          inpUnidade.value = unidade;
-          window._dadosCarregados['1.1'] = unidade;
-        }
+        unidadeFinal = await buscarUnidadeDoUsuario();
       } catch (err) {
         console.error('Erro ao preencher unidade do usuário:', err);
       }
     }
+
+    if (!unidadeFinal) {
+      try {
+        unidadeFinal = await buscarUnidadeCorreicionadaUsuario();
+      } catch (err) {
+        console.error('Erro ao preencher unidade via fallback:', err);
+      }
+    }
+
+    if (unidadeFinal) {
+      inpUnidade.value = unidadeFinal;
+      window._dadosCarregados['1.1'] = unidadeFinal;
+    }
+
     inpUnidade.readOnly = true;
     inpUnidade.tabIndex = -1;
     inpUnidade.placeholder = '';
@@ -101,7 +124,6 @@ function autoSalvar() {
       const dados = coletar();
       window._dadosCarregados = { ...window._dadosCarregados, ...dados };
 
-      if (typeof atualizarCamposCalculados === 'function') atualizarCamposCalculados();
       if (typeof avaliarCondicionais === 'function') avaliarCondicionais();
       if (typeof atualizarEstadoSubtopicos === 'function') atualizarEstadoSubtopicos();
     }
@@ -293,7 +315,6 @@ async function novaCorreicao() {
     if (aviso) aviso.remove();
 
     await preencherCamposFixos();
-    atualizarCamposCalculados();
 
     avaliarCondicionais();
     abrirFormulario();
@@ -343,7 +364,7 @@ async function init() {
     window._dadosCarregados = reg.dados || {};
 
     carregar();
-    await preencherCamposFixos();
+    await preencherCamposFixos(reg);
 
     const secoesOk = reg.secoes_ok || {};
     Object.keys(secoesOk).forEach(i => {
