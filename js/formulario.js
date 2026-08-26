@@ -4,8 +4,8 @@ const ROTULOS_26 = {
   "26.a": "Inquéritos Policiais recebidos",
   "26.b": "Termos Circunstanciados de Ocorrência recebidos",
   "26.c": "Procedimentos Investigatórios Criminais instaurados",
-  "26.d": "Processos criminais recebidos",
-  "26.e": "Processos cíveis recebidos",
+  "26.d": "Processos criminais na fila",
+  "26.e": "Processos cíveis na fila",
   "26.f": "Notícias de Fato (NF) autuadas",
   "26.g": "Inquéritos Civis (IC) instaurados",
   "26.h": "Procedimentos Preparatórios (PP) instaurados",
@@ -29,6 +29,19 @@ const ROTULOS_26 = {
   "26.z": "Visitas em estabelecimentos militares",
   "26.aa": "Outras visitas/inspeções"
 };
+
+const SECOES_QUANTITATIVOS_26 = [
+  {
+    id: "judiciais",
+    titulo: "Dados Judiciais",
+    campos: ["26.a", "26.b", "26.c", "26.d", "26.e", "26.l", "26.m", "26.p", "26.s", "26.t"]
+  },
+  {
+    id: "extrajudiciais",
+    titulo: "Dados Extrajudiciais",
+    campos: ["26.f", "26.g", "26.h", "26.i", "26.j", "26.k", "26.n", "26.o", "26.r", "26.q", "26.u", "26.v", "26.w", "26.x", "26.y", "26.z", "26.aa"]
+  }
+];
 
 function calcularTotais26(dados) {
   const get = (id) => Number(extrairTexto(dados[id]) || 0);
@@ -65,22 +78,24 @@ function calcularTotais26(dados) {
 }
 
 function renderizarQuantitativosOrgao(dados) {
-  const tbody = document.getElementById('tabela-quantitativos-orgao-body');
-  if (!tbody) return;
-
   const totais = calcularTotais26(dados);
-  tbody.innerHTML = '';
 
-  Object.keys(ROTULOS_26).forEach(id => {
-    const tr = document.createElement('tr');
-    const tdLabel = document.createElement('td');
-    tdLabel.textContent = ROTULOS_26[id];
-    const tdValor = document.createElement('td');
-    // usa valor salvo (se existir) ou recalcula pela somatória
-    tdValor.textContent = extrairTexto(dados[id]) || totais[id] || 0;
-    tr.appendChild(tdLabel);
-    tr.appendChild(tdValor);
-    tbody.appendChild(tr);
+  SECOES_QUANTITATIVOS_26.forEach(secao => {
+    const tbody = document.getElementById(`tabela-quantitativos-${secao.id}-body`);
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    secao.campos.forEach(id => {
+      const tr = document.createElement('tr');
+      const tdLabel = document.createElement('td');
+      tdLabel.textContent = ROTULOS_26[id];
+      const tdValor = document.createElement('td');
+      // Usa o valor salvo (se existir) ou recalcula pela somatória.
+      tdValor.textContent = extrairTexto(dados[id]) || totais[id] || 0;
+      tr.appendChild(tdLabel);
+      tr.appendChild(tdValor);
+      tbody.appendChild(tr);
+    });
   });
 }
 

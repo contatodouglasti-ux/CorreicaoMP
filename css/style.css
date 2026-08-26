@@ -339,6 +339,15 @@ label.required::after {
   color: #ff4d4f;
 }
 
+/* Texto de apoio exibido abaixo de um campo. */
+.campo-nota {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #607d8b;
+  font-style: italic;
+}
+
 input, textarea {
   width: 100%;
   padding: 10px;

@@ -999,4 +999,9 @@ input[type="text"].auto-expand {
     .relatorio-salvar-flutuante {
         display: none !important;
     }
+
+    /* O seletor serve apenas para edição; a textarea mantém o texto escolhido. */
+    .modelo-texto-seletor {
+        display: none !important;
+    }
 }

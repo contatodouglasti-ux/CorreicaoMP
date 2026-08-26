@@ -968,15 +968,30 @@
                    
 
                     <div class="field">
-                    <label>Dados estatísticos gerais do órgão</label>
-                    <table id="tabela-quantitativos-orgao" class="tabela-quantitativos">
+                    <label>Dados Judiciais</label>
+                    <table id="tabela-quantitativos-judiciais" class="tabela-quantitativos">
                         <thead>
                             <tr>
                                 <th>Item</th>
                                 <th>Quantidade</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-quantitativos-orgao-body">
+                        <tbody id="tabela-quantitativos-judiciais-body">
+                            <!-- preenchido dinamicamente por renderizarQuantitativosOrgao() -->
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div class="field">
+                    <label>Dados Extrajudiciais</label>
+                    <table id="tabela-quantitativos-extrajudiciais" class="tabela-quantitativos">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-quantitativos-extrajudiciais-body">
                             <!-- preenchido dinamicamente por renderizarQuantitativosOrgao() -->
                         </tbody>
                     </table>
@@ -2633,7 +2648,7 @@
             <div class="field" style="margin-top:12px;">
                
             <label>16.1. DIAGNÓSTICO DOS SERVIÇOS CORREICIONADOS</label>
-    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo161(this)">
+    <select class="table-input modelo-texto-seletor" style="margin-bottom:6px;" onchange="aplicarModelo161(this)">
         <option value="">— Escolher modelo de texto —</option>
         <option value="modelo1">Modelo 1 – Serviços em ritmo regular/satisfatório</option>
         <option value="modelo2">Modelo 2 – Serviços com pendências</option>
@@ -2646,7 +2661,7 @@
             <label>16.2 ASPECTOS POSITIVOS E BOAS PRÁTICAS</label>
          <div class="subtle">Merece registro elogioso o empenho do(a) Promotor(a) de Justiça Titular e de sua equipe técnica no que tange a:</div>
   
-    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo162(this)">
+    <select class="table-input modelo-texto-seletor" style="margin-bottom:6px;" onchange="aplicarModelo162(this)">
         <option value="">— Escolher modelo de texto —</option>
         <option value="modelo3">Modelo 1 – Excelente índice </option>
         <option value="modelo4">Modelo 2 – Organização e constante</option>
@@ -2661,7 +2676,7 @@
                 <div class="subtle">Por outro lado, identificaram-se inconformidades pontuais que demandam correção, tais como:</div>
 
             
-    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo163(this)">
+    <select class="table-input modelo-texto-seletor" style="margin-bottom:6px;" onchange="aplicarModelo163(this)">
         <option value="">— Escolher modelo de texto —</option>
         
         <option value="modelo6">Modelo 1 – Acúmulo excessivo</option>
@@ -2677,7 +2692,7 @@
                 <div class="subtle">Diante das falhas anotadas, DETERMINA-SE ao(à) Promotor(a) de Justiça Titular, sob as penas legais e regimentais, que:</div>
 
             
-    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo164(this)">
+    <select class="table-input modelo-texto-seletor" style="margin-bottom:6px;" onchange="aplicarModelo164(this)">
         <option value="">— Escolher modelo de texto —</option>
         <option value="modelo8">Modelo 1 – Promova o saneamento </option>
         <option value="modelo9">Modelo 2 – Regularize o lançamento</option>
@@ -2690,7 +2705,7 @@
                 <div class="subtle">Ademais, RECOMENDA-SE à chefia da unidade correicionada que:</div>
 
             
-    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo165(this)">
+    <select class="table-input modelo-texto-seletor" style="margin-bottom:6px;" onchange="aplicarModelo165(this)">
         <option value="">— Escolher modelo de texto —</option>
         <option value="modelo10">Modelo 1 – Estabeleça um cronograma </option>
         <option value="modelo11">Modelo 2 – Adote o modelo de fluxograma</option>
@@ -2710,7 +2725,7 @@
  <div class="field" style="margin-top:12px;">
        
             
-    <select class="table-input" style="margin-bottom:6px;" onchange="aplicarModelo166(this)">
+    <select class="table-input modelo-texto-seletor" style="margin-bottom:6px;" onchange="aplicarModelo166(this)">
         <option value="">— Escolher modelo de texto —</option>
         <option value="modelo12">Modelo 1 – Considerando que as falhas constatadas </option>
         <option value="modelo13">Modelo 2 – Comunique-se o teor deste relatório</option>

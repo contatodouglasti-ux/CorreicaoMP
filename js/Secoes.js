@@ -383,7 +383,7 @@ const form = {
         {"id": "26.a", "pergunta": "Inquéritos Policiais recebidos", "tipo": "number","obrigatorio": false},
         {"id": "26.b", "pergunta": "Termos Circunstanciados de Ocorrência recebidos", "tipo": "number"},
         {"id": "26.c", "pergunta": "Procedimentos Investigatórios Criminais instaurados", "tipo": "number"},
-        {"id": "26.d", "pergunta": "Processos criminais na fila (Total atual na data do preenchimento)", "tipo": "number"},
+        {"id": "26.d", "pergunta": "Processos criminais na fila", "tipo": "number"},
         {"id": "26.d.obs", "pergunta": "Total atual na data do preenchimento", "tipo": "note"},
         {"id": "26.e", "pergunta": "Processos cíveis na fila", "tipo": "number"},
         {"id": "26.l", "pergunta": "Acordos de Não Persecução Cível (ANPC)", "tipo": "number"},
