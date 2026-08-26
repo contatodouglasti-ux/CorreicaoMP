@@ -50,7 +50,7 @@
 
     return Promise.all((data || []).map(async anexo => {
       const { data: link, error: erroLink } = await sbVisitas.storage
-        .from('anexos_visitas_unidades').createSignedUrl(anexo.caminho, 3600);
+        .from('anexos_visitas_unidades').createSignedUrl(anexo.caminho, 60 * 60 * 24 * 7);
       if (erroLink) throw erroLink;
       return { ...anexo, url: link.signedUrl };
     }));
@@ -85,6 +85,13 @@
     if (error) throw error;
     visitaRascunhoId = data.id;
     iniciarNovoRascunho = false;
+    return data;
+  };
+
+  window.carregarVisitaDoHistorico = async function carregarVisitaDoHistorico(id) {
+    const { data, error } = await sbVisitas.from('visitas_unidades_prisionais')
+      .select('id, dados').eq('id', id).single();
+    if (error) throw error;
     return data;
   };
 

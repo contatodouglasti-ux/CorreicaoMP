@@ -72,7 +72,7 @@ async function abrirHistorico() {
             const status = visita.status === "rascunho" ? "Rascunho" : "Enviada";
             return `<article class="history-item">
               <div><strong>${titulo}</strong><span>${visita.estabelecimento || "Unidade não informada"} · ${formatarDataHistorico(visita.data_visita || visita.criado_em)}</span></div>
-              <div class="history-item-actions"><em class="status-${visita.status}">${status}</em><button type="button" onclick="visualizarAnexos('${visita.id}')">Ver anexos</button>${visita.status === "rascunho" ? `<button type="button" onclick="continuarRascunho('${visita.id}')">Continuar</button>` : ""}</div>
+              <div class="history-item-actions"><em class="status-${visita.status}">${status}</em><button type="button" onclick="visualizarAnexos('${visita.id}')">Ver anexos</button><button type="button" onclick="baixarPdfHistorico('${visita.id}')">Baixar PDF</button>${visita.status === "rascunho" ? `<button type="button" onclick="continuarRascunho('${visita.id}')">Continuar</button>` : ""}</div>
             </article>`;
         }).join("") : '<p class="history-empty">Nenhuma visita salva ainda.</p>';
         const novo = document.getElementById("newDraftBtn");
@@ -115,6 +115,73 @@ async function visualizarAnexos(visitaId) {
 
 function fecharAnexos() {
     document.getElementById("attachmentsPanel").hidden = true;
+}
+
+async function baixarPdfHistorico(visitaId) {
+    try {
+        const visita = await carregarVisitaDoHistorico(visitaId);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        let y = 18;
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(15);
+        pdf.text("RELATÓRIO DE VISITA A UNIDADES PRISIONAIS", 14, y);
+        y += 10;
+
+        document.querySelectorAll(".step").forEach(secao => {
+            const titulo = secao.querySelector("h2")?.textContent?.trim();
+            const linhas = [];
+            const nomesProcessados = new Set();
+
+            secao.querySelectorAll("[name]").forEach(campo => {
+                if (!campo.name || campo.type === "file" || nomesProcessados.has(campo.name)) return;
+                nomesProcessados.add(campo.name);
+                const valor = visita.dados?.[campo.name];
+                if (valor === undefined || valor === null || valor === "") return;
+                const rotulo = campo.closest(".field")?.querySelector("label")?.textContent?.replace("*", "").trim() || campo.name;
+                linhas.push([rotulo, String(valor)]);
+            });
+
+            if (!linhas.length) return;
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(12);
+            pdf.text(titulo, 14, y);
+            y += 4;
+            pdf.autoTable({
+                startY: y,
+                head: [["Campo", "Resposta"]],
+                body: linhas,
+                theme: "grid",
+                styles: { fontSize: 8, overflow: "linebreak", valign: "top" },
+                columnStyles: { 0: { cellWidth: 65 }, 1: { cellWidth: 115 } }
+            });
+            y = pdf.lastAutoTable.finalY + 10;
+        });
+
+        const anexos = await listarAnexosVisita(visitaId);
+        if (anexos.length) {
+            pdf.addPage();
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text("ANEXOS", 14, 20);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);
+            let yAnexo = 32;
+            anexos.forEach((anexo, indice) => {
+                if (yAnexo > 275) {
+                    pdf.addPage();
+                    yAnexo = 20;
+                }
+                pdf.textWithLink(`${indice + 1}. ${anexo.nome_arquivo}`, 14, yAnexo, { url: anexo.url });
+                yAnexo += 9;
+            });
+        }
+
+        pdf.save("relatorio-inspecao.pdf");
+    } catch (error) {
+        alert(`Não foi possível gerar o PDF: ${error.message}`);
+    }
 }
 
 async function continuarRascunho(id) {
@@ -321,8 +388,10 @@ if (!form.checkValidity()) {
         }
      
 
-        const { jsPDF } = window.jspdf;
+const { jsPDF } = window.jspdf;
 const pdf = new jsPDF();
+let resolverPdf;
+const pdfPronto = new Promise(resolve => { resolverPdf = resolve; });
 
 const data = jsonData;
 // ================= INÍCIO PDF =================
@@ -628,7 +697,7 @@ const secoes = {
 
   
     // ===== DOWNLOAD =====
-    pdf.save("relatorio-inspecao.pdf");
+    resolverPdf(pdf);
  };
  // ================= FIM PDF =================
 
@@ -636,6 +705,26 @@ const secoes = {
         const arquivos = Array.from(document.getElementById("foto").files);
         const registro = await salvarVisitaNoSupabase(jsonData);
         if (arquivos.length) await enviarAnexosVisita(registro.id, arquivos);
+        const pdfFinal = await pdfPronto;
+        const anexosPdf = await listarAnexosVisita(registro.id);
+        if (anexosPdf.length) {
+            pdfFinal.addPage();
+            pdfFinal.setFont("helvetica", "bold");
+            pdfFinal.setFontSize(14);
+            pdfFinal.text("ANEXOS", 14, 20);
+            pdfFinal.setFont("helvetica", "normal");
+            pdfFinal.setFontSize(10);
+            let yAnexo = 32;
+            anexosPdf.forEach((anexo, indice) => {
+                if (yAnexo > 275) {
+                    pdfFinal.addPage();
+                    yAnexo = 20;
+                }
+                pdfFinal.textWithLink(`${indice + 1}. ${anexo.nome_arquivo}`, 14, yAnexo, { url: anexo.url });
+                yAnexo += 9;
+            });
+        }
+        pdfFinal.save("relatorio-inspecao.pdf");
 
         okBox.style.background = "#d1e7dd";
         okBox.style.color = "#0f5132";
