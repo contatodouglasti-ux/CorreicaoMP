@@ -48,6 +48,12 @@ create policy visitas_unidades_prisionais_ler_proprias
 on public.visitas_unidades_prisionais for select to anon
 using (criado_por = lower(coalesce(current_setting('request.headers', true)::json ->> 'x-user-id', '')));
 
+drop policy if exists visitas_unidades_prisionais_atualizar_propria on public.visitas_unidades_prisionais;
+create policy visitas_unidades_prisionais_atualizar_propria
+on public.visitas_unidades_prisionais for update to anon
+using (criado_por = lower(coalesce(current_setting('request.headers', true)::json ->> 'x-user-id', '')))
+with check (criado_por = lower(coalesce(current_setting('request.headers', true)::json ->> 'x-user-id', '')));
+
 insert into storage.buckets (id, name, public)
 values ('anexos_visitas_unidades', 'anexos_visitas_unidades', false)
 on conflict (id) do nothing;

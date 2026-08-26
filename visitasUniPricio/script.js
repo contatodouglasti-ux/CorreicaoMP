@@ -37,6 +37,165 @@ const prevBtn = document.querySelector(".prev");
 
 const okBox = document.getElementById("ok");
 
+function formatarDataHistorico(data) {
+    if (!data) return "Sem data";
+    const [ano, mes, dia] = String(data).slice(0, 10).split("-");
+    return ano ? `${dia}/${mes}/${ano}` : data;
+}
+
+function preencherFormulario(dados) {
+    Object.entries(dados || {}).forEach(([nome, valor]) => {
+        const campos = document.querySelectorAll(`[name="${CSS.escape(nome)}"]`);
+        campos.forEach(campo => {
+            if (campo.type === "radio" || campo.type === "checkbox") {
+                campo.checked = campo.value === valor;
+                if (campo.checked) campo.dispatchEvent(new Event("change"));
+            } else if (campo.type !== "file") {
+                campo.value = valor;
+                campo.dispatchEvent(new Event("change"));
+            }
+        });
+    });
+}
+
+async function abrirHistorico() {
+    const painel = document.getElementById("historyPanel");
+    const lista = document.getElementById("historyList");
+    painel.hidden = false;
+    lista.innerHTML = '<p class="history-loading">Carregando histórico...</p>';
+
+    try {
+        const visitas = await listarVisitasDoUsuario();
+        const rascunhos = visitas.filter(visita => visita.status === "rascunho");
+        lista.innerHTML = visitas.length ? visitas.map(visita => {
+            const titulo = visita.municipio || visita.estabelecimento || "Visita sem identificação";
+            const status = visita.status === "rascunho" ? "Rascunho" : "Enviada";
+            return `<article class="history-item">
+              <div><strong>${titulo}</strong><span>${visita.estabelecimento || "Unidade não informada"} · ${formatarDataHistorico(visita.data_visita || visita.criado_em)}</span></div>
+              <div class="history-item-actions"><em class="status-${visita.status}">${status}</em><button type="button" onclick="visualizarAnexos('${visita.id}')">Ver anexos</button>${visita.status === "rascunho" ? `<button type="button" onclick="continuarRascunho('${visita.id}')">Continuar</button>` : ""}</div>
+            </article>`;
+        }).join("") : '<p class="history-empty">Nenhuma visita salva ainda.</p>';
+        const novo = document.getElementById("newDraftBtn");
+        novo.disabled = rascunhos.length >= 2;
+        novo.title = novo.disabled ? "O limite de dois rascunhos foi atingido." : "";
+    } catch (error) {
+        lista.innerHTML = `<p class="history-empty">Não foi possível carregar o histórico: ${error.message}</p>`;
+    }
+}
+
+function fecharHistorico() {
+    document.getElementById("historyPanel").hidden = true;
+}
+
+function renderizarAnexos(anexos, destino) {
+    destino.innerHTML = anexos.length ? anexos.map(anexo => anexo.tipo_arquivo.startsWith("image/")
+        ? `<a href="${anexo.url}" target="_blank" rel="noopener"><img src="${anexo.url}" alt="${anexo.nome_arquivo}"><span>${anexo.nome_arquivo}</span></a>`
+        : `<a class="attachment-file" href="${anexo.url}" target="_blank" rel="noopener">📄 ${anexo.nome_arquivo}</a>`
+    ).join("") : '<p class="history-empty">Nenhum anexo enviado.</p>';
+}
+
+async function mostrarAnexosNoFormulario(visitaId) {
+    const preview = document.getElementById("photoPreview");
+    const anexos = await listarAnexosVisita(visitaId);
+    renderizarAnexos(anexos, preview);
+    if (anexos.length) document.getElementById("foto").required = false;
+}
+
+async function visualizarAnexos(visitaId) {
+    const painel = document.getElementById("attachmentsPanel");
+    const lista = document.getElementById("attachmentsList");
+    painel.hidden = false;
+    lista.innerHTML = '<p class="history-loading">Carregando anexos...</p>';
+    try {
+        renderizarAnexos(await listarAnexosVisita(visitaId), lista);
+    } catch (error) {
+        lista.innerHTML = `<p class="history-empty">Não foi possível carregar os anexos: ${error.message}</p>`;
+    }
+}
+
+function fecharAnexos() {
+    document.getElementById("attachmentsPanel").hidden = true;
+}
+
+async function continuarRascunho(id) {
+    try {
+        const visita = await carregarRascunhoVisita(id);
+        preencherFormulario(visita.dados);
+        await mostrarAnexosNoFormulario(visita.id);
+        i = 0;
+        show();
+        fecharHistorico();
+        okBox.style.display = "block";
+        okBox.style.background = "#d1e7dd";
+        okBox.style.color = "#0f5132";
+        okBox.textContent = "Rascunho carregado. Você pode continuar o preenchimento.";
+    } catch (error) {
+        alert(`Não foi possível carregar o rascunho: ${error.message}`);
+    }
+}
+
+async function novoRascunho() {
+    try {
+        await iniciarNovoRascunhoVisita();
+        document.getElementById("form").reset();
+        i = 0;
+        show();
+        fecharHistorico();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+function dadosDaSecaoAtual() {
+    const dados = {};
+    steps[i].querySelectorAll("[name]").forEach(campo => {
+        if (campo.disabled || campo.type === "file") return;
+        if ((campo.type === "radio" || campo.type === "checkbox") && !campo.checked) return;
+        dados[campo.name] = campo.value;
+    });
+    return dados;
+}
+
+async function salvarSecaoAtual() {
+    const camposInvalidos = Array.from(steps[i].querySelectorAll("[name]"))
+        .filter(campo => !campo.disabled && !campo.checkValidity());
+    if (camposInvalidos.length) {
+        document.getElementById("form").classList.add("form-enviado");
+        camposInvalidos[0].focus();
+        camposInvalidos[0].reportValidity();
+        return;
+    }
+
+    const botao = document.querySelector(".save-section");
+    const textoOriginal = botao.textContent;
+    botao.disabled = true;
+    botao.textContent = "Salvando...";
+
+    try {
+        const registro = await salvarRascunhoVisita(dadosDaSecaoAtual());
+        if (i === steps.length - 1) {
+            const arquivos = Array.from(document.getElementById("foto").files);
+            if (arquivos.length) {
+                await enviarAnexosVisita(registro.id, arquivos);
+                document.getElementById("foto").value = "";
+                await mostrarAnexosNoFormulario(registro.id);
+            }
+        }
+        okBox.style.display = "block";
+        okBox.style.background = "#d1e7dd";
+        okBox.style.color = "#0f5132";
+        okBox.textContent = `Seção ${i + 1} salva com sucesso.`;
+    } catch (error) {
+        okBox.style.display = "block";
+        okBox.style.background = "#f8d7da";
+        okBox.style.color = "#842029";
+        okBox.textContent = `Não foi possível salvar a seção: ${error.message}`;
+    } finally {
+        botao.disabled = false;
+        botao.textContent = textoOriginal;
+    }
+}
+
 function show(){
 
     steps.forEach((s, idx)=>{
@@ -474,8 +633,9 @@ const secoes = {
  // ================= FIM PDF =================
 
 
-        const arquivo = document.getElementById("foto").files[0];
-        const registro = await salvarVisitaNoSupabase(jsonData, arquivo);
+        const arquivos = Array.from(document.getElementById("foto").files);
+        const registro = await salvarVisitaNoSupabase(jsonData);
+        if (arquivos.length) await enviarAnexosVisita(registro.id, arquivos);
 
         okBox.style.background = "#d1e7dd";
         okBox.style.color = "#0f5132";
@@ -697,19 +857,21 @@ obrigarCampoQuandoSim(
 const inputFile = document.getElementById("foto");
 
 inputFile.addEventListener("change", function () {
-
-    const file = this.files[0];
-
-    if (!file) return;
-
     const maxSize = 10 * 1024 * 1024; // 10MB em bytes
-
-    if (file.size > maxSize) {
-
-        alert("Arquivo muito grande! Máximo permitido: 10MB");
-
-        this.value = ""; // limpa o campo
+    const permitidos = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    const arquivos = Array.from(this.files);
+    const invalido = arquivos.find(file => file.size > maxSize || !permitidos.includes(file.type));
+    if (invalido) {
+        alert("Use imagens JPG, PNG ou WEBP e PDFs de até 10MB por arquivo.");
+        this.value = "";
+        return;
     }
+
+    const preview = document.getElementById("photoPreview");
+    preview.innerHTML = arquivos.map(file => file.type.startsWith("image/")
+        ? `<span><img src="${URL.createObjectURL(file)}" alt="${file.name}"><small>${file.name}</small></span>`
+        : `<span class="attachment-file">📄 ${file.name}</span>`
+    ).join("");
 }
 );
 
@@ -1004,3 +1166,27 @@ function controlarCampos(simRadio, naoRadio, campos) {
 
   atualizar();
 }
+
+async function carregarUltimoRascunhoAoIniciar() {
+  try {
+    const visitas = await listarVisitasDoUsuario();
+    const ultimoRascunho = visitas.find(visita => visita.status === "rascunho");
+    if (!ultimoRascunho) return;
+
+    const visita = await carregarRascunhoVisita(ultimoRascunho.id);
+    preencherFormulario(visita.dados);
+    await mostrarAnexosNoFormulario(visita.id);
+    i = 0;
+    show();
+
+    okBox.style.display = "block";
+    okBox.style.background = "#d1e7dd";
+    okBox.style.color = "#0f5132";
+    okBox.textContent = "O último rascunho foi carregado automaticamente.";
+  } catch (error) {
+    // A página continua utilizável mesmo se o usuário ainda não tiver histórico.
+    console.warn("Não foi possível carregar o último rascunho:", error.message);
+  }
+}
+
+window.addEventListener("load", carregarUltimoRascunhoAoIniciar);

@@ -15,12 +15,35 @@
     <span><strong>MPAM · CGMP</strong><small>Visitas a Unidades Prisionais</small></span>
   </a>
   <div class="topbar-actions">
+    <button class="history-btn" type="button" onclick="abrirHistorico()">Histórico</button>
     <button class="menu-btn" type="button" onclick="toggleMenu()" aria-controls="sidebar" aria-expanded="false">
       <span aria-hidden="true">☰</span><span>Seções</span>
     </button>
     <a class="back-link" href="../home.html">← Página inicial</a>
   </div>
 </header>
+
+<section class="history-panel" id="historyPanel" hidden aria-label="Histórico de visitas">
+  <div class="history-dialog">
+    <div class="history-header">
+      <div><span>Visitas a unidades</span><h2>Histórico e rascunhos</h2></div>
+      <button type="button" class="history-close" onclick="fecharHistorico()" aria-label="Fechar histórico">×</button>
+    </div>
+    <p class="history-help">Continue um rascunho salvo ou consulte os registros enviados.</p>
+    <div class="history-list" id="historyList"></div>
+    <button type="button" class="new-draft-btn" id="newDraftBtn" onclick="novoRascunho()">+ Novo rascunho</button>
+  </div>
+</section>
+
+<section class="attachments-panel" id="attachmentsPanel" hidden aria-label="Anexos da visita">
+  <div class="attachments-dialog">
+    <div class="history-header">
+      <div><span>Registro fotográfico</span><h2>Anexos da visita</h2></div>
+      <button type="button" class="history-close" onclick="fecharAnexos()" aria-label="Fechar anexos">×</button>
+    </div>
+    <div class="attachments-list" id="attachmentsList"></div>
+  </div>
+</section>
 
 <div class="menu-overlay" id="menuOverlay" onclick="fecharMenu()"></div>
 <main class="form-layout">
@@ -537,13 +560,14 @@
 <div class="field"><label>Considerações finais<span class="obrigatorio"> *</span></label><textarea name="consideracoes" required></textarea></div>
 
 <div class="field"><label>Registro fotográfico<span class="obrigatorio"> *</span></label><p>Anexar fotografias das irregularidades eventualmente detectadas.
-(Para a visita do mês de março, observar o disposto no parágrafo único, do art. 5º, do Ato nº 002/2025/CGMP, de 10/10/2025)</p><input type="file" name="foto" id="foto" accept="image/*,application/pdf" required></div>
+(Para a visita do mês de março, observar o disposto no parágrafo único, do art. 5º, do Ato nº 002/2025/CGMP, de 10/10/2025)</p><input type="file" name="foto" id="foto" accept="image/jpeg,image/png,image/webp,application/pdf" multiple required><div class="photo-preview" id="photoPreview"></div></div>
 
 </div>
 
 <!-- NAV -->
 <div class="nav">
 <button type="button" class="prev" onclick="prev()">Anterior</button>
+<button type="button" class="save-section" onclick="salvarSecaoAtual()">Salvar seção</button>
 <button type="button" class="next" onclick="next()">Próximo</button>
 </div>
 
