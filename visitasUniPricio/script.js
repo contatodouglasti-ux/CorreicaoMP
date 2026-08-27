@@ -36,6 +36,50 @@ const nextBtn = document.querySelector(".next");
 const prevBtn = document.querySelector(".prev");
 
 const okBox = document.getElementById("ok");
+let anexosPendentes = [];
+let anexosSalvosNoFormulario = [];
+
+function escapeHtml(texto) {
+    const elemento = document.createElement("span");
+    elemento.textContent = texto || "";
+    return elemento.innerHTML;
+}
+
+function sincronizarArquivosPendentes() {
+    const input = document.getElementById("foto");
+    const transferencia = new DataTransfer();
+    anexosPendentes.forEach(arquivo => transferencia.items.add(arquivo));
+    input.files = transferencia.files;
+    input.required = anexosPendentes.length === 0 && anexosSalvosNoFormulario.length === 0;
+}
+
+function atualizarPreviaAnexos() {
+    const preview = document.getElementById("photoPreview");
+    const salvos = anexosSalvosNoFormulario.map(anexo => anexo.tipo_arquivo.startsWith("image/")
+        ? `<a class="attachment-saved" href="${anexo.url}" target="_blank" rel="noopener"><img src="${anexo.url}" alt="${escapeHtml(anexo.nome_arquivo)}"><small>${escapeHtml(anexo.nome_arquivo)}</small></a>`
+        : `<a class="attachment-file attachment-saved" href="${anexo.url}" target="_blank" rel="noopener">📄 ${escapeHtml(anexo.nome_arquivo)}</a>`
+    );
+    const pendentes = anexosPendentes.map((arquivo, indice) => {
+        const nome = escapeHtml(arquivo.name);
+        const conteudo = arquivo.type.startsWith("image/")
+            ? `<img src="${URL.createObjectURL(arquivo)}" alt="${nome}"><small>${nome}</small>`
+            : `<span class="attachment-file">📄 ${nome}</span>`;
+        return `<span class="attachment-pending">${conteudo}<button type="button" class="remove-attachment" onclick="removerAnexoPendente(${indice})" aria-label="Remover ${nome}">Remover</button></span>`;
+    });
+    preview.innerHTML = [...salvos, ...pendentes].join("");
+}
+
+function removerAnexoPendente(indice) {
+    anexosPendentes.splice(indice, 1);
+    sincronizarArquivosPendentes();
+    atualizarPreviaAnexos();
+}
+
+function limparAnexosPendentes() {
+    anexosPendentes = [];
+    sincronizarArquivosPendentes();
+    atualizarPreviaAnexos();
+}
 
 function formatarDataHistorico(data) {
     if (!data) return "Sem data";
@@ -72,7 +116,7 @@ async function abrirHistorico() {
             const status = visita.status === "rascunho" ? "Rascunho" : "Enviada";
             return `<article class="history-item">
               <div><strong>${titulo}</strong><span>${visita.estabelecimento || "Unidade não informada"} · ${formatarDataHistorico(visita.data_visita || visita.criado_em)}</span></div>
-              <div class="history-item-actions"><em class="status-${visita.status}">${status}</em><button type="button" onclick="visualizarAnexos('${visita.id}')">Ver anexos</button><button type="button" onclick="baixarPdfHistorico('${visita.id}')">Baixar PDF</button>${visita.status === "rascunho" ? `<button type="button" onclick="continuarRascunho('${visita.id}')">Continuar</button>` : ""}</div>
+              <div class="history-item-actions"><em class="status-${visita.status}">${status}</em><button type="button" onclick="visualizarAnexos('${visita.id}')">Ver anexos</button><button type="button" onclick="baixarPdfHistorico('${visita.id}')">Imprimir PDF</button>${visita.status === "rascunho" ? `<button type="button" onclick="continuarRascunho('${visita.id}')">Continuar</button>` : ""}</div>
             </article>`;
         }).join("") : '<p class="history-empty">Nenhuma visita salva ainda.</p>';
         const novo = document.getElementById("newDraftBtn");
@@ -95,10 +139,9 @@ function renderizarAnexos(anexos, destino) {
 }
 
 async function mostrarAnexosNoFormulario(visitaId) {
-    const preview = document.getElementById("photoPreview");
-    const anexos = await listarAnexosVisita(visitaId);
-    renderizarAnexos(anexos, preview);
-    if (anexos.length) document.getElementById("foto").required = false;
+    anexosSalvosNoFormulario = await listarAnexosVisita(visitaId);
+    sincronizarArquivosPendentes();
+    atualizarPreviaAnexos();
 }
 
 async function visualizarAnexos(visitaId) {
@@ -117,17 +160,55 @@ function fecharAnexos() {
     document.getElementById("attachmentsPanel").hidden = true;
 }
 
+function prepararImpressao() {
+    return window.open("", "_blank");
+}
+
+function imprimirPdf(pdf, janela) {
+    pdf.autoPrint();
+    const urlPdf = pdf.output("bloburl");
+
+    if (janela) {
+        janela.location.href = urlPdf;
+        window.setTimeout(() => URL.revokeObjectURL(urlPdf), 60000);
+        return;
+    }
+
+    window.open(urlPdf, "_blank");
+}
+
+async function adicionarCabecalhoPdf(pdf) {
+    const resposta = await fetch(new URL("logo.png", window.location.href));
+    if (!resposta.ok) throw new Error("NÃ£o foi possÃ­vel carregar a imagem do cabeÃ§alho.");
+
+    const logoBase64 = await fileToBase64(await resposta.blob());
+    const propriedades = pdf.getImageProperties(logoBase64);
+    const margem = 5;
+    const largura = pdf.internal.pageSize.getWidth() - (margem * 2);
+    const altura = largura * (propriedades.height / propriedades.width);
+    const linhaY = altura + 8;
+
+    pdf.addImage(logoBase64, "PNG", margem, 4, largura, altura);
+    pdf.setDrawColor(124, 26, 27);
+    pdf.line(margem, linhaY, pdf.internal.pageSize.getWidth() - margem, linhaY);
+    return linhaY + 8;
+}
+
 async function baixarPdfHistorico(visitaId) {
+    const janelaImpressao = prepararImpressao();
     try {
         const visita = await carregarVisitaDoHistorico(visitaId);
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
-        let y = 18;
+        let y = await adicionarCabecalhoPdf(pdf);
 
-        pdf.setFont("helvetica", "bold");
+        /* Título textual removido: o cabeçalho visual é a própria imagem. */
+        /* pdf.setFont("helvetica", "bold");
         pdf.setFontSize(15);
+        pdf.setTextColor(124, 26, 27);
         pdf.text("RELATÓRIO DE VISITA A UNIDADES PRISIONAIS", 14, y);
-        y += 10;
+        pdf.setTextColor(0, 0, 0);
+        y += 10; */
 
         document.querySelectorAll(".step").forEach(secao => {
             const titulo = secao.querySelector("h2")?.textContent?.trim();
@@ -154,7 +235,8 @@ async function baixarPdfHistorico(visitaId) {
                 body: linhas,
                 theme: "grid",
                 styles: { fontSize: 8, overflow: "linebreak", valign: "top" },
-                columnStyles: { 0: { cellWidth: 65 }, 1: { cellWidth: 115 } }
+                columnStyles: { 0: { cellWidth: 65 }, 1: { cellWidth: 115 } },
+                headStyles: { fillColor: [124, 26, 27], textColor: 255 }
             });
             y = pdf.lastAutoTable.finalY + 10;
         });
@@ -178,8 +260,9 @@ async function baixarPdfHistorico(visitaId) {
             });
         }
 
-        pdf.save("relatorio-inspecao.pdf");
+        imprimirPdf(pdf, janelaImpressao);
     } catch (error) {
+        janelaImpressao?.close();
         alert(`Não foi possível gerar o PDF: ${error.message}`);
     }
 }
@@ -241,10 +324,10 @@ async function salvarSecaoAtual() {
     try {
         const registro = await salvarRascunhoVisita(dadosDaSecaoAtual());
         if (i === steps.length - 1) {
-            const arquivos = Array.from(document.getElementById("foto").files);
+            const arquivos = [...anexosPendentes];
             if (arquivos.length) {
                 await enviarAnexosVisita(registro.id, arquivos);
-                document.getElementById("foto").value = "";
+                anexosPendentes = [];
                 await mostrarAnexosNoFormulario(registro.id);
             }
         }
@@ -354,6 +437,7 @@ if (!form.checkValidity()) {
 
     return;
 }
+    const janelaImpressao = prepararImpressao();
     okBox.style.display = "block";
 
     okBox.style.background = "#fff3cd";
@@ -390,6 +474,7 @@ if (!form.checkValidity()) {
 
 const { jsPDF } = window.jspdf;
 const pdf = new jsPDF();
+const COR_VINHO = [124, 26, 27];
 let resolverPdf;
 const pdfPronto = new Promise(resolve => { resolverPdf = resolve; });
 
@@ -407,22 +492,17 @@ function limitarTexto(texto, max = 2000) {
 
 // ===== IMAGEM =====
 const img = new Image();
-img.src = "logo.png";
 
 img.onload = function () {
-    // calcula proporção automaticamente
-    let largura = 190;
-    let altura = largura * (img.height / img.width);
-// limita altura máxima (evita logo gigante)
-    const alturaMax = 40;
-    if (altura > alturaMax) {
-        altura = alturaMax;
-        largura = altura * (img.width / img.height);
-    }
-    const linhaY = altura + 10;
+    // Usa a mesma faixa completa mostrada no cabeçalho do formulário.
+    const margem = 5;
+    const largura = pdf.internal.pageSize.getWidth() - (margem * 2);
+    const altura = largura * (img.height / img.width);
+    const linhaY = altura + 8;
     // ===== CABEÇALHO =====
-    pdf.addImage(img, "PNG", 10, 5, largura, altura);
-    pdf.line(10, linhaY, 200, linhaY);
+    pdf.addImage(img, "PNG", margem, 4, largura, altura);
+    pdf.setDrawColor(...COR_VINHO);
+    pdf.line(margem, linhaY, pdf.internal.pageSize.getWidth() - margem, linhaY);
 
         y = linhaY + 7;
 
@@ -681,7 +761,7 @@ const secoes = {
             rowPageBreak: "auto",
 
             headStyles: {
-                fillColor: [82, 31, 31],
+                fillColor: COR_VINHO,
                 textColor: 255
             }
         });
@@ -699,10 +779,24 @@ const secoes = {
     // ===== DOWNLOAD =====
     resolverPdf(pdf);
  };
- // ================= FIM PDF =================
+// Registra o evento antes de definir a origem: se a imagem estiver no cache,
+// o navegador pode concluí-la imediatamente.
+const respostaLogo = await fetch(new URL("logo.png", window.location.href));
+if (!respostaLogo.ok) {
+    throw new Error("NÃ£o foi possÃ­vel carregar a imagem do cabeÃ§alho.");
+}
+const logoBlob = await respostaLogo.blob();
+const logoBase64 = await new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result);
+    leitor.onerror = () => reject(new Error("NÃ£o foi possÃ­vel preparar a imagem do cabeÃ§alho."));
+    leitor.readAsDataURL(logoBlob);
+});
+img.src = logoBase64;
+// ================= FIM PDF =================
 
 
-        const arquivos = Array.from(document.getElementById("foto").files);
+        const arquivos = [...anexosPendentes];
         const registro = await salvarVisitaNoSupabase(jsonData);
         if (arquivos.length) await enviarAnexosVisita(registro.id, arquivos);
         const pdfFinal = await pdfPronto;
@@ -724,12 +818,16 @@ const secoes = {
                 yAnexo += 9;
             });
         }
-        pdfFinal.save("relatorio-inspecao.pdf");
+        imprimirPdf(pdfFinal, janelaImpressao);
 
         okBox.style.background = "#d1e7dd";
         okBox.style.color = "#0f5132";
         okBox.innerHTML = `<h3>Formulário salvo com sucesso</h3><p>Registro ${registro.id} gravado no Supabase.</p>`;
+        anexosPendentes = [];
+        anexosSalvosNoFormulario = [];
         form.reset();
+        sincronizarArquivosPendentes();
+        atualizarPreviaAnexos();
         i = 0;
         show();
         submitBtn.disabled = false;
@@ -828,6 +926,8 @@ ${resposta}
         */
 
     }catch(error){
+
+        janelaImpressao?.close();
 
         okBox.style.background =
         "#f8d7da";
@@ -963,6 +1063,26 @@ inputFile.addEventListener("change", function () {
     ).join("");
 }
 );
+
+inputFile.addEventListener("change", function () {
+    const maxSize = 10 * 1024 * 1024;
+    const permitidos = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    const novosArquivos = Array.from(this.files);
+    if (novosArquivos.some(arquivo => arquivo.size > maxSize || !permitidos.includes(arquivo.type))) {
+        sincronizarArquivosPendentes();
+        atualizarPreviaAnexos();
+        return;
+    }
+
+    novosArquivos.forEach(arquivo => {
+        const jaAdicionado = anexosPendentes.some(anexo =>
+            anexo.name === arquivo.name && anexo.size === arquivo.size && anexo.lastModified === arquivo.lastModified
+        );
+        if (!jaAdicionado) anexosPendentes.push(arquivo);
+    });
+    sincronizarArquivosPendentes();
+    atualizarPreviaAnexos();
+});
 
 
 const dados = [
