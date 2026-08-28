@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel administrativo — Visitas a Unidades Prisionais</title>
+  <link rel="stylesheet" href="admin-visitas.css">
+</head>
+<body>
+  <header class="admin-topbar">
+    <a class="admin-brand" href="../home.html" aria-label="Voltar para a página inicial">
+      <span>MP</span>
+      <div><strong>MPAM · CGMP</strong><small>Visitas a Unidades Prisionais</small></div>
+    </a>
+    <div class="admin-user" id="userBadge" style="display:none">
+      <span class="avatar" id="userAvatar">MP</span><span id="userName"></span>
+    </div>
+    <a class="back-link" href="index.html">Abrir formulário</a>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-intro">
+      <div>
+        <p class="eyebrow">PAINEL ADMINISTRATIVO</p>
+        <h1>Visitas a Unidades Prisionais</h1>
+        <p>Indicadores consolidados das visitas finalizadas, com foco em lotação, perfil dos custodiados e garantia de direitos.</p>
+      </div>
+      <button type="button" id="refreshButton" class="refresh-button">Atualizar dados</button>
+    </section>
+
+    <section class="filters" aria-label="Filtros do painel">
+      <label>Unidade
+        <select id="unitFilter"><option value="">Todas as unidades</option></select>
+      </label>
+      <label>De
+        <input id="startDate" type="month">
+      </label>
+      <label>Até
+        <input id="endDate" type="month">
+      </label>
+      <button type="button" id="clearFilters">Limpar filtros</button>
+    </section>
+
+    <p id="dashboardStatus" class="dashboard-status" role="status">Carregando dados…</p>
+
+    <section class="kpi-grid" aria-label="Indicadores principais">
+      <article class="kpi-card"><span>Custodiados</span><strong id="kpiCustodiados">—</strong><small>última visita de cada unidade</small></article>
+      <article class="kpi-card"><span>Capacidade</span><strong id="kpiCapacidade">—</strong><small>capacidade projetada</small></article>
+      <article class="kpi-card emphasis"><span>Taxa de lotação</span><strong id="kpiLotacao">—</strong><small id="kpiLotacaoNote">—</small></article>
+      <article class="kpi-card"><span>Direitos assegurados</span><strong id="kpiDireitos">—</strong><small>respostas “Sim”</small></article>
+      <article class="kpi-card"><span>AVCB vigente</span><strong id="kpiAvcb">—</strong><small>última visita de cada unidade</small></article>
+    </section>
+
+    <section class="charts-grid">
+      <article class="panel panel-wide">
+        <div class="panel-heading"><div><p class="eyebrow">LOTAÇÃO</p><h2>Custodiados × capacidade</h2></div><span>Por mês</span></div>
+        <div class="chart-box"><canvas id="occupancyChart"></canvas></div>
+      </article>
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">CUSTÓDIA</p><h2>Perfil dos custodiados</h2></div><span>Por mês</span></div>
+        <div class="chart-box"><canvas id="profileChart"></canvas></div>
+      </article>
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">PONTOS CRÍTICOS</p><h2>Ocorrências por tipo</h2></div><span>Visitas</span></div>
+        <div class="chart-box"><canvas id="criticalChart"></canvas></div>
+      </article>
+      <article class="panel panel-wide">
+        <div class="panel-heading"><div><p class="eyebrow">DIREITOS</p><h2>Cumprimento por competência</h2></div><span>Verde: assegurado · vinho: não assegurado</span></div>
+        <div id="rightsHeatmap" class="heatmap" aria-label="Matriz de cumprimento de direitos"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/db-admin.js"></script>
+  <script src="admin-visitas.js"></script>
+</body>
+</html>
