@@ -56,6 +56,17 @@
     }));
   };
 
+  window.listarComarcasVisitas = async function listarComarcasVisitas() {
+    const { data, error } = await sbVisitas
+      .from('unidades_correicionadas')
+      .select('nome')
+      .like('nome', '%Comarca%')
+      .or('nome.like.P%,nome.like.01ª%')
+      .order('nome');
+    if (error) throw error;
+    return data || [];
+  };
+
   async function buscarRascunho(email) {
     const { data, error } = await sbVisitas
       .from('visitas_unidades_prisionais')

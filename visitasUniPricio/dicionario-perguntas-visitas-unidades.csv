@@ -1,0 +1,89 @@
+Seção;Campo JSON/Supabase;ID HTML;Pergunta exibida no formulário
+1 - Identificação;dados.membro_responsavel;nome;Membro Responsável
+1 - Identificação;dados.email;email;Email
+2 - Dados da Unidade;dados.municipio;municipio;Município
+2 - Dados da Unidade;dados.estabelecimento;;Estabelecimento
+2 - Dados da Unidade;dados.endereco;endereco;Endereço
+2 - Dados da Unidade;dados.telefone;telefone;Telefone
+2 - Dados da Unidade;dados.responsavel;;Responsável
+2 - Dados da Unidade;dados.cargo;;Cargo
+2 - Dados da Unidade;dados.quadro_funcional;;Quadro funcional da unidade
+2 - Dados da Unidade;dados.quadro_suficiente;;O quadro funcional da unidade é suficiente?
+2 - Dados da Unidade;dados.providencias_unidade;;Providências a serem adotadas no âmbito do Procedimento Administrativo instaurado
+3 - Dados da Visita;dados.data_visita;;Data da visita
+3 - Dados da Visita;dados.acompanhou;;O responsável pela unidade acompanhou a visita?
+3 - Dados da Visita;dados.quem_acompanhou;;Quem acompanhou?
+3 - Dados da Visita;dados.cargo_acompanhante;;Cargo de quem acompanhou
+4 - Funcionamento;dados.capacidade;;Capacidade projetada para presos
+4 - Funcionamento;dados.total_presos;;Quantitativo de presos no momento da visita
+4 - Funcionamento;dados.provisorios;;Presos provisórios
+4 - Funcionamento;dados.definitivos;;Presos definitivos
+4 - Funcionamento;dados.mulheres;;Mulheres
+4 - Funcionamento;dados.indigenas;;Indígenas
+4 - Funcionamento;dados.lgbt;;LGBTQIAPN+
+4 - Funcionamento;dados.separacao;sep_sim | sep_nao;Os presos estavam separados de acordo com gênero, natureza do delito e indicativos de liderança de grupos faccionados?
+4 - Funcionamento;dados.Razao_detalhes;razao;Qual a razão?
+4 - Funcionamento;dados.fuga;fuga_sim | fuga_nao;Houve registro de fuga no último mês?
+4 - Funcionamento;dados.fuga_detalhes;fuga_detalhes;Descrição da fuga
+4 - Funcionamento;dados.circunstancias;;Informar as circunstâncias, providências adotadas e procedimentos instaurados
+4 - Funcionamento;dados.fonar;;Aplica o Formulário Nacional de Avaliação de Risco - FONAR?
+4 - Funcionamento;dados.fonar_prov;;Providências adotadas durante a visita para aplicação do formulário FONAR
+4 - Funcionamento;dados.rogeria;;Aplica o Formulário Rogéria?
+4 - Funcionamento;dados.rogeria_prov;;Providências adotadas durante a visita para aplicação do Formulário Rogéria
+4 - Funcionamento;dados.registros30;;Quantidade de registros nos últimos 30 dias
+4 - Funcionamento;dados.prov_imediatas;;Providências imediatas adotadas durante a visita
+4 - Funcionamento;dados.prov_admin_func;;Providências a adotar no âmbito do Procedimento Administrativo instaurado
+5 - Rotinas;dados.banho_sol;;Tem sido assegurado o direito ao banho de sol?
+5 - Rotinas;dados.freq_banho;;Frequência do banho de sol
+5 - Rotinas;dados.visita_familiar;;Tem sido assegurado o direito à visita de familiares?
+5 - Rotinas;dados.freq_visitas;;Frequência de visitas
+5 - Rotinas;dados.visita_intima;;Tem sido assegurado o direito à visita íntima?
+5 - Rotinas;dados.freq_visitas_intimas;;Frequência de visitas íntimas
+5 - Rotinas;dados.educacao;;Tem sido assegurado o direito à educação?
+5 - Rotinas;dados.trabalho;;Tem sido assegurado o direito ao trabalho?
+5 - Rotinas;dados.remissao;;Tem sido assegurado o direito à remição por leitura?
+5 - Rotinas;dados.saude;;Tem sido assegurado o direito à assistência à saúde?
+5 - Rotinas;dados.religiosa;;Tem sido assegurado o direito à assistência religiosa?
+5 - Rotinas;dados.freq_religiosa;;Frequência da assistência religiosa
+5 - Rotinas;dados.prov_rotinas;;Providências imediatas adotadas durante a visita
+5 - Rotinas;dados.prov_rotinas_rotinas;;Providências a adotar no âmbito do Procedimento Administrativo instaurado
+6 - Segurança;dados.visitantes;;Existem protocolos de ingresso de visitas com registro e identificação dos visitantes?
+6 - Segurança;dados.revista;;Existem procedimentos de revista com detector de metais, raio X e/ou body scanner?
+6 - Segurança;dados.equipamentos;equipamentos;Quais estão instalados e/ou em funcionamento?
+6 - Segurança;dados.video;;Existem sistemas de videomonitoramento na unidade?
+6 - Segurança;dados.abrangencia;;Abrangência do videomonitoramento
+6 - Segurança;dados.armazenamento;;Como é realizado o armazenamento de dados, áudios e imagens?
+6 - Segurança;dados.tornozeleira;torno_sim | torno_nao;Existe vigilância eletrônica de presos (tornozeleiras)?
+6 - Segurança;dados.justificativa;justificativa;Justificativa
+6 - Segurança;dados.noturna;;Como é realizada a vigilância dos presos durante o período noturno?
+6 - Segurança;dados.prov_protoc;;Providências imediatas adotadas durante a visita
+6 - Segurança;dados.prov_adotar_protoc;;Providências a adotar no âmbito do Procedimento Administrativo instaurado
+7 - Alimentação;dados.refeicoes;;Número de refeições diárias
+7 - Alimentação;dados.terceirizado;;Fornecimento terceirizado?
+7 - Alimentação;dados.reclamacoes;reclam_sim | reclam_nao;Houve reclamações dos custodiados quanto à qualidade e/ou quantidade?
+7 - Alimentação;dados.quais_reclam;quais;Quais reclamações?
+7 - Alimentação;dados.prov_aliment;;Providências imediatas adotadas durante a visita
+7 - Alimentação;dados.prov_adotar_aliment;;Providências a adotar no âmbito do Procedimento Administrativo instaurado
+8 - Instalações;dados.ventilacao;;Ventilação adequada?
+8 - Instalações;dados.iluminacao;;Iluminação adequada?
+8 - Instalações;dados.agua;;Água potável?
+8 - Instalações;dados.limpeza;;Condições gerais de limpeza e conservação adequadas?
+8 - Instalações;dados.esgoto;;Sistema de esgotamento sanitário em funcionamento adequado?
+8 - Instalações;dados.avcb;;Possui Auto de Vistoria do Corpo de Bombeiros (AVCB)?
+8 - Instalações;dados.sanitaria;;Possui licença da Vigilância Sanitária?
+8 - Instalações;dados.irregularidades;;Irregularidades constatadas nas instalações físicas?
+8 - Instalações;dados.prov_intala;;Providências imediatas adotadas durante a visita
+8 - Instalações;dados.prov_adotar_instala;;Providências a adotar no âmbito do Procedimento Administrativo instaurado
+9 - Audiência;dados.audiencia;;A audiência de custódia é realizada na Delegacia?
+9 - Audiência;dados.violacao;violacao_sim | violacao_nao;Há relatos de violação de direitos e/ou tortura?
+9 - Audiência;dados.descricao_violacao;descricao_violacao;Descrição das violações
+9 - Audiência;dados.sigilo;;É necessário o sigilo das informações prestadas pelos presos?
+9 - Audiência;dados.impo;impo;Existem Instrumentos de Menor Potencial Ofensivo - IMPO à disposição dos agentes de segurança?
+9 - Audiência;dados.det_impo;dest_impo;Quais, quantos e quais condições de funcionamento?
+9 - Audiência;dados.prov_audiencia;;Providências imediatas adotadas durante a visita
+9 - Audiência;dados.prov_adotar_audiencia;;Providências a adotar no âmbito do Procedimento Administrativo instaurado
+10 - Evolução;dados.ultima_visita;;Data da última visita
+10 - Evolução;dados.melhorias;;Relatar o saneamento de irregularidades constatadas em visitas anteriores
+11 - Conclusão;dados.necessidades;;Necessidades mais urgentes detectadas
+11 - Conclusão;dados.consideracoes;;Considerações finais
+11 - Conclusão;foto;foto;Registro fotográfico

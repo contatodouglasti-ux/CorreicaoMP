@@ -698,7 +698,7 @@ const secoes = {
 
   { label: "Considerações finais", key: "consideracoes" },
 
-  { label: "Registro fotográfico", key: null,  valor: "Anexos disponíveis na cópia encaminhada automaticamente ao e-mail."
+  { label: "Registro fotográfico", key: null,  valor: "Anexos disponíveis nos links deste relatório."
   } 
 ]
 
@@ -1085,80 +1085,35 @@ inputFile.addEventListener("change", function () {
 });
 
 
-const dados = [
-  { municipio: "Boa Vista do Ramos", endereco: "Estrada Presidente Figueiredo, s/n, Bairro Monte Sião, CEP 69220-472" },
-  { municipio: "Canutama", endereco: "Rua João Pontes, s/n, bairro São Francisco" },
-  { municipio: "Uarini", endereco: "Av. Franco Lopes, s/n, Centro" },
-  { municipio: "Boca do Acre", endereco: "Avenida 13, Conjunto Shan" },
-  { municipio: "Manaquiri", endereco: "Rua 3, S/nº, Bairro Novo, CEP 69435-000" },
-  { municipio: "Maués", endereco: "Estrada do Guaranatuba, S/N" },
-  { municipio: "Maraã", endereco: "Rua do Aeroporto, Benedito Ramos" },
-  { municipio: "Amaturá", endereco: "Rua São Francisco, 1166, Bairro São Francisco" },
-  { municipio: "Jutaí", endereco: "Rua 6 de Fevereiro, São Francisco" },
-  { municipio: "Autazes", endereco: "Estrada AZ1, S/N, Bairro Jair Menezes Tupinambá" },
-  { municipio: "Rio Preto da Eva", endereco: "Rua Domingos Monteiro, s/n, Centro" },
-  { municipio: "Santo Antônio do Içá", endereco: "Avenida Presidente Médici, 55, Campinas II" },
-  { municipio: "Santa Isabel do Rio Negro", endereco: "Avenida Rio Negro, nº 76, Centro" },
-  { municipio: "São Paulo de Olivença", endereco: "Rua Prudêncio Andion, s/n, bairro Campinas" },
-  { municipio: "Ipixuna", endereco: "Rua Leland Barroso, 372, Centro" },
-  { municipio: "Fonte Boa", endereco: "Rua Tertuliano Rodrigues, S/N, Centro" },
-  { municipio: "Eirunepé", endereco: "Estrada do Xidá, Bairro Nossa Senhora de Fátima" },
-  { municipio: "Apuí", endereco: "Avenida 13 de Novembro, S/N, Centro" },
-  { municipio: "Envira", endereco: "Av. Joaquim Borba, S/Nº, Centro" },
-  { municipio: "Lábrea", endereco: "Rua 24 de Agosto, S/N, Vila Falcão" },
-  { municipio: "Anamã", endereco: "Rua Álvaro Maia, 560, Centro" },
-  { municipio: "Borba", endereco: "Estrada do Aeroporto, 457, Bairro Cristo Rei" },
-  { municipio: "Barreirinha", endereco: "Rua Maria Belém, s/n, Bairro Ulisses Guimarães" },
-  { municipio: "Nova Olinda do Norte", endereco: "Rua Coronel Janary Nunes, s/n, Centro" },
-  { municipio: "Japurá", endereco: "Av. Raimundo Cruz, s/n, Centro" },
-  { municipio: "Nhamundá", endereco: "Rua Governador Plínio Ramos Coelho, 153" },
-  { municipio: "Atalaia do Norte", endereco: "Rua Raimundo Gimaque, Centro" },
-  { municipio: "Itapiranga", endereco: "Rua Urucurituba, nº 122, Centro" },
-  { municipio: "Silves", endereco: "Avenida Governador Eduardo Braga, s/n, Panorama" },
-  { municipio: "Tapauá", endereco: "Rua Raimundo Jó de Andrade, s/n, Bairro Açaí" },
-  { municipio: "Manicoré", endereco: "Av. Santos Dumont, S/N, Bairro Centro" },
-  { municipio: "São Sebastião do Uatumã", endereco: "Rua do Conjunto, 185" },
-  { municipio: "Itacoatiara", endereco: "Ramal do Canaçari, Km 6,5, s/nº - AM 010" },
-  { municipio: "São Gabriel da Cachoeira", endereco: "Rua 04, nº103, Bairro Dabaru" },
-  { municipio: "Barcelos", endereco: "Rua Efigênio Sales, s/nº" },
-  { municipio: "Presidente Figueiredo", endereco: "Avenida Padre Calleri, 233, Tancredo Neves" },
-  { municipio: "Urucurituba", endereco: "Estrada do Arrozal, s/n" },
-  { municipio: "Parintins", endereco: "Av. Nações Unidas, nº 1842, Bairro Centro"},
-  { municipio: "Parintins (Delegacia de Polícia)", endereco: "Rua Irmã Cristine, s/nº, bairro Itaúna II"},
-  { municipio: "Novo Aripuanã", endereco: "Estrada NAP 01, s/n° - Bairro da TV" },
-  { municipio: "Coari", endereco: "Rua Jonatatas Pedrosa, s/n, Bairro Santa Efigênia" },
-  { municipio: "Tefé", endereco: "Estrada da Agrovila, KM 05" },
-  { municipio: "Alvarães", endereco: "Estrada Alvarães Nogueira, nº 970, São Francisco" },
-  { municipio: "Codajás", endereco: "Rua 05 de Setembro, s/n, Centro" },
-  { municipio: "Juruá", endereco: "Rua Angel Lopes Cabado, nº 16, Bairro São Francisco" },
-  { municipio: "Novo Airão", endereco: "Rua Ajuricaba, s/n, Nova Esperança" },
-  { municipio: "Caapiranga", endereco: "Avenida Valdomiro Morais de Castro, s/n, Bairro São Geraldo" },
-  { municipio: "Pauini", endereco: "Estrada PNI 002, Bairro Fortaleza" },
-  { municipio: "Itamarati", endereco: "Rua Albertina Lisboa, s/n" },
-  { municipio: "Careiro da Várzea", endereco: "Rua Miracauera, Centro" },
-  { municipio: "Humaitá", endereco: "Rua Padre José Maria Pena, 1639, São Pedro" },
-  { municipio: "Tabatinga", endereco: "Rua Manoel Tananta, s/n, Santa Rosa" },
-  { municipio: "Beruri", endereco: "Rua Getulio Vargas, 23, São Pedro" },
-  { municipio: "Anori", endereco: "Avenida 31 de Março, 344, Bairro Centro" },
-  { municipio: "Manacapuru", endereco: "Avenida Almirante Tamandaré, 3000" },
-  { municipio: "Urucará", endereco: "Rua Major Lobato Mendes, s/n, Santa Luzia" },
-  { municipio: "Guajará", endereco: "Avenida Getúlio Vargas, 282, Centro" },
-  { municipio: "Carauari", endereco: "Juscelino Kubitscheck, nº 530, Nova República" },
-  { municipio: "Careiro", endereco: "Rua Arajá, s/nº, Bairro Vista Alegre" }
-];
+
 const datalistMunicipios = document.getElementById("listaMunicipios");
 const inputMunicipio = document.getElementById("municipio");
 
+function extrairMunicipioDaComarca(nomeUnidade) {
+  const encontrado = String(nomeUnidade || '').match(/\bComarca\s+de\s+(.+)$/i);
+  return encontrado ? encontrado[1].replace(/\s*(?:\(|[-–—]).*$/, '').trim() : '';
+}
 
-// ordena
-dados.sort((a, b) => a.municipio.localeCompare(b.municipio));
+async function carregarMunicipiosDasComarcas() {
+  try {
+    const unidades = await listarComarcasVisitas();
+    const municipios = [...new Set(unidades
+      .map(unidade => extrairMunicipioDaComarca(unidade.nome))
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-// popula datalist
-dados.forEach(item => {
-  const option = document.createElement("option");
-  option.value = item.municipio;
-  datalistMunicipios.appendChild(option);
-});
+    datalistMunicipios.replaceChildren(...municipios.map(municipio => {
+      const option = document.createElement('option');
+      option.value = municipio;
+      return option;
+    }));
+  } catch (erro) {
+    console.error('Não foi possível carregar as comarcas:', erro);
+    datalistMunicipios.replaceChildren();
+  }
+}
+
+carregarMunicipiosDasComarcas();
 
 // melhor evento (mais confiável que blur)
 

@@ -17,23 +17,29 @@
   const sim = valor => ['sim', 's', 'yes'].includes(resposta(valor));
   const nao = valor => ['não', 'nao', 'n'].includes(resposta(valor));
   const competencia = visita => String(visita.data_visita || visita.criado_em || '').slice(0, 7);
+  const municipio = visita => visita.municipio || visita.dados?.municipio || '';
+  const tipoEstabelecimento = visita => visita.estabelecimento || visita.dados?.estabelecimento || '';
+  const unidadePainel = visita => municipio(visita) || tipoEstabelecimento(visita) || 'Unidade não informada';
   const unidade = visita => visita.estabelecimento || visita.municipio || 'Unidade não informada';
   const formatarMes = chave => chave ? new Intl.DateTimeFormat('pt-BR', { month: 'short', year: '2-digit' }).format(new Date(`${chave}-02T12:00:00`)) : 'Sem data';
   const status = (texto, erro = false) => { const elemento = document.getElementById('dashboardStatus'); elemento.textContent = texto; elemento.classList.toggle('error', erro); };
 
   function filtrar() {
     const filtroUnidade = document.getElementById('unitFilter').value;
+    const filtroMunicipio = document.getElementById('municipalityFilter').value;
     const inicio = document.getElementById('startDate').value;
     const fim = document.getElementById('endDate').value;
     return registros.filter(visita => {
       const mes = competencia(visita);
-      return (!filtroUnidade || unidade(visita) === filtroUnidade) && (!inicio || mes >= inicio) && (!fim || mes <= fim);
+      return (!filtroUnidade || tipoEstabelecimento(visita) === filtroUnidade)
+        && (!filtroMunicipio || municipio(visita) === filtroMunicipio)
+        && (!inicio || mes >= inicio) && (!fim || mes <= fim);
     });
   }
 
   function ultimasPorUnidade(visitas) {
     return Object.values(visitas.reduce((mapa, visita) => {
-      const chave = unidade(visita);
+      const chave = unidadePainel(visita);
       if (!mapa[chave] || String(visita.data_visita || visita.criado_em) > String(mapa[chave].data_visita || mapa[chave].criado_em)) mapa[chave] = visita;
       return mapa;
     }, {}));
@@ -135,11 +141,17 @@
       const { data, error } = await cliente.rpc('buscar_visitas_unidades_painel');
       if (error) throw error;
       registros = (data || []).map(visita => ({ ...visita, dados: visita.dados || {} }));
-      const select = document.getElementById('unitFilter');
-      const valorAtual = select.value;
-      const unidades = [...new Set(registros.map(unidade))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      select.innerHTML = '<option value="">Todas as unidades</option>' + unidades.map(nome => `<option value="${nome.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}">${nome.replaceAll('&', '&amp;').replaceAll('<', '&lt;')}</option>`).join('');
-      select.value = unidades.includes(valorAtual) ? valorAtual : '';
+      const selectTipo = document.getElementById('unitFilter');
+      const selectMunicipio = document.getElementById('municipalityFilter');
+      const tipoAtual = selectTipo.value;
+      const municipioAtual = selectMunicipio.value;
+      const escapar = nome => String(nome).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+      const tipos = [...new Set(registros.map(tipoEstabelecimento).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      const municipios = [...new Set(registros.map(municipio).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      selectTipo.innerHTML = '<option value="">Todos os tipos</option>' + tipos.map(nome => `<option value="${escapar(nome)}">${escapar(nome)}</option>`).join('');
+      selectMunicipio.innerHTML = '<option value="">Todos os municípios</option>' + municipios.map(nome => `<option value="${escapar(nome)}">${escapar(nome)}</option>`).join('');
+      selectTipo.value = tipos.includes(tipoAtual) ? tipoAtual : '';
+      selectMunicipio.value = municipios.includes(municipioAtual) ? municipioAtual : '';
       atualizarTudo();
     } catch (erro) {
       status(`Não foi possível carregar o painel: ${erro.message}`, true);
@@ -147,9 +159,10 @@
   }
 
   document.getElementById('unitFilter').addEventListener('change', atualizarTudo);
+  document.getElementById('municipalityFilter').addEventListener('change', atualizarTudo);
   document.getElementById('startDate').addEventListener('change', atualizarTudo);
   document.getElementById('endDate').addEventListener('change', atualizarTudo);
-  document.getElementById('clearFilters').addEventListener('click', () => { document.getElementById('unitFilter').value = ''; document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; atualizarTudo(); });
+  document.getElementById('clearFilters').addEventListener('click', () => { document.getElementById('unitFilter').value = ''; document.getElementById('municipalityFilter').value = ''; document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; atualizarTudo(); });
   document.getElementById('refreshButton').addEventListener('click', carregar);
 
   (async () => {
